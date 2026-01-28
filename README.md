@@ -142,10 +142,9 @@ For general CrossPoint features, see the [upstream project](https://github.com/c
 
 CrossPoint Reader is **not affiliated with Xteink or any manufacturer of the X4 hardware**.
 
-This Vietnamese fork is maintained by [@lelinhtinh](https://github.com/lelinhtinh).
-
 **Credits:**
 
 - [CrossPoint Reader](https://github.com/crosspoint-reader/crosspoint-reader) by [@daveallie](https://github.com/daveallie) - Original project
 - [diy-esp32-epub-reader](https://github.com/atomic14/diy-esp32-epub-reader) by atomic14 - Inspiration for the original project
 - [Pridi Font](https://fonts.google.com/specimen/Pridi) - Thai/Vietnamese font family
+- [crosspoint-reader-vi](https://github.com/danoooob/crosspoint-reader-vi) - Vietnamese display solution

@@ -30,38 +30,75 @@ intervals = [
     ### Basic Latin ###
     # ASCII letters, digits, punctuation, control characters
     (0x0000, 0x007F),
+
     ### Latin-1 Supplement ###
     # Accented characters for Western European languages
+    # Includes: À Á Â Ã È É Ê Ì Í Ò Ó Ô Õ Ù Ú Ý (used in Vietnamese)
     (0x0080, 0x00FF),
-    ### Latin Extended-A ###
-    # Eastern European and Baltic languages
-    (0x0100, 0x017F),
+
+    ### Latin Extended-A (Vietnamese only) ###
+    # Ă (0x0102) and ă (0x0103) - A with breve (used in Vietnamese)
+    (0x0102, 0x0103),
+    # Đ (0x0110) and đ (0x0111) - Vietnamese D with stroke
+    (0x0110, 0x0111),
+    # Ĩ (0x0128) and ĩ (0x0129) - I with tilde (used in Vietnamese)
+    (0x0128, 0x0129),
+    # Ũ (0x0168) and ũ (0x0169) - U with tilde (used in Vietnamese)
+    (0x0168, 0x0169),
+    # Eastern European and Baltic languages (not needed for Vietnamese)
+    # (0x0100, 0x010F),  # Ā-ď
+    # (0x0112, 0x017F),  # Ē-ſ
+
+    ### Latin Extended-B (Vietnamese) ###
+    # O and o with Horn (Ơ, ơ)
+    (0x01A0, 0x01A1),
+    # U and u with Horn (Ư, ư)
+    (0x01AF, 0x01B0),
+
+    ### Latin Extended Additional (Vietnamese) ###
+    # Vietnamese vowels with all diacritics (Ạ-ỹ)
+    # Ạ ạ Ả ả Ấ ấ Ầ ầ Ẩ ẩ Ẫ ẫ Ậ ậ Ắ ắ Ằ ằ Ẳ ẳ Ẵ ẵ Ặ ặ
+    # Ẹ ẹ Ẻ ẻ Ẽ ẽ Ế ế Ề ề Ể ể Ễ ễ Ệ ệ
+    # Ỉ ỉ Ị ị
+    # Ọ ọ Ỏ ỏ Ố ố Ồ ồ Ổ ổ Ỗ ỗ Ộ ộ Ớ ớ Ờ ờ Ở ở Ỡ ỡ Ợ ợ
+    # Ụ ụ Ủ ủ Ứ ứ Ừ ừ Ử ử Ữ ữ Ự ự
+    # Ỳ ỳ Ỵ ỵ Ỷ ỷ Ỹ ỹ
+    (0x1EA0, 0x1EF9),
+
     ### General Punctuation (core subset) ###
     # Smart quotes, en dash, em dash, ellipsis, NO-BREAK SPACE
     (0x2000, 0x206F),
+
     ### Basic Symbols From "Latin-1 + Misc" ###
     # dashes, quotes, prime marks
     (0x2010, 0x203A),
     # misc punctuation
     (0x2040, 0x205F),
-    # common currency symbols
+    # common currency symbols (₫ Vietnamese Dong at 0x20AB)
     (0x20A0, 0x20CF),
-    ### Combining Diacritical Marks (minimal subset) ###
-    # Needed for proper rendering of many extended Latin languages
+
+    ### Combining Diacritical Marks ###
+    # May be needed for some Vietnamese text representations
+    # Hook above (0x0309), Tilde (0x0303), Dot below (0x0323),
+    # Acute (0x0301), Grave (0x0300), Circumflex (0x0302)
     (0x0300, 0x036F),
+
     ### Greek & Coptic ###
     # Used in science, maths, philosophy, some academic texts
     # (0x0370, 0x03FF),
+
     ### Cyrillic ###
-    # Russian, Ukrainian, Bulgarian, etc.
-    (0x0400, 0x04FF),
+    # Russian, Ukrainian, Bulgarian, etc. (not needed for Vietnamese)
+    # (0x0400, 0x04FF),
+
     ### Math Symbols (common subset) ###
-    # Superscripts and Subscripts
-    (0x2070, 0x209F),
-    # General math operators
-    (0x2200, 0x22FF),
-    # Arrows
-    (0x2190, 0x21FF),
+    # Superscripts and Subscripts (optional for Vietnamese reading)
+    # (0x2070, 0x209F),
+    # General math operators (optional for Vietnamese reading)
+    # (0x2200, 0x22FF),
+    # Arrows (optional for Vietnamese reading)
+    # (0x2190, 0x21FF),
+
     ### CJK ###
     # Core Unified Ideographs
     # (0x4E00, 0x9FFF),

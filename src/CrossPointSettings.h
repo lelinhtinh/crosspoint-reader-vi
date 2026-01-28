@@ -58,8 +58,8 @@ class CrossPointSettings {
   // Swapped: Next, Previous
   enum SIDE_BUTTON_LAYOUT { PREV_NEXT = 0, NEXT_PREV = 1, SIDE_BUTTON_LAYOUT_COUNT };
 
-  // Font family options
-  enum FONT_FAMILY { BOOKERLY = 0, NOTOSANS = 1, OPENDYSLEXIC = 2, FONT_FAMILY_COUNT };
+  // Font family options - Pridi only for Vietnamese support
+  enum FONT_FAMILY { PRIDI = 0, FONT_FAMILY_COUNT };
   // Font size options
   enum FONT_SIZE { SMALL = 0, MEDIUM = 1, LARGE = 2, EXTRA_LARGE = 3, FONT_SIZE_COUNT };
   enum LINE_COMPRESSION { TIGHT = 0, NORMAL = 1, WIDE = 2, LINE_COMPRESSION_COUNT };
@@ -106,7 +106,7 @@ class CrossPointSettings {
   // Status bar settings
   uint8_t statusBar = FULL;
   // Text rendering settings
-  uint8_t extraParagraphSpacing = 1;
+  uint8_t extraParagraphSpacing = 0;
   uint8_t textAntiAliasing = 1;
   // Short power button click behaviour
   uint8_t shortPwrBtn = IGNORE;
@@ -117,10 +117,10 @@ class CrossPointSettings {
   uint8_t frontButtonLayout = BACK_CONFIRM_LEFT_RIGHT;
   uint8_t sideButtonLayout = PREV_NEXT;
   // Reader font settings
-  uint8_t fontFamily = BOOKERLY;
+  uint8_t fontFamily = PRIDI;
   uint8_t fontSize = MEDIUM;
   uint8_t lineSpacing = NORMAL;
-  uint8_t paragraphAlignment = JUSTIFIED;
+  uint8_t paragraphAlignment = LEFT_ALIGN;
   // Auto-sleep timeout setting (default 10 minutes)
   uint8_t sleepTimeout = SLEEP_10_MIN;
   // E-ink refresh frequency (default 15 pages)

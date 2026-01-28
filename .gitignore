@@ -9,3 +9,7 @@ build
 **/__pycache__/
 /compile_commands.json
 /.cache
+
+# Python virtual environments
+venv/
+.venv/

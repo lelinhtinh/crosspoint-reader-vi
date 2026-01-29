@@ -2,6 +2,7 @@
 
 #include <EpdFontFamily.h>
 #include <HalDisplay.h>
+#include <string>
 
 #include <map>
 
@@ -106,6 +107,9 @@ class GfxRenderer {
   // Low level functions
   uint8_t* getFrameBuffer() const;
   static size_t getBufferSize();
+  // Save the current framebuffer to a PBM file in `directory` (creates directory if missing)
+  // Returns true on success
+  bool saveScreenshot(const std::string& directory = "/screenshots") const;
   void grayscaleRevert() const;
   void getOrientedViewableTRBL(int* outTop, int* outRight, int* outBottom, int* outLeft) const;
 };

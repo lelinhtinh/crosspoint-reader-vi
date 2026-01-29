@@ -7,6 +7,12 @@ fi
 
 # --- Main Logic ---
 
+# Ensure clang-format is available
+if ! command -v clang-format >/dev/null 2>&1; then
+  echo "clang-format not found. Please install clang-format (e.g. 'sudo apt-get install clang-format')."
+  exit 1
+fi
+
 # Format all files (or only modified files if -g is passed)
 
 # Use 'git ls-files' to get a list of all files tracked by git:

@@ -9,7 +9,9 @@ Built using **PlatformIO** and targeting the **ESP32-C3** microcontroller.
 - Vietnamese-optimized Pridi font family
 - Simplified font system for reduced firmware size
 
-![cover](./docs/images/cover.jpg)
+| Home                                                  | Recents                                                   | Reader                                                   | TOC                                                  |
+| ----------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
+| ![home](./docs/images/vietnamese/screenshot_8471.png) | ![recents](./docs/images/vietnamese/screenshot_14421.png) | ![reader](./docs/images/vietnamese/screenshot_10361.png) | ![toc](./docs/images/vietnamese/screenshot_8862.png) |
 
 ## Motivation
 

@@ -1,6 +1,12 @@
 #include "GfxRenderer.h"
 
 #include <Utf8.h>
+#include <SDCardManager.h>
+#include <HardwareSerial.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <esp_heap_caps.h>
 
 void GfxRenderer::insertFont(const int fontId, EpdFontFamily font) { fontMap.insert({fontId, font}); }
 
@@ -653,6 +659,88 @@ void GfxRenderer::drawTextRotated90CW(const int fontId, const int x, const int y
 uint8_t* GfxRenderer::getFrameBuffer() const { return display.getFrameBuffer(); }
 
 size_t GfxRenderer::getBufferSize() { return HalDisplay::BUFFER_SIZE; }
+
+bool GfxRenderer::saveScreenshot(const std::string& directory) const {
+  // Ensure the screenshots directory exists
+  if (!SdMan.exists(directory.c_str())) {
+    if (!SdMan.mkdir(directory.c_str())) {
+      Serial.printf("[%lu] [GFX] Failed to create directory: %s\n", millis(), directory.c_str());
+      return false;
+    }
+  }
+
+  // Build filename using millis() to avoid collisions
+  char filenameBuf[256];
+  snprintf(filenameBuf, sizeof(filenameBuf), "%s/screenshot_%lu.pbm", directory.c_str(), millis());
+  const std::string filename = filenameBuf;
+
+  FsFile out;
+  if (!SdMan.openFileForWrite("SCR", filename, out)) {
+    Serial.printf("[%lu] [GFX] Failed to open file for write: %s\n", millis(), filename.c_str());
+    return false;
+  }
+
+  const int DISPLAY_WIDTH_LOCAL = HalDisplay::DISPLAY_WIDTH;    // 800
+  const int DISPLAY_HEIGHT_LOCAL = HalDisplay::DISPLAY_HEIGHT;  // 480
+  const int DISPLAY_WIDTH_BYTES_LOCAL = DISPLAY_WIDTH_LOCAL / 8;
+
+  // PBM header: rotate image 90° counterclockwise when saving (portrait)
+  // We follow the same convention as desktop helper: output dimensions swapped
+  char header[64];
+  int headerLen = snprintf(header, sizeof(header), "P4\n%d %d\n", DISPLAY_HEIGHT_LOCAL, DISPLAY_WIDTH_LOCAL);
+  out.write(reinterpret_cast<const uint8_t*>(header), headerLen);
+
+  // Allocate rotated buffer size (size = DISPLAY_WIDTH_LOCAL * (DISPLAY_HEIGHT_LOCAL / 8) == BUFFER_SIZE)
+  const size_t outSize = (DISPLAY_HEIGHT_LOCAL / 8) * DISPLAY_WIDTH_LOCAL;
+
+  // Quick heap check to avoid OOM on constrained devices
+  if (ESP.getFreeHeap() < static_cast<int>(outSize + 8192)) {
+    Serial.printf("[%lu] [GFX] Not enough heap to save screenshot (%u bytes free, need %u)\n", millis(), (unsigned)ESP.getFreeHeap(), (unsigned)(outSize + 8192));
+    out.close();
+    return false;
+  }
+
+  uint8_t* rotated = static_cast<uint8_t*>(malloc(outSize));
+  if (!rotated) {
+    Serial.printf("[%lu] [GFX] Failed to allocate rotated buffer\n", millis());
+    out.close();
+    return false;
+  }
+  memset(rotated, 0, outSize);
+
+  const uint8_t* buffer = display.getFrameBuffer();
+  if (!buffer) {
+    Serial.printf("[%lu] [GFX] No framebuffer available\n", millis());
+    free(rotated);
+    out.close();
+    return false;
+  }
+
+  // Rotate and convert: original buffer (800x480), rotate so output is 480x800
+  for (int outY = 0; outY < DISPLAY_WIDTH_LOCAL; outY++) {
+    for (int outX = 0; outX < DISPLAY_HEIGHT_LOCAL; outX++) {
+      const int inX = outY;
+      const int inY = DISPLAY_HEIGHT_LOCAL - 1 - outX;
+
+      const int inByteIndex = inY * DISPLAY_WIDTH_BYTES_LOCAL + (inX / 8);
+      const int inBitPosition = 7 - (inX % 8);
+      const bool isWhite = (buffer[inByteIndex] >> inBitPosition) & 1;
+
+      const int outByteIndex = outY * (DISPLAY_HEIGHT_LOCAL / 8) + (outX / 8);
+      const int outBitPosition = 7 - (outX % 8);
+      if (!isWhite) {  // invert: e-ink white=1 -> PBM black=1
+        rotated[outByteIndex] |= (1 << outBitPosition);
+      }
+    }
+  }
+
+  out.write(rotated, outSize);
+  out.close();
+  free(rotated);
+
+  Serial.printf("[%lu] [GFX] Saved screenshot to %s\n", millis(), filename.c_str());
+  return true;
+}
 
 // unused
 // void GfxRenderer::grayscaleRevert() const { display.grayscaleRevert(); }

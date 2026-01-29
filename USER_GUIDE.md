@@ -2,36 +2,39 @@
 
 Welcome to the **CrossPoint** firmware. This guide outlines the hardware controls, navigation, and reading features of the device.
 
-- [CrossPoint User Guide](#crosspoint-user-guide)
-  - [1. Hardware Overview](#1-hardware-overview)
-    - [Button Layout](#button-layout)
-  - [2. Power \& Startup](#2-power--startup)
-    - [Power On / Off](#power-on--off)
-    - [First Launch](#first-launch)
-  - [3. Screens](#3-screens)
-    - [3.1 Home Screen](#31-home-screen)
-    - [3.2 Book Selection](#32-book-selection)
-    - [3.3 Reading Mode](#33-reading-mode)
-    - [3.4 File Upload Screen](#34-file-upload-screen)
-    - [3.5 Settings](#35-settings)
-    - [3.6 Sleep Screen](#36-sleep-screen)
-  - [4. Reading Mode](#4-reading-mode)
-    - [Page Turning](#page-turning)
-    - [Chapter Navigation](#chapter-navigation)
-    - [System Navigation](#system-navigation)
-  - [5. Chapter Selection Screen](#5-chapter-selection-screen)
-  - [6. Current Limitations \& Roadmap](#6-current-limitations--roadmap)
-
+- [1. Hardware Overview](#1-hardware-overview)
+  - [Button Layout](#button-layout)
+- [2. Power \& Startup](#2-power--startup)
+  - [Power On / Off](#power-on--off)
+  - [First Launch](#first-launch)
+- [3. Screens](#3-screens)
+  - [3.1 Home Screen](#31-home-screen)
+  - [3.2 Book Selection](#32-book-selection)
+  - [3.3 Reading Mode](#33-reading-mode)
+  - [3.4 File Upload Screen](#34-file-upload-screen)
+  - [3.4.1 Calibre Wireless Transfers](#341-calibre-wireless-transfers)
+  - [3.5 Settings](#35-settings)
+  - [3.6 Sleep Screen](#36-sleep-screen)
+- [4. Reading Mode](#4-reading-mode)
+  - [Page Turning](#page-turning)
+  - [Chapter Navigation](#chapter-navigation)
+  - [System Navigation](#system-navigation)
+  - [Supported Languages](#supported-languages)
+- [5. Chapter Selection Screen](#5-chapter-selection-screen)
+- [6. Current Limitations \& Roadmap](#6-current-limitations--roadmap)
 
 ## 1. Hardware Overview
 
 The device utilises the standard buttons on the Xtink X4 (in the same layout as the manufacturer firmware, by default):
 
 ### Button Layout
+
 | Location        | Buttons                                              |
 | --------------- | ---------------------------------------------------- |
 | **Bottom Edge** | **Back**, **Confirm**, **Left**, **Right**           |
 | **Right Side**  | **Power**, **Volume Up**, **Volume Down**, **Reset** |
+
+**Shortcut:** Press **Power + Volume Down** together to take a screenshot (saved to `/screenshots` on the SD card) when the feature is enabled in **Settings → System → Enable Screenshot**.
 
 Button layout can be customized in **[Settings](#35-settings)**.
 
@@ -65,8 +68,8 @@ The Home Screen is the main entry point to the firmware. From here you can navig
 
 The Book Selection acts as a folder and file browser.
 
-* **Navigate List:** Use **Left** (or **Volume Up**), or **Right** (or **Volume Down**) to move the selection cursor up and down through folders and books. You can also long-press these buttons to scroll a full page up or down.
-* **Open Selection:** Press **Confirm** to open a folder or read a selected book.
+- **Navigate List:** Use **Left** (or **Volume Up**), or **Right** (or **Volume Down**) to move the selection cursor up and down through folders and books. You can also long-press these buttons to scroll a full page up or down.
+- **Open Selection:** Press **Confirm** to open a folder or read a selected book.
 
 ### 3.3 Reading Mode
 
@@ -86,7 +89,7 @@ See the [webserver docs](./docs/webserver.md) for more information on how to con
 CrossPoint supports sending books from Calibre using the CrossPoint Reader device plugin.
 
 1. Install the plugin in Calibre:
-   - Head to https://github.com/crosspoint-reader/calibre-plugins/releases to download the latest version of the crosspoint_reader plugin.
+   - Head to <https://github.com/crosspoint-reader/calibre-plugins/releases> to download the latest version of the crosspoint_reader plugin.
    - Download the zip file.
    - Open Calibre → Preferences → Plugins → Load plugin from file → Select the zip file.
 2. On the device: File Transfer → Connect to Calibre → Join a network.
@@ -96,6 +99,7 @@ CrossPoint supports sending books from Calibre using the CrossPoint Reader devic
 ### 3.5 Settings
 
 The Settings screen allows you to configure the device's behavior. There are a few settings you can adjust:
+
 - **Sleep Screen**: Which sleep screen to display when the device sleeps:
   - "Dark" (default) - The default dark Crosspoint logo sleep screen
   - "Light" - The same default sleep screen, on a white background
@@ -105,7 +109,7 @@ The Settings screen allows you to configure the device's behavior. There are a f
 - **Sleep Screen Cover Mode**: How to display the book cover when "Cover" sleep screen is selected:
   - "Fit" (default) - Scale the image down to fit centered on the screen, padding with white borders as necessary
   - "Crop" - Scale the image down and crop as necessary to try to to fill the screen (Note: this is experimental and may not work as expected)
-- **Sleep Screen Cover Filter**: What filter will be applied to the book cover when "Cover" sleep screen is selected 
+- **Sleep Screen Cover Filter**: What filter will be applied to the book cover when "Cover" sleep screen is selected
   - "None" (default) - The cover image will be converted to a grayscale image and displayed as it is
   - "Contrast" - The image will be displayed as a black & white image without grayscale conversion
   - "Inverted" - The image will be inverted as in white&black and will be displayed without grayscale conversion
@@ -149,6 +153,7 @@ The Settings screen allows you to configure the device's behavior. There are a f
 - **Time to Sleep**: Set the duration of inactivity before the device automatically goes to sleep.
 - **Refresh Frequency**: Set how often the screen does a full refresh while reading to reduce ghosting.
 - **OPDS Browser**: Configure OPDS server settings for browsing and downloading books. Set the server URL (for Calibre Content Server, add `/opds` to the end), and optionally configure username and password for servers requiring authentication. Note: Only HTTP Basic authentication is supported. If using Calibre Content Server with authentication enabled, you must set it to use Basic authentication instead of the default Digest authentication.
+- **Enable Screenshot**: Toggle whether the global shortcut (Power + Volume Down) saves a screenshot to the SD card's `/screenshots` directory. When disabled, the screenshot feature will not run and does not allocate the temporary buffer, saving RAM on memory-constrained devices.
 - **Check for updates**: Check for firmware updates over WiFi.
 
 ### 3.6 Sleep Screen
@@ -160,9 +165,10 @@ You can customize the sleep screen by placing custom images in specific location
 
 > [!NOTE]
 > You'll need to set the **Sleep Screen** setting to **Custom** in order to use these images.
-
+>
 > [!TIP]
 > For best results:
+>
 > - Use uncompressed BMP files with 24-bit color depth
 > - Use a resolution of 480x800 pixels to match the device's screen resolution.
 
@@ -173,6 +179,7 @@ You can customize the sleep screen by placing custom images in specific location
 Once you have opened a book, the button layout changes to facilitate reading.
 
 ### Page Turning
+
 | Action            | Buttons                              |
 | ----------------- | ------------------------------------ |
 | **Previous Page** | Press **Left** _or_ **Volume Up**    |
@@ -183,25 +190,25 @@ The role of the volume (side) buttons can be swapped in **[Settings](#35-setting
 If the **Short Power Button Click** setting is set to "Page Turn", you can also turn to the next page by briefly pressing the Power button.
 
 ### Chapter Navigation
-* **Next Chapter:** Press and **hold** the **Right** (or **Volume Down**) button briefly, then release.
-* **Previous Chapter:** Press and **hold** the **Left** (or **Volume Up**) button briefly, then release.
+
+- **Next Chapter:** Press and **hold** the **Right** (or **Volume Down**) button briefly, then release.
+- **Previous Chapter:** Press and **hold** the **Left** (or **Volume Up**) button briefly, then release.
 
 This feature can be disabled in **[Settings](#35-settings)** to help avoid changing chapters by mistake.
 
-
 ### System Navigation
-* **Return to Book Selection:** Press **Back** to close the book and return to the **[Book Selection](#32-book-selection)** screen.
-* **Return to Home:** Press and **hold** the **Back** button to close the book and return to the **[Home](#31-home-screen)** screen.
-* **Chapter Menu:** Press **Confirm** to open the **[Table of Contents/Chapter Selection](#5-chapter-selection-screen)**.
+
+- **Return to Book Selection:** Press **Back** to close the book and return to the **[Book Selection](#32-book-selection)** screen.
+- **Return to Home:** Press and **hold** the **Back** button to close the book and return to the **[Home](#31-home-screen)** screen.
+- **Chapter Menu:** Press **Confirm** to open the **[Table of Contents/Chapter Selection](#5-chapter-selection-screen)**.
 
 ### Supported Languages
 
 CrossPoint renders text using the following Unicode character blocks, enabling support for a wide range of languages:
 
-*   **Latin Script (Basic, Supplement, Extended-A):** Covers English, German, French, Spanish, Portuguese, Italian, Dutch, Swedish, Norwegian, Danish, Finnish, Polish, Czech, Hungarian, Romanian, Slovak, Slovenian, Turkish, and others.
-*   **Cyrillic Script (Standard and Extended):** Covers Russian, Ukrainian, Belarusian, Bulgarian, Serbian, Macedonian, Kazakh, Kyrgyz, Mongolian, and others.
+- **Latin Script (Basic, Supplement, Extended-A, Extended-B, Latin Extended Additional):** Covers English, German, French, Spanish, Portuguese, Italian, Dutch, Swedish, Norwegian, Danish, Finnish, Polish, Czech, Hungarian, Romanian, Slovak, Slovenian, Turkish, Vietnamese, and others.
 
-What is not supported: Chinese, Japanese, Korean, Vietnamese, Hebrew, Arabic and Farsi.
+- **Not currently supported:** Cyrillic (Russian, Ukrainian, etc.), Greek, CJK (Chinese, Japanese, Korean), Hebrew, Arabic, Farsi, and other non-Latin scripts.
 
 ---
 
@@ -209,9 +216,9 @@ What is not supported: Chinese, Japanese, Korean, Vietnamese, Hebrew, Arabic and
 
 Accessible by pressing **Confirm** while inside a book.
 
-1.  Use **Left** (or **Volume Up**), or **Right** (or **Volume Down**) to highlight the desired chapter.
-2.  Press **Confirm** to jump to that chapter.
-3.  *Alternatively, press **Back** to cancel and return to your current page.*
+1. Use **Left** (or **Volume Up**), or **Right** (or **Volume Down**) to highlight the desired chapter.
+2. Press **Confirm** to jump to that chapter.
+3. _Alternatively, press **Back** to cancel and return to your current page._
 
 ---
 
@@ -219,4 +226,4 @@ Accessible by pressing **Confirm** while inside a book.
 
 Please note that this firmware is currently in active development. The following features are **not yet supported** but are planned for future updates:
 
-* **Images:** Embedded images in e-books will not render.
+- **Images:** Embedded images in e-books will not render.

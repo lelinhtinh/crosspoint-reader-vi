@@ -269,6 +269,25 @@ void loop() {
     lastMemPrint = millis();
   }
 
+  // Global shortcut: Power + Volume Down -> take screenshot (not configurable)
+  static unsigned long lastScreenshotAt = 0;
+  if (millis() - lastScreenshotAt > 1000) {
+    if (gpio.isPressed(HalGPIO::BTN_POWER) && gpio.isPressed(HalGPIO::BTN_DOWN)) {
+      lastScreenshotAt = millis();
+      Serial.printf("[%lu] [SCR] Shortcut Power+VolDown detected\n", millis());
+      if (!SETTINGS.screenshotEnabled) {
+        Serial.printf("[%lu] [SCR] Screenshot feature is disabled in settings\n", millis());
+        exitActivity();
+        enterNewActivity(new FullScreenMessageActivity(renderer, mappedInputManager, "Screenshot disabled", EpdFontFamily::BOLD));
+      } else {
+        const bool success = renderer.saveScreenshot("/screenshots");
+        const char* msg = success ? "Screenshot saved" : "Failed to save screenshot";
+        exitActivity();
+        enterNewActivity(new FullScreenMessageActivity(renderer, mappedInputManager, msg, EpdFontFamily::BOLD));
+      }
+    }
+  }
+
   // Check for any user activity (button press or release) or active background work
   static unsigned long lastActivityTime = millis();
   if (gpio.wasAnyPressed() || gpio.wasAnyReleased() || (currentActivity && currentActivity->preventAutoSleep())) {

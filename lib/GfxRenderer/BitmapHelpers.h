@@ -14,11 +14,11 @@ int adjustPixel(int gray);
 // 1/8 1/8 1/8
 //     1/8
 class Atkinson1BitDitherer {
- public:
+public:
   explicit Atkinson1BitDitherer(int width) : width(width) {
-    errorRow0 = new int16_t[width + 4]();  // Current row
-    errorRow1 = new int16_t[width + 4]();  // Next row
-    errorRow2 = new int16_t[width + 4]();  // Row after next
+    errorRow0 = new int16_t[width + 4](); // Current row
+    errorRow1 = new int16_t[width + 4](); // Next row
+    errorRow2 = new int16_t[width + 4](); // Row after next
   }
 
   ~Atkinson1BitDitherer() {
@@ -28,10 +28,10 @@ class Atkinson1BitDitherer {
   }
 
   // EXPLICITLY DELETE THE COPY CONSTRUCTOR
-  Atkinson1BitDitherer(const Atkinson1BitDitherer& other) = delete;
+  Atkinson1BitDitherer(const Atkinson1BitDitherer &other) = delete;
 
   // EXPLICITLY DELETE THE COPY ASSIGNMENT OPERATOR
-  Atkinson1BitDitherer& operator=(const Atkinson1BitDitherer& other) = delete;
+  Atkinson1BitDitherer &operator=(const Atkinson1BitDitherer &other) = delete;
 
   uint8_t processPixel(int gray, int x) {
     // Apply brightness/contrast/gamma adjustments
@@ -39,8 +39,10 @@ class Atkinson1BitDitherer {
 
     // Add accumulated error
     int adjusted = gray + errorRow0[x + 2];
-    if (adjusted < 0) adjusted = 0;
-    if (adjusted > 255) adjusted = 255;
+    if (adjusted < 0)
+      adjusted = 0;
+    if (adjusted > 255)
+      adjusted = 255;
 
     // Quantize to 2 levels (1-bit): 0 = black, 1 = white
     uint8_t quantized;
@@ -54,21 +56,21 @@ class Atkinson1BitDitherer {
     }
 
     // Calculate error (only distribute 6/8 = 75%)
-    int error = (adjusted - quantizedValue) >> 3;  // error/8
+    int error = (adjusted - quantizedValue) >> 3; // error/8
 
     // Distribute 1/8 to each of 6 neighbors
-    errorRow0[x + 3] += error;  // Right
-    errorRow0[x + 4] += error;  // Right+1
-    errorRow1[x + 1] += error;  // Bottom-left
-    errorRow1[x + 2] += error;  // Bottom
-    errorRow1[x + 3] += error;  // Bottom-right
-    errorRow2[x + 2] += error;  // Two rows down
+    errorRow0[x + 3] += error; // Right
+    errorRow0[x + 4] += error; // Right+1
+    errorRow1[x + 1] += error; // Bottom-left
+    errorRow1[x + 2] += error; // Bottom
+    errorRow1[x + 3] += error; // Bottom-right
+    errorRow2[x + 2] += error; // Two rows down
 
     return quantized;
   }
 
   void nextRow() {
-    int16_t* temp = errorRow0;
+    int16_t *temp = errorRow0;
     errorRow0 = errorRow1;
     errorRow1 = errorRow2;
     errorRow2 = temp;
@@ -81,11 +83,11 @@ class Atkinson1BitDitherer {
     memset(errorRow2, 0, (width + 4) * sizeof(int16_t));
   }
 
- private:
+private:
   int width;
-  int16_t* errorRow0;
-  int16_t* errorRow1;
-  int16_t* errorRow2;
+  int16_t *errorRow0;
+  int16_t *errorRow1;
+  int16_t *errorRow2;
 };
 
 // Atkinson dithering - distributes only 6/8 (75%) of error for cleaner results
@@ -95,11 +97,11 @@ class Atkinson1BitDitherer {
 //     1/8
 // Less error buildup = fewer artifacts than Floyd-Steinberg
 class AtkinsonDitherer {
- public:
+public:
   explicit AtkinsonDitherer(int width) : width(width) {
-    errorRow0 = new int16_t[width + 4]();  // Current row
-    errorRow1 = new int16_t[width + 4]();  // Next row
-    errorRow2 = new int16_t[width + 4]();  // Row after next
+    errorRow0 = new int16_t[width + 4](); // Current row
+    errorRow1 = new int16_t[width + 4](); // Next row
+    errorRow2 = new int16_t[width + 4](); // Row after next
   }
 
   ~AtkinsonDitherer() {
@@ -108,21 +110,23 @@ class AtkinsonDitherer {
     delete[] errorRow2;
   }
   // **1. EXPLICITLY DELETE THE COPY CONSTRUCTOR**
-  AtkinsonDitherer(const AtkinsonDitherer& other) = delete;
+  AtkinsonDitherer(const AtkinsonDitherer &other) = delete;
 
   // **2. EXPLICITLY DELETE THE COPY ASSIGNMENT OPERATOR**
-  AtkinsonDitherer& operator=(const AtkinsonDitherer& other) = delete;
+  AtkinsonDitherer &operator=(const AtkinsonDitherer &other) = delete;
 
   uint8_t processPixel(int gray, int x) {
     // Add accumulated error
     int adjusted = gray + errorRow0[x + 2];
-    if (adjusted < 0) adjusted = 0;
-    if (adjusted > 255) adjusted = 255;
+    if (adjusted < 0)
+      adjusted = 0;
+    if (adjusted > 255)
+      adjusted = 255;
 
     // Quantize to 4 levels
     uint8_t quantized;
     int quantizedValue;
-    if (false) {  // original thresholds
+    if (false) { // original thresholds
       if (adjusted < 43) {
         quantized = 0;
         quantizedValue = 0;
@@ -136,7 +140,7 @@ class AtkinsonDitherer {
         quantized = 3;
         quantizedValue = 255;
       }
-    } else {  // fine-tuned to X4 eink display
+    } else { // fine-tuned to X4 eink display
       if (adjusted < 30) {
         quantized = 0;
         quantizedValue = 15;
@@ -153,21 +157,21 @@ class AtkinsonDitherer {
     }
 
     // Calculate error (only distribute 6/8 = 75%)
-    int error = (adjusted - quantizedValue) >> 3;  // error/8
+    int error = (adjusted - quantizedValue) >> 3; // error/8
 
     // Distribute 1/8 to each of 6 neighbors
-    errorRow0[x + 3] += error;  // Right
-    errorRow0[x + 4] += error;  // Right+1
-    errorRow1[x + 1] += error;  // Bottom-left
-    errorRow1[x + 2] += error;  // Bottom
-    errorRow1[x + 3] += error;  // Bottom-right
-    errorRow2[x + 2] += error;  // Two rows down
+    errorRow0[x + 3] += error; // Right
+    errorRow0[x + 4] += error; // Right+1
+    errorRow1[x + 1] += error; // Bottom-left
+    errorRow1[x + 2] += error; // Bottom
+    errorRow1[x + 3] += error; // Bottom-right
+    errorRow2[x + 2] += error; // Two rows down
 
     return quantized;
   }
 
   void nextRow() {
-    int16_t* temp = errorRow0;
+    int16_t *temp = errorRow0;
     errorRow0 = errorRow1;
     errorRow1 = errorRow2;
     errorRow2 = temp;
@@ -180,11 +184,11 @@ class AtkinsonDitherer {
     memset(errorRow2, 0, (width + 4) * sizeof(int16_t));
   }
 
- private:
+private:
   int width;
-  int16_t* errorRow0;
-  int16_t* errorRow1;
-  int16_t* errorRow2;
+  int16_t *errorRow0;
+  int16_t *errorRow1;
+  int16_t *errorRow2;
 };
 
 // Floyd-Steinberg error diffusion dithering with serpentine scanning
@@ -196,9 +200,9 @@ class AtkinsonDitherer {
 // 1/16 5/16 3/16
 //      7/16  X
 class FloydSteinbergDitherer {
- public:
+public:
   explicit FloydSteinbergDitherer(int width) : width(width), rowCount(0) {
-    errorCurRow = new int16_t[width + 2]();  // +2 for boundary handling
+    errorCurRow = new int16_t[width + 2](); // +2 for boundary handling
     errorNextRow = new int16_t[width + 2]();
   }
 
@@ -208,10 +212,10 @@ class FloydSteinbergDitherer {
   }
 
   // **1. EXPLICITLY DELETE THE COPY CONSTRUCTOR**
-  FloydSteinbergDitherer(const FloydSteinbergDitherer& other) = delete;
+  FloydSteinbergDitherer(const FloydSteinbergDitherer &other) = delete;
 
   // **2. EXPLICITLY DELETE THE COPY ASSIGNMENT OPERATOR**
-  FloydSteinbergDitherer& operator=(const FloydSteinbergDitherer& other) = delete;
+  FloydSteinbergDitherer &operator=(const FloydSteinbergDitherer &other) = delete;
 
   // Process a single pixel and return quantized 2-bit value
   // x is the logical x position (0 to width-1), direction handled internally
@@ -220,13 +224,15 @@ class FloydSteinbergDitherer {
     int adjusted = gray + errorCurRow[x + 1];
 
     // Clamp to valid range
-    if (adjusted < 0) adjusted = 0;
-    if (adjusted > 255) adjusted = 255;
+    if (adjusted < 0)
+      adjusted = 0;
+    if (adjusted > 255)
+      adjusted = 255;
 
     // Quantize to 4 levels (0, 85, 170, 255)
     uint8_t quantized;
     int quantizedValue;
-    if (false) {  // original thresholds
+    if (false) { // original thresholds
       if (adjusted < 43) {
         quantized = 0;
         quantizedValue = 0;
@@ -240,7 +246,7 @@ class FloydSteinbergDitherer {
         quantized = 3;
         quantizedValue = 255;
       }
-    } else {  // fine-tuned to X4 eink display
+    } else { // fine-tuned to X4 eink display
       if (adjusted < 30) {
         quantized = 0;
         quantizedValue = 15;
@@ -288,7 +294,7 @@ class FloydSteinbergDitherer {
   // Call at the end of each row to swap buffers
   void nextRow() {
     // Swap buffers
-    int16_t* temp = errorCurRow;
+    int16_t *temp = errorCurRow;
     errorCurRow = errorNextRow;
     errorNextRow = temp;
     // Clear the next row buffer
@@ -306,9 +312,9 @@ class FloydSteinbergDitherer {
     rowCount = 0;
   }
 
- private:
+private:
   int width;
   int rowCount;
-  int16_t* errorCurRow;
-  int16_t* errorNextRow;
+  int16_t *errorCurRow;
+  int16_t *errorNextRow;
 };

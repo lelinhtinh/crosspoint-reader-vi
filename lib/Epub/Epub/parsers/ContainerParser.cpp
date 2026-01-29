@@ -16,8 +16,8 @@ bool ContainerParser::setup() {
 
 ContainerParser::~ContainerParser() {
   if (parser) {
-    XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-    XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+    XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+    XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
     XML_ParserFree(parser);
     parser = nullptr;
   }
@@ -25,14 +25,15 @@ ContainerParser::~ContainerParser() {
 
 size_t ContainerParser::write(const uint8_t data) { return write(&data, 1); }
 
-size_t ContainerParser::write(const uint8_t* buffer, const size_t size) {
-  if (!parser) return 0;
+size_t ContainerParser::write(const uint8_t *buffer, const size_t size) {
+  if (!parser)
+    return 0;
 
-  const uint8_t* currentBufferPos = buffer;
+  const uint8_t *currentBufferPos = buffer;
   auto remainingInBuffer = size;
 
   while (remainingInBuffer > 0) {
-    void* const buf = XML_GetBuffer(parser, 1024);
+    void *const buf = XML_GetBuffer(parser, 1024);
     if (!buf) {
       Serial.printf("[%lu] [CTR] Couldn't allocate buffer\n", millis());
       return 0;
@@ -53,8 +54,8 @@ size_t ContainerParser::write(const uint8_t* buffer, const size_t size) {
   return size;
 }
 
-void XMLCALL ContainerParser::startElement(void* userData, const XML_Char* name, const XML_Char** atts) {
-  auto* self = static_cast<ContainerParser*>(userData);
+void XMLCALL ContainerParser::startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  auto *self = static_cast<ContainerParser *>(userData);
 
   // Simple state tracking to ensure we are looking at the valid schema structure
   if (self->state == START && strcmp(name, "container") == 0) {
@@ -68,8 +69,8 @@ void XMLCALL ContainerParser::startElement(void* userData, const XML_Char* name,
   }
 
   if (self->state == IN_ROOTFILES && strcmp(name, "rootfile") == 0) {
-    const char* mediaType = nullptr;
-    const char* path = nullptr;
+    const char *mediaType = nullptr;
+    const char *path = nullptr;
 
     for (int i = 0; atts[i]; i += 2) {
       if (strcmp(atts[i], "media-type") == 0) {
@@ -86,8 +87,8 @@ void XMLCALL ContainerParser::startElement(void* userData, const XML_Char* name,
   }
 }
 
-void XMLCALL ContainerParser::endElement(void* userData, const XML_Char* name) {
-  auto* self = static_cast<ContainerParser*>(userData);
+void XMLCALL ContainerParser::endElement(void *userData, const XML_Char *name) {
+  auto *self = static_cast<ContainerParser *>(userData);
 
   if (self->state == IN_ROOTFILES && strcmp(name, "rootfiles") == 0) {
     self->state = IN_CONTAINER;

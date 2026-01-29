@@ -22,24 +22,17 @@
  * 5. Apply or upload progress
  */
 class KOReaderSyncActivity final : public ActivityWithSubactivity {
- public:
+public:
   using OnCancelCallback = std::function<void()>;
   using OnSyncCompleteCallback = std::function<void(int newSpineIndex, int newPageNumber)>;
 
-  explicit KOReaderSyncActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                const std::shared_ptr<Epub>& epub, const std::string& epubPath, int currentSpineIndex,
+  explicit KOReaderSyncActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                const std::shared_ptr<Epub> &epub, const std::string &epubPath, int currentSpineIndex,
                                 int currentPage, int totalPagesInSpine, OnCancelCallback onCancel,
                                 OnSyncCompleteCallback onSyncComplete)
-      : ActivityWithSubactivity("KOReaderSync", renderer, mappedInput),
-        epub(epub),
-        epubPath(epubPath),
-        currentSpineIndex(currentSpineIndex),
-        currentPage(currentPage),
-        totalPagesInSpine(totalPagesInSpine),
-        remoteProgress{},
-        remotePosition{},
-        localProgress{},
-        onCancel(std::move(onCancel)),
+      : ActivityWithSubactivity("KOReaderSync", renderer, mappedInput), epub(epub), epubPath(epubPath),
+        currentSpineIndex(currentSpineIndex), currentPage(currentPage), totalPagesInSpine(totalPagesInSpine),
+        remoteProgress{}, remotePosition{}, localProgress{}, onCancel(std::move(onCancel)),
         onSyncComplete(std::move(onSyncComplete)) {}
 
   void onEnter() override;
@@ -47,7 +40,7 @@ class KOReaderSyncActivity final : public ActivityWithSubactivity {
   void loop() override;
   bool preventAutoSleep() override { return state == CONNECTING || state == SYNCING; }
 
- private:
+private:
   enum State {
     WIFI_SELECTION,
     CONNECTING,
@@ -92,7 +85,7 @@ class KOReaderSyncActivity final : public ActivityWithSubactivity {
   void performSync();
   void performUpload();
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render();
 };

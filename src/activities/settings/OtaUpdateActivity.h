@@ -30,13 +30,13 @@ class OtaUpdateActivity : public ActivityWithSubactivity {
   OtaUpdater updater;
 
   void onWifiSelectionComplete(bool success);
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render();
 
- public:
-  explicit OtaUpdateActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                             const std::function<void()>& goBack)
+public:
+  explicit OtaUpdateActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                             const std::function<void()> &goBack)
       : ActivityWithSubactivity("OtaUpdate", renderer, mappedInput), goBack(goBack), updater() {}
   void onEnter() override;
   void onExit() override;

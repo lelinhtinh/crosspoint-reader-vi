@@ -8,7 +8,7 @@
 #include "Battery.h"
 #include "fontIds.h"
 
-void ScreenComponents::drawBattery(const GfxRenderer& renderer, const int left, const int top,
+void ScreenComponents::drawBattery(const GfxRenderer &renderer, const int left, const int top,
                                    const bool showPercentage) {
   // Left aligned battery icon and percentage
   const uint16_t percentage = battery.readPercentage();
@@ -36,13 +36,13 @@ void ScreenComponents::drawBattery(const GfxRenderer& renderer, const int left, 
   // The +1 is to round up, so that we always fill at least one pixel
   int filledWidth = percentage * (batteryWidth - 5) / 100 + 1;
   if (filledWidth > batteryWidth - 5) {
-    filledWidth = batteryWidth - 5;  // Ensure we don't overflow
+    filledWidth = batteryWidth - 5; // Ensure we don't overflow
   }
 
   renderer.fillRect(x + 2, y + 2, filledWidth, batteryHeight - 4);
 }
 
-void ScreenComponents::drawBookProgressBar(const GfxRenderer& renderer, const size_t bookProgress) {
+void ScreenComponents::drawBookProgressBar(const GfxRenderer &renderer, const size_t bookProgress) {
   int vieweableMarginTop, vieweableMarginRight, vieweableMarginBottom, vieweableMarginLeft;
   renderer.getOrientedViewableTRBL(&vieweableMarginTop, &vieweableMarginRight, &vieweableMarginBottom,
                                    &vieweableMarginLeft);
@@ -53,18 +53,18 @@ void ScreenComponents::drawBookProgressBar(const GfxRenderer& renderer, const si
   renderer.fillRect(vieweableMarginLeft, progressBarY, barWidth, BOOK_PROGRESS_BAR_HEIGHT, true);
 }
 
-int ScreenComponents::drawTabBar(const GfxRenderer& renderer, const int y, const std::vector<TabInfo>& tabs) {
-  constexpr int tabPadding = 20;      // Horizontal padding between tabs
-  constexpr int leftMargin = 20;      // Left margin for first tab
-  constexpr int underlineHeight = 2;  // Height of selection underline
-  constexpr int underlineGap = 4;     // Gap between text and underline
+int ScreenComponents::drawTabBar(const GfxRenderer &renderer, const int y, const std::vector<TabInfo> &tabs) {
+  constexpr int tabPadding = 20;     // Horizontal padding between tabs
+  constexpr int leftMargin = 20;     // Left margin for first tab
+  constexpr int underlineHeight = 2; // Height of selection underline
+  constexpr int underlineGap = 4;    // Gap between text and underline
 
   const int lineHeight = renderer.getLineHeight(UI_12_FONT_ID);
   const int tabBarHeight = lineHeight + underlineGap + underlineHeight;
 
   int currentX = leftMargin;
 
-  for (const auto& tab : tabs) {
+  for (const auto &tab : tabs) {
     const int textWidth =
         renderer.getTextWidth(UI_12_FONT_ID, tab.label, tab.selected ? EpdFontFamily::BOLD : EpdFontFamily::REGULAR);
 
@@ -83,19 +83,19 @@ int ScreenComponents::drawTabBar(const GfxRenderer& renderer, const int y, const
   return tabBarHeight;
 }
 
-void ScreenComponents::drawScrollIndicator(const GfxRenderer& renderer, const int currentPage, const int totalPages,
+void ScreenComponents::drawScrollIndicator(const GfxRenderer &renderer, const int currentPage, const int totalPages,
                                            const int contentTop, const int contentHeight) {
   if (totalPages <= 1) {
-    return;  // No need for indicator if only one page
+    return; // No need for indicator if only one page
   }
 
   const int screenWidth = renderer.getScreenWidth();
   constexpr int indicatorWidth = 20;
   constexpr int arrowSize = 6;
-  constexpr int margin = 15;  // Offset from right edge
+  constexpr int margin = 15; // Offset from right edge
 
   const int centerX = screenWidth - indicatorWidth / 2 - margin;
-  const int indicatorTop = contentTop + 60;  // Offset to avoid overlapping side button hints
+  const int indicatorTop = contentTop + 60; // Offset to avoid overlapping side button hints
   const int indicatorBottom = contentTop + contentHeight - 30;
 
   // Draw up arrow at top (^) - narrow point at top, wide base at bottom
@@ -122,7 +122,7 @@ void ScreenComponents::drawScrollIndicator(const GfxRenderer& renderer, const in
   renderer.drawText(SMALL_FONT_ID, textX, textY, pageText.c_str());
 }
 
-void ScreenComponents::drawProgressBar(const GfxRenderer& renderer, const int x, const int y, const int width,
+void ScreenComponents::drawProgressBar(const GfxRenderer &renderer, const int x, const int y, const int width,
                                        const int height, const size_t current, const size_t total) {
   if (total == 0) {
     return;

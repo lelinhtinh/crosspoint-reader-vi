@@ -30,7 +30,7 @@ HalDisplay display;
 HalGPIO gpio;
 MappedInputManager mappedInputManager(gpio);
 GfxRenderer renderer(display);
-Activity* currentActivity;
+Activity *currentActivity;
 
 // Fonts - Pridi only for Vietnamese support (Regular and Bold only)
 // Italic will fallback to Regular, BoldItalic will fallback to Bold
@@ -47,7 +47,7 @@ EpdFontFamily pridi16FontFamily(&pridi16RegularFont, &pridi16BoldFont);
 EpdFont pridi18RegularFont(&pridi_18_regular);
 EpdFont pridi18BoldFont(&pridi_18_bold);
 EpdFontFamily pridi18FontFamily(&pridi18RegularFont, &pridi18BoldFont);
-#endif  // OMIT_FONTS
+#endif // OMIT_FONTS
 
 EpdFont smallFont(&pridi_8_regular);
 EpdFontFamily smallFontFamily(&smallFont);
@@ -72,7 +72,7 @@ void exitActivity() {
   }
 }
 
-void enterNewActivity(Activity* activity) {
+void enterNewActivity(Activity *activity) {
   currentActivity = activity;
   currentActivity->onEnter();
 }
@@ -99,7 +99,7 @@ void verifyPowerButtonDuration() {
   gpio.update();
   // Needed because inputManager.isPressed() may take up to ~500ms to return the correct state
   while (!gpio.isPressed(HalGPIO::BTN_POWER) && millis() - start < 1000) {
-    delay(10);  // only wait 10ms each iteration to not delay too much in case of short configured duration.
+    delay(10); // only wait 10ms each iteration to not delay too much in case of short configured duration.
     gpio.update();
   }
 
@@ -142,8 +142,8 @@ void enterDeepSleep() {
 }
 
 void onGoHome();
-void onGoToMyLibraryWithTab(const std::string& path, MyLibraryActivity::Tab tab);
-void onGoToReader(const std::string& initialEpubPath, MyLibraryActivity::Tab fromTab) {
+void onGoToMyLibraryWithTab(const std::string &path, MyLibraryActivity::Tab tab);
+void onGoToReader(const std::string &initialEpubPath, MyLibraryActivity::Tab fromTab) {
   exitActivity();
   enterNewActivity(
       new ReaderActivity(renderer, mappedInputManager, initialEpubPath, fromTab, onGoHome, onGoToMyLibraryWithTab));
@@ -165,7 +165,7 @@ void onGoToMyLibrary() {
   enterNewActivity(new MyLibraryActivity(renderer, mappedInputManager, onGoHome, onGoToReader));
 }
 
-void onGoToMyLibraryWithTab(const std::string& path, MyLibraryActivity::Tab tab) {
+void onGoToMyLibraryWithTab(const std::string &path, MyLibraryActivity::Tab tab) {
   exitActivity();
   enterNewActivity(new MyLibraryActivity(renderer, mappedInputManager, onGoHome, onGoToReader, tab, path));
 }
@@ -189,7 +189,7 @@ void setupDisplayAndFonts() {
   renderer.insertFont(PRIDI_12_FONT_ID, pridi12FontFamily);
   renderer.insertFont(PRIDI_16_FONT_ID, pridi16FontFamily);
   renderer.insertFont(PRIDI_18_FONT_ID, pridi18FontFamily);
-#endif  // OMIT_FONTS
+#endif // OMIT_FONTS
   renderer.insertFont(UI_10_FONT_ID, ui10FontFamily);
   renderer.insertFont(UI_12_FONT_ID, ui12FontFamily);
   renderer.insertFont(SMALL_FONT_ID, smallFontFamily);
@@ -278,10 +278,11 @@ void loop() {
       if (!SETTINGS.screenshotEnabled) {
         Serial.printf("[%lu] [SCR] Screenshot feature is disabled in settings\n", millis());
         exitActivity();
-        enterNewActivity(new FullScreenMessageActivity(renderer, mappedInputManager, "Screenshot disabled", EpdFontFamily::BOLD));
+        enterNewActivity(
+            new FullScreenMessageActivity(renderer, mappedInputManager, "Screenshot disabled", EpdFontFamily::BOLD));
       } else {
         const bool success = renderer.saveScreenshot("/screenshots");
-        const char* msg = success ? "Screenshot saved" : "Failed to save screenshot";
+        const char *msg = success ? "Screenshot saved" : "Failed to save screenshot";
         exitActivity();
         enterNewActivity(new FullScreenMessageActivity(renderer, mappedInputManager, msg, EpdFontFamily::BOLD));
       }
@@ -291,7 +292,7 @@ void loop() {
   // Check for any user activity (button press or release) or active background work
   static unsigned long lastActivityTime = millis();
   if (gpio.wasAnyPressed() || gpio.wasAnyReleased() || (currentActivity && currentActivity->preventAutoSleep())) {
-    lastActivityTime = millis();  // Reset inactivity timer
+    lastActivityTime = millis(); // Reset inactivity timer
   }
 
   const unsigned long sleepTimeoutMs = SETTINGS.getSleepTimeoutMs();
@@ -327,8 +328,8 @@ void loop() {
   // When an activity requests skip loop delay (e.g., webserver running), use yield() for faster response
   // Otherwise, use longer delay to save power
   if (currentActivity && currentActivity->skipLoopDelay()) {
-    yield();  // Give FreeRTOS a chance to run tasks, but return immediately
+    yield(); // Give FreeRTOS a chance to run tasks, but return immediately
   } else {
-    delay(10);  // Normal delay when no activity requires fast response
+    delay(10); // Normal delay when no activity requires fast response
   }
 }

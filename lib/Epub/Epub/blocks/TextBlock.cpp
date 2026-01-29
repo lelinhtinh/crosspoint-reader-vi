@@ -3,7 +3,7 @@
 #include <GfxRenderer.h>
 #include <Serialization.h>
 
-void TextBlock::render(const GfxRenderer& renderer, const int fontId, const int x, const int y) const {
+void TextBlock::render(const GfxRenderer &renderer, const int fontId, const int x, const int y) const {
   // Validate iterator bounds before rendering
   if (words.size() != wordXpos.size() || words.size() != wordStyles.size()) {
     Serial.printf("[%lu] [TXB] Render skipped: size mismatch (words=%u, xpos=%u, styles=%u)\n", millis(),
@@ -24,7 +24,7 @@ void TextBlock::render(const GfxRenderer& renderer, const int fontId, const int 
   }
 }
 
-bool TextBlock::serialize(FsFile& file) const {
+bool TextBlock::serialize(FsFile &file) const {
   if (words.size() != wordXpos.size() || words.size() != wordStyles.size()) {
     Serial.printf("[%lu] [TXB] Serialization failed: size mismatch (words=%u, xpos=%u, styles=%u)\n", millis(),
                   words.size(), wordXpos.size(), wordStyles.size());
@@ -33,9 +33,12 @@ bool TextBlock::serialize(FsFile& file) const {
 
   // Word data
   serialization::writePod(file, static_cast<uint16_t>(words.size()));
-  for (const auto& w : words) serialization::writeString(file, w);
-  for (auto x : wordXpos) serialization::writePod(file, x);
-  for (auto s : wordStyles) serialization::writePod(file, s);
+  for (const auto &w : words)
+    serialization::writeString(file, w);
+  for (auto x : wordXpos)
+    serialization::writePod(file, x);
+  for (auto s : wordStyles)
+    serialization::writePod(file, s);
 
   // Block style
   serialization::writePod(file, style);
@@ -43,7 +46,7 @@ bool TextBlock::serialize(FsFile& file) const {
   return true;
 }
 
-std::unique_ptr<TextBlock> TextBlock::deserialize(FsFile& file) {
+std::unique_ptr<TextBlock> TextBlock::deserialize(FsFile &file) {
   uint16_t wc;
   std::list<std::string> words;
   std::list<uint16_t> wordXpos;
@@ -63,9 +66,12 @@ std::unique_ptr<TextBlock> TextBlock::deserialize(FsFile& file) {
   words.resize(wc);
   wordXpos.resize(wc);
   wordStyles.resize(wc);
-  for (auto& w : words) serialization::readString(file, w);
-  for (auto& x : wordXpos) serialization::readPod(file, x);
-  for (auto& s : wordStyles) serialization::readPod(file, s);
+  for (auto &w : words)
+    serialization::readString(file, w);
+  for (auto &x : wordXpos)
+    serialization::readPod(file, x);
+  for (auto &s : wordStyles)
+    serialization::readPod(file, s);
 
   // Block style
   serialization::readPod(file, style);

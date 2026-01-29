@@ -34,7 +34,7 @@ class CalibreConnectActivity final : public ActivityWithSubactivity {
   unsigned long lastCompleteAt = 0;
   bool exitRequested = false;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render() const;
   void renderServerRunning() const;
@@ -43,9 +43,9 @@ class CalibreConnectActivity final : public ActivityWithSubactivity {
   void startWebServer();
   void stopWebServer();
 
- public:
-  explicit CalibreConnectActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                  const std::function<void()>& onComplete)
+public:
+  explicit CalibreConnectActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                  const std::function<void()> &onComplete)
       : ActivityWithSubactivity("CalibreConnect", renderer, mappedInput), onComplete(onComplete) {}
   void onEnter() override;
   void onExit() override;

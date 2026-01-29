@@ -9,7 +9,7 @@
  * Wraps WiFiClientSecure and HTTPClient for HTTPS requests.
  */
 class HttpDownloader {
- public:
+public:
   using ProgressCallback = std::function<void(size_t downloaded, size_t total)>;
 
   enum DownloadError {
@@ -25,9 +25,9 @@ class HttpDownloader {
    * @param outContent The fetched content (output)
    * @return true if fetch succeeded, false on error
    */
-  static bool fetchUrl(const std::string& url, std::string& outContent);
+  static bool fetchUrl(const std::string &url, std::string &outContent);
 
-  static bool fetchUrl(const std::string& url, Stream& stream);
+  static bool fetchUrl(const std::string &url, Stream &stream);
 
   /**
    * Download a file to the SD card.
@@ -36,9 +36,9 @@ class HttpDownloader {
    * @param progress Optional progress callback
    * @return DownloadError indicating success or failure type
    */
-  static DownloadError downloadToFile(const std::string& url, const std::string& destPath,
+  static DownloadError downloadToFile(const std::string &url, const std::string &destPath,
                                       ProgressCallback progress = nullptr);
 
- private:
+private:
   static constexpr size_t DOWNLOAD_CHUNK_SIZE = 1024;
 };

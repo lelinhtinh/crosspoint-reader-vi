@@ -16,10 +16,10 @@ class ContainerParser final : public Print {
   XML_Parser parser = nullptr;
   ParserState state = START;
 
-  static void startElement(void* userData, const XML_Char* name, const XML_Char** atts);
-  static void endElement(void* userData, const XML_Char* name);
+  static void startElement(void *userData, const XML_Char *name, const XML_Char **atts);
+  static void endElement(void *userData, const XML_Char *name);
 
- public:
+public:
   std::string fullPath;
 
   explicit ContainerParser(const size_t xmlSize) : remainingSize(xmlSize) {}
@@ -28,5 +28,5 @@ class ContainerParser final : public Print {
   bool setup();
 
   size_t write(uint8_t) override;
-  size_t write(const uint8_t* buffer, size_t size) override;
+  size_t write(const uint8_t *buffer, size_t size) override;
 };

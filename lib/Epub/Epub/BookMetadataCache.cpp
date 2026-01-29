@@ -13,7 +13,7 @@ constexpr uint8_t BOOK_CACHE_VERSION = 5;
 constexpr char bookBinFile[] = "/book.bin";
 constexpr char tmpSpineBinFile[] = "/spine.bin.tmp";
 constexpr char tmpTocBinFile[] = "/toc.bin.tmp";
-}  // namespace
+} // namespace
 
 /* ============= WRITING / BUILDING FUNCTIONS ================ */
 
@@ -61,7 +61,7 @@ bool BookMetadataCache::beginTocPass() {
       spineHrefIndex.push_back(idx);
     }
     std::sort(spineHrefIndex.begin(), spineHrefIndex.end(),
-              [](const SpineHrefIndexEntry& a, const SpineHrefIndexEntry& b) {
+              [](const SpineHrefIndexEntry &a, const SpineHrefIndexEntry &b) {
                 return a.hrefHash < b.hrefHash || (a.hrefHash == b.hrefHash && a.hrefLen < b.hrefLen);
               });
     spineFile.seek(0);
@@ -96,7 +96,7 @@ bool BookMetadataCache::endWrite() {
   return true;
 }
 
-bool BookMetadataCache::buildBookBin(const std::string& epubPath, const BookMetadata& metadata) {
+bool BookMetadataCache::buildBookBin(const std::string &epubPath, const BookMetadata &metadata) {
   // Open all three files, writing to meta, reading from spine and toc
   if (!SdMan.openFileForWrite("BMC", cachePath + bookBinFile, bookFile)) {
     return false;
@@ -202,7 +202,7 @@ bool BookMetadataCache::buildBookBin(const std::string& epubPath, const BookMeta
       targets.push_back(t);
     }
 
-    std::sort(targets.begin(), targets.end(), [](const ZipFile::SizeTarget& a, const ZipFile::SizeTarget& b) {
+    std::sort(targets.begin(), targets.end(), [](const ZipFile::SizeTarget &a, const ZipFile::SizeTarget &b) {
       return a.hash < b.hash || (a.hash == b.hash && a.len < b.len);
     });
 
@@ -284,7 +284,7 @@ bool BookMetadataCache::cleanupTmpFiles() const {
   return true;
 }
 
-uint32_t BookMetadataCache::writeSpineEntry(FsFile& file, const SpineEntry& entry) const {
+uint32_t BookMetadataCache::writeSpineEntry(FsFile &file, const SpineEntry &entry) const {
   const uint32_t pos = file.position();
   serialization::writeString(file, entry.href);
   serialization::writePod(file, entry.cumulativeSize);
@@ -292,7 +292,7 @@ uint32_t BookMetadataCache::writeSpineEntry(FsFile& file, const SpineEntry& entr
   return pos;
 }
 
-uint32_t BookMetadataCache::writeTocEntry(FsFile& file, const TocEntry& entry) const {
+uint32_t BookMetadataCache::writeTocEntry(FsFile &file, const TocEntry &entry) const {
   const uint32_t pos = file.position();
   serialization::writeString(file, entry.title);
   serialization::writeString(file, entry.href);
@@ -304,7 +304,7 @@ uint32_t BookMetadataCache::writeTocEntry(FsFile& file, const TocEntry& entry) c
 
 // Note: for the LUT to be accurate, this **MUST** be called for all spine items before `addTocEntry` is ever called
 // this is because in this function we're marking positions of the items
-void BookMetadataCache::createSpineEntry(const std::string& href) {
+void BookMetadataCache::createSpineEntry(const std::string &href) {
   if (!buildMode || !spineFile) {
     Serial.printf("[%lu] [BMC] createSpineEntry called but not in build mode\n", millis());
     return;
@@ -315,7 +315,7 @@ void BookMetadataCache::createSpineEntry(const std::string& href) {
   spineCount++;
 }
 
-void BookMetadataCache::createTocEntry(const std::string& title, const std::string& href, const std::string& anchor,
+void BookMetadataCache::createTocEntry(const std::string &title, const std::string &href, const std::string &anchor,
                                        const uint8_t level) {
   if (!buildMode || !tocFile || !spineFile) {
     Serial.printf("[%lu] [BMC] createTocEntry called but not in build mode\n", millis());
@@ -330,7 +330,7 @@ void BookMetadataCache::createTocEntry(const std::string& title, const std::stri
 
     auto it =
         std::lower_bound(spineHrefIndex.begin(), spineHrefIndex.end(), SpineHrefIndexEntry{targetHash, targetLen, 0},
-                         [](const SpineHrefIndexEntry& a, const SpineHrefIndexEntry& b) {
+                         [](const SpineHrefIndexEntry &a, const SpineHrefIndexEntry &b) {
                            return a.hrefHash < b.hrefHash || (a.hrefHash == b.hrefHash && a.hrefLen < b.hrefLen);
                          });
 
@@ -429,7 +429,7 @@ BookMetadataCache::TocEntry BookMetadataCache::getTocEntry(const int index) {
   return readTocEntry(bookFile);
 }
 
-BookMetadataCache::SpineEntry BookMetadataCache::readSpineEntry(FsFile& file) const {
+BookMetadataCache::SpineEntry BookMetadataCache::readSpineEntry(FsFile &file) const {
   SpineEntry entry;
   serialization::readString(file, entry.href);
   serialization::readPod(file, entry.cumulativeSize);
@@ -437,7 +437,7 @@ BookMetadataCache::SpineEntry BookMetadataCache::readSpineEntry(FsFile& file) co
   return entry;
 }
 
-BookMetadataCache::TocEntry BookMetadataCache::readTocEntry(FsFile& file) const {
+BookMetadataCache::TocEntry BookMetadataCache::readTocEntry(FsFile &file) const {
   TocEntry entry;
   serialization::readString(file, entry.title);
   serialization::readString(file, entry.href);

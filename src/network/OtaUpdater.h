@@ -12,7 +12,7 @@ class OtaUpdater {
   size_t totalSize = 0;
   bool render = false;
 
- public:
+public:
   enum OtaUpdaterError {
     OK = 0,
     NO_UPDATE,
@@ -33,7 +33,7 @@ class OtaUpdater {
 
   OtaUpdater() = default;
   bool isUpdateNewer() const;
-  const std::string& getLatestVersion() const;
+  const std::string &getLatestVersion() const;
   OtaUpdaterError checkForUpdate();
   OtaUpdaterError installUpdate();
 };

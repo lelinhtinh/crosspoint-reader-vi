@@ -6,16 +6,16 @@
 
 namespace {
 // Extract filename from path (everything after last '/')
-std::string getFilename(const std::string& path) {
+std::string getFilename(const std::string &path) {
   const size_t pos = path.rfind('/');
   if (pos == std::string::npos) {
     return path;
   }
   return path.substr(pos + 1);
 }
-}  // namespace
+} // namespace
 
-std::string KOReaderDocumentId::calculateFromFilename(const std::string& filePath) {
+std::string KOReaderDocumentId::calculateFromFilename(const std::string &filePath) {
   const std::string filename = getFilename(filePath);
   if (filename.empty()) {
     return "";
@@ -41,7 +41,7 @@ size_t KOReaderDocumentId::getOffset(int i) {
   return CHUNK_SIZE << (2 * i);
 }
 
-std::string KOReaderDocumentId::calculate(const std::string& filePath) {
+std::string KOReaderDocumentId::calculate(const std::string &filePath) {
   FsFile file;
   if (!SdMan.openFileForRead("KODoc", filePath, file)) {
     Serial.printf("[%lu] [KODoc] Failed to open file: %s\n", millis(), filePath.c_str());

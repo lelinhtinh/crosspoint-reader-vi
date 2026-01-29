@@ -10,7 +10,7 @@ class GfxRenderer;
 class Section {
   std::shared_ptr<Epub> epub;
   const int spineIndex;
-  GfxRenderer& renderer;
+  GfxRenderer &renderer;
   std::string filePath;
   FsFile file;
 
@@ -18,14 +18,12 @@ class Section {
                               uint16_t viewportWidth, uint16_t viewportHeight, bool hyphenationEnabled);
   uint32_t onPageComplete(std::unique_ptr<Page> page);
 
- public:
+public:
   uint16_t pageCount = 0;
   int currentPage = 0;
 
-  explicit Section(const std::shared_ptr<Epub>& epub, const int spineIndex, GfxRenderer& renderer)
-      : epub(epub),
-        spineIndex(spineIndex),
-        renderer(renderer),
+  explicit Section(const std::shared_ptr<Epub> &epub, const int spineIndex, GfxRenderer &renderer)
+      : epub(epub), spineIndex(spineIndex), renderer(renderer),
         filePath(epub->getCachePath() + "/sections/" + std::to_string(spineIndex) + ".bin") {}
   ~Section() = default;
   bool loadSectionFile(int fontId, float lineCompression, bool extraParagraphSpacing, uint8_t paragraphAlignment,
@@ -33,7 +31,7 @@ class Section {
   bool clearCache() const;
   bool createSectionFile(int fontId, float lineCompression, bool extraParagraphSpacing, uint8_t paragraphAlignment,
                          uint16_t viewportWidth, uint16_t viewportHeight, bool hyphenationEnabled,
-                         const std::function<void()>& progressSetupFn = nullptr,
-                         const std::function<void(int)>& progressFn = nullptr);
+                         const std::function<void()> &progressSetupFn = nullptr,
+                         const std::function<void(int)> &progressFn = nullptr);
   std::unique_ptr<Page> loadPageFromSectionFile();
 };

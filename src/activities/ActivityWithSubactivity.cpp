@@ -7,7 +7,7 @@ void ActivityWithSubactivity::exitActivity() {
   }
 }
 
-void ActivityWithSubactivity::enterNewActivity(Activity* activity) {
+void ActivityWithSubactivity::enterNewActivity(Activity *activity) {
   subActivity.reset(activity);
   subActivity->onEnter();
 }

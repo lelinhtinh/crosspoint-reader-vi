@@ -27,14 +27,14 @@ class NetworkModeSelectionActivity final : public Activity {
   const std::function<void(NetworkMode)> onModeSelected;
   const std::function<void()> onCancel;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render() const;
 
- public:
-  explicit NetworkModeSelectionActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                        const std::function<void(NetworkMode)>& onModeSelected,
-                                        const std::function<void()>& onCancel)
+public:
+  explicit NetworkModeSelectionActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                        const std::function<void(NetworkMode)> &onModeSelected,
+                                        const std::function<void()> &onCancel)
       : Activity("NetworkModeSelection", renderer, mappedInput), onModeSelected(onModeSelected), onCancel(onCancel) {}
   void onEnter() override;
   void onExit() override;

@@ -22,9 +22,9 @@ constexpr char DEFAULT_SERVER_URL[] = "https://sync.koreader.rocks:443";
 // This is NOT cryptographic security, just prevents casual file reading
 constexpr uint8_t OBFUSCATION_KEY[] = {0x4B, 0x4F, 0x52, 0x65, 0x61, 0x64, 0x65, 0x72};
 constexpr size_t KEY_LENGTH = sizeof(OBFUSCATION_KEY);
-}  // namespace
+} // namespace
 
-void KOReaderCredentialStore::obfuscate(std::string& data) const {
+void KOReaderCredentialStore::obfuscate(std::string &data) const {
   for (size_t i = 0; i < data.size(); i++) {
     data[i] ^= OBFUSCATION_KEY[i % KEY_LENGTH];
   }
@@ -88,7 +88,7 @@ bool KOReaderCredentialStore::loadFromFile() {
   // Read and deobfuscate password
   if (file.available()) {
     serialization::readString(file, password);
-    obfuscate(password);  // XOR is symmetric, so same function deobfuscates
+    obfuscate(password); // XOR is symmetric, so same function deobfuscates
   } else {
     password.clear();
   }
@@ -114,7 +114,7 @@ bool KOReaderCredentialStore::loadFromFile() {
   return true;
 }
 
-void KOReaderCredentialStore::setCredentials(const std::string& user, const std::string& pass) {
+void KOReaderCredentialStore::setCredentials(const std::string &user, const std::string &pass) {
   username = user;
   password = pass;
   Serial.printf("[%lu] [KRS] Set credentials for user: %s\n", millis(), user.c_str());
@@ -143,7 +143,7 @@ void KOReaderCredentialStore::clearCredentials() {
   Serial.printf("[%lu] [KRS] Cleared KOReader credentials\n", millis());
 }
 
-void KOReaderCredentialStore::setServerUrl(const std::string& url) {
+void KOReaderCredentialStore::setServerUrl(const std::string &url) {
   serverUrl = url;
   Serial.printf("[%lu] [KRS] Set server URL: %s\n", millis(), url.empty() ? "(default)" : url.c_str());
 }

@@ -21,7 +21,7 @@ LanguageHyphenator spanishHyphenator(es_patterns, isLatinLetter, toLowerLatin);
 
 using EntryArray = std::array<LanguageEntry, 5>;
 
-const EntryArray& entries() {
+const EntryArray &entries() {
   static const EntryArray kEntries = {{{"english", "en", &englishHyphenator},
                                        {"french", "fr", &frenchHyphenator},
                                        {"german", "de", &germanHyphenator},
@@ -30,16 +30,16 @@ const EntryArray& entries() {
   return kEntries;
 }
 
-}  // namespace
+} // namespace
 
-const LanguageHyphenator* getLanguageHyphenatorForPrimaryTag(const std::string& primaryTag) {
-  const auto& allEntries = entries();
+const LanguageHyphenator *getLanguageHyphenatorForPrimaryTag(const std::string &primaryTag) {
+  const auto &allEntries = entries();
   const auto it = std::find_if(allEntries.begin(), allEntries.end(),
-                               [&primaryTag](const LanguageEntry& entry) { return primaryTag == entry.primaryTag; });
+                               [&primaryTag](const LanguageEntry &entry) { return primaryTag == entry.primaryTag; });
   return (it != allEntries.end()) ? it->hyphenator : nullptr;
 }
 
 LanguageEntryView getLanguageEntries() {
-  const auto& allEntries = entries();
+  const auto &allEntries = entries();
   return LanguageEntryView{allEntries.data(), allEntries.size()};
 }

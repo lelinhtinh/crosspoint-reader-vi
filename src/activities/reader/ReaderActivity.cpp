@@ -9,7 +9,7 @@
 #include "activities/util/FullScreenMessageActivity.h"
 #include "util/StringUtils.h"
 
-std::string ReaderActivity::extractFolderPath(const std::string& filePath) {
+std::string ReaderActivity::extractFolderPath(const std::string &filePath) {
   const auto lastSlash = filePath.find_last_of('/');
   if (lastSlash == std::string::npos || lastSlash == 0) {
     return "/";
@@ -17,16 +17,16 @@ std::string ReaderActivity::extractFolderPath(const std::string& filePath) {
   return filePath.substr(0, lastSlash);
 }
 
-bool ReaderActivity::isXtcFile(const std::string& path) {
+bool ReaderActivity::isXtcFile(const std::string &path) {
   return StringUtils::checkFileExtension(path, ".xtc") || StringUtils::checkFileExtension(path, ".xtch");
 }
 
-bool ReaderActivity::isTxtFile(const std::string& path) {
+bool ReaderActivity::isTxtFile(const std::string &path) {
   return StringUtils::checkFileExtension(path, ".txt") ||
-         StringUtils::checkFileExtension(path, ".md");  // Treat .md as txt files (until we have a markdown reader)
+         StringUtils::checkFileExtension(path, ".md"); // Treat .md as txt files (until we have a markdown reader)
 }
 
-std::unique_ptr<Epub> ReaderActivity::loadEpub(const std::string& path) {
+std::unique_ptr<Epub> ReaderActivity::loadEpub(const std::string &path) {
   if (!SdMan.exists(path.c_str())) {
     Serial.printf("[%lu] [   ] File does not exist: %s\n", millis(), path.c_str());
     return nullptr;
@@ -41,7 +41,7 @@ std::unique_ptr<Epub> ReaderActivity::loadEpub(const std::string& path) {
   return nullptr;
 }
 
-std::unique_ptr<Xtc> ReaderActivity::loadXtc(const std::string& path) {
+std::unique_ptr<Xtc> ReaderActivity::loadXtc(const std::string &path) {
   if (!SdMan.exists(path.c_str())) {
     Serial.printf("[%lu] [   ] File does not exist: %s\n", millis(), path.c_str());
     return nullptr;
@@ -56,7 +56,7 @@ std::unique_ptr<Xtc> ReaderActivity::loadXtc(const std::string& path) {
   return nullptr;
 }
 
-std::unique_ptr<Txt> ReaderActivity::loadTxt(const std::string& path) {
+std::unique_ptr<Txt> ReaderActivity::loadTxt(const std::string &path) {
   if (!SdMan.exists(path.c_str())) {
     Serial.printf("[%lu] [   ] File does not exist: %s\n", millis(), path.c_str());
     return nullptr;
@@ -71,7 +71,7 @@ std::unique_ptr<Txt> ReaderActivity::loadTxt(const std::string& path) {
   return nullptr;
 }
 
-void ReaderActivity::goToLibrary(const std::string& fromBookPath) {
+void ReaderActivity::goToLibrary(const std::string &fromBookPath) {
   // If coming from a book, start in that book's folder; otherwise start from root
   const auto initialPath = fromBookPath.empty() ? "/" : extractFolderPath(fromBookPath);
   onGoToLibrary(initialPath, libraryTab);
@@ -105,7 +105,7 @@ void ReaderActivity::onEnter() {
   ActivityWithSubactivity::onEnter();
 
   if (initialBookPath.empty()) {
-    goToLibrary();  // Start from root when entering via Browse
+    goToLibrary(); // Start from root when entering via Browse
     return;
   }
 

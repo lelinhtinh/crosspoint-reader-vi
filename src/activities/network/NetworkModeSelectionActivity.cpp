@@ -7,16 +7,16 @@
 
 namespace {
 constexpr int MENU_ITEM_COUNT = 3;
-const char* MENU_ITEMS[MENU_ITEM_COUNT] = {"Join a Network", "Connect to Calibre", "Create Hotspot"};
-const char* MENU_DESCRIPTIONS[MENU_ITEM_COUNT] = {
+const char *MENU_ITEMS[MENU_ITEM_COUNT] = {"Join a Network", "Connect to Calibre", "Create Hotspot"};
+const char *MENU_DESCRIPTIONS[MENU_ITEM_COUNT] = {
     "Connect to an existing WiFi network",
     "Use Calibre wireless device transfers",
     "Create a WiFi network others can join",
 };
-}  // namespace
+} // namespace
 
-void NetworkModeSelectionActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<NetworkModeSelectionActivity*>(param);
+void NetworkModeSelectionActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<NetworkModeSelectionActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -32,10 +32,10 @@ void NetworkModeSelectionActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&NetworkModeSelectionActivity::taskTrampoline, "NetworkModeTask",
-              2048,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              2048,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -111,7 +111,7 @@ void NetworkModeSelectionActivity::render() const {
   renderer.drawCenteredText(UI_10_FONT_ID, 50, "How would you like to connect?");
 
   // Draw menu items centered on screen
-  constexpr int itemHeight = 50;  // Height for each menu item (including description)
+  constexpr int itemHeight = 50; // Height for each menu item (including description)
   const int startY = (pageHeight - (MENU_ITEM_COUNT * itemHeight)) / 2 + 10;
 
   for (int i = 0; i < MENU_ITEM_COUNT; i++) {

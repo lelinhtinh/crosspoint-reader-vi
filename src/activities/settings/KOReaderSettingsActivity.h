@@ -12,16 +12,16 @@
  * Shows username, password, and authenticate options.
  */
 class KOReaderSettingsActivity final : public ActivityWithSubactivity {
- public:
-  explicit KOReaderSettingsActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                    const std::function<void()>& onBack)
+public:
+  explicit KOReaderSettingsActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                    const std::function<void()> &onBack)
       : ActivityWithSubactivity("KOReaderSettings", renderer, mappedInput), onBack(onBack) {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
 
- private:
+private:
   TaskHandle_t displayTaskHandle = nullptr;
   SemaphoreHandle_t renderingMutex = nullptr;
   bool updateRequired = false;
@@ -29,7 +29,7 @@ class KOReaderSettingsActivity final : public ActivityWithSubactivity {
   int selectedIndex = 0;
   const std::function<void()> onBack;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render();
   void handleSelection();

@@ -29,13 +29,13 @@ enum class BmpReaderError : uint8_t {
 };
 
 class Bitmap {
- public:
-  static const char* errorToString(BmpReaderError err);
+public:
+  static const char *errorToString(BmpReaderError err);
 
-  explicit Bitmap(FsFile& file, bool dithering = false) : file(file), dithering(dithering) {}
+  explicit Bitmap(FsFile &file, bool dithering = false) : file(file), dithering(dithering) {}
   ~Bitmap();
   BmpReaderError parseHeaders();
-  BmpReaderError readNextRow(uint8_t* data, uint8_t* rowBuffer) const;
+  BmpReaderError readNextRow(uint8_t *data, uint8_t *rowBuffer) const;
   BmpReaderError rewindToData() const;
   int getWidth() const { return width; }
   int getHeight() const { return height; }
@@ -45,11 +45,11 @@ class Bitmap {
   bool is1Bit() const { return bpp == 1; }
   uint16_t getBpp() const { return bpp; }
 
- private:
-  static uint16_t readLE16(FsFile& f);
-  static uint32_t readLE32(FsFile& f);
+private:
+  static uint16_t readLE16(FsFile &f);
+  static uint32_t readLE32(FsFile &f);
 
-  FsFile& file;
+  FsFile &file;
   bool dithering = false;
   int width = 0;
   int height = 0;
@@ -60,10 +60,10 @@ class Bitmap {
   uint8_t paletteLum[256] = {};
 
   // Floyd-Steinberg dithering state (mutable for const methods)
-  mutable int16_t* errorCurRow = nullptr;
-  mutable int16_t* errorNextRow = nullptr;
-  mutable int prevRowY = -1;  // Track row progression for error propagation
+  mutable int16_t *errorCurRow = nullptr;
+  mutable int16_t *errorNextRow = nullptr;
+  mutable int prevRowY = -1; // Track row progression for error propagation
 
-  mutable AtkinsonDitherer* atkinsonDitherer = nullptr;
-  mutable FloydSteinbergDitherer* fsDitherer = nullptr;
+  mutable AtkinsonDitherer *atkinsonDitherer = nullptr;
+  mutable FloydSteinbergDitherer *fsDitherer = nullptr;
 };

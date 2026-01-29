@@ -12,9 +12,9 @@
  * Connects to WiFi and authenticates with the KOReader sync server.
  */
 class KOReaderAuthActivity final : public ActivityWithSubactivity {
- public:
-  explicit KOReaderAuthActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                const std::function<void()>& onComplete)
+public:
+  explicit KOReaderAuthActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                const std::function<void()> &onComplete)
       : ActivityWithSubactivity("KOReaderAuth", renderer, mappedInput), onComplete(onComplete) {}
 
   void onEnter() override;
@@ -22,7 +22,7 @@ class KOReaderAuthActivity final : public ActivityWithSubactivity {
   void loop() override;
   bool preventAutoSleep() override { return state == CONNECTING || state == AUTHENTICATING; }
 
- private:
+private:
   enum State { WIFI_SELECTION, CONNECTING, AUTHENTICATING, SUCCESS, FAILED };
 
   TaskHandle_t displayTaskHandle = nullptr;
@@ -38,7 +38,7 @@ class KOReaderAuthActivity final : public ActivityWithSubactivity {
   void onWifiSelectionComplete(bool success);
   void performAuthentication();
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render();
 };

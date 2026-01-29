@@ -17,19 +17,19 @@
 
 namespace {
 // AP Mode configuration
-constexpr const char* AP_SSID = "CrossPoint-Reader";
-constexpr const char* AP_PASSWORD = nullptr;  // Open network for ease of use
-constexpr const char* AP_HOSTNAME = "crosspoint";
+constexpr const char *AP_SSID = "CrossPoint-Reader";
+constexpr const char *AP_PASSWORD = nullptr; // Open network for ease of use
+constexpr const char *AP_HOSTNAME = "crosspoint";
 constexpr uint8_t AP_CHANNEL = 1;
 constexpr uint8_t AP_MAX_CONNECTIONS = 4;
 
 // DNS server for captive portal (redirects all DNS queries to our IP)
-DNSServer* dnsServer = nullptr;
+DNSServer *dnsServer = nullptr;
 constexpr uint16_t DNS_PORT = 53;
-}  // namespace
+} // namespace
 
-void CrossPointWebServerActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<CrossPointWebServerActivity*>(param);
+void CrossPointWebServerActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<CrossPointWebServerActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -50,17 +50,17 @@ void CrossPointWebServerActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&CrossPointWebServerActivity::taskTrampoline, "WebServerActivityTask",
-              2048,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              2048,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 
   // Launch network mode selection subactivity
   Serial.printf("[%lu] [WEBACT] Launching NetworkModeSelectionActivity...\n", millis());
   enterNewActivity(new NetworkModeSelectionActivity(
       renderer, mappedInput, [this](const NetworkMode mode) { onNetworkModeSelected(mode); },
-      [this]() { onGoBack(); }  // Cancel goes back to home
+      [this]() { onGoBack(); } // Cancel goes back to home
       ));
 }
 
@@ -94,13 +94,13 @@ void CrossPointWebServerActivity::onExit() {
     WiFi.softAPdisconnect(true);
   } else {
     Serial.printf("[%lu] [WEBACT] Disconnecting WiFi (graceful)...\n", millis());
-    WiFi.disconnect(false);  // false = don't erase credentials, send disconnect frame
+    WiFi.disconnect(false); // false = don't erase credentials, send disconnect frame
   }
-  delay(30);  // Allow disconnect frame to be sent
+  delay(30); // Allow disconnect frame to be sent
 
   Serial.printf("[%lu] [WEBACT] Setting WiFi mode OFF...\n", millis());
   WiFi.mode(WIFI_OFF);
-  delay(30);  // Allow WiFi hardware to power down
+  delay(30); // Allow WiFi hardware to power down
 
   Serial.printf("[%lu] [WEBACT] [MEM] Free heap after WiFi disconnect: %d bytes\n", millis(), ESP.getFreeHeap());
 
@@ -126,7 +126,7 @@ void CrossPointWebServerActivity::onExit() {
 }
 
 void CrossPointWebServerActivity::onNetworkModeSelected(const NetworkMode mode) {
-  const char* modeName = "Join Network";
+  const char *modeName = "Join Network";
   if (mode == NetworkMode::CONNECT_CALIBRE) {
     modeName = "Connect to Calibre";
   } else if (mode == NetworkMode::CREATE_HOTSPOT) {
@@ -174,7 +174,7 @@ void CrossPointWebServerActivity::onWifiSelectionComplete(const bool connected) 
 
   if (connected) {
     // Get connection info before exiting subactivity
-    connectedIP = static_cast<WifiSelectionActivity*>(subActivity.get())->getConnectedIP();
+    connectedIP = static_cast<WifiSelectionActivity *>(subActivity.get())->getConnectedIP();
     connectedSSID = WiFi.SSID().c_str();
     isApMode = false;
 
@@ -220,7 +220,7 @@ void CrossPointWebServerActivity::startAccessPoint() {
     return;
   }
 
-  delay(100);  // Wait for AP to fully initialize
+  delay(100); // Wait for AP to fully initialize
 
   // Get AP IP address
   const IPAddress apIP = WiFi.softAPIP();
@@ -304,7 +304,7 @@ void CrossPointWebServerActivity::loop() {
     // STA mode: Monitor WiFi connection health
     if (!isApMode && webServer && webServer->isRunning()) {
       static unsigned long lastWifiCheck = 0;
-      if (millis() - lastWifiCheck > 2000) {  // Check every 2 seconds
+      if (millis() - lastWifiCheck > 2000) { // Check every 2 seconds
         lastWifiCheck = millis();
         const wl_status_t wifiStatus = WiFi.status();
         if (wifiStatus != WL_CONNECTED) {
@@ -392,7 +392,7 @@ void CrossPointWebServerActivity::render() const {
   }
 }
 
-void drawQRCode(const GfxRenderer& renderer, const int x, const int y, const std::string& data) {
+void drawQRCode(const GfxRenderer &renderer, const int x, const int y, const std::string &data) {
   // Implementation of QR code calculation
   // The structure to manage the QR code
   QRCode qrcode;
@@ -400,7 +400,7 @@ void drawQRCode(const GfxRenderer& renderer, const int x, const int y, const std
   Serial.printf("[%lu] [WEBACT] QR Code (%lu): %s\n", millis(), data.length(), data.c_str());
 
   qrcode_initText(&qrcode, qrcodeBytes, 4, ECC_LOW, data.c_str());
-  const uint8_t px = 6;  // pixels per module
+  const uint8_t px = 6; // pixels per module
   for (uint8_t cy = 0; cy < qrcode.size; cy++) {
     for (uint8_t cx = 0; cx < qrcode.size; cx++) {
       if (qrcode_getModule(&qrcode, cx, cy)) {
@@ -416,7 +416,7 @@ void drawQRCode(const GfxRenderer& renderer, const int x, const int y, const std
 
 void CrossPointWebServerActivity::renderServerRunning() const {
   // Use consistent line spacing
-  constexpr int LINE_SPACING = 28;  // Space between lines
+  constexpr int LINE_SPACING = 28; // Space between lines
 
   renderer.drawCenteredText(UI_12_FONT_ID, 15, "File Transfer", true, EpdFontFamily::BOLD);
 

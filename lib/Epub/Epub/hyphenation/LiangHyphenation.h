@@ -34,5 +34,5 @@ struct LiangWordConfig {
 };
 
 // Shared Liang pattern evaluator used by every language-specific hyphenator.
-std::vector<size_t> liangBreakIndexes(const std::vector<CodepointInfo>& cps,
-                                      const SerializedHyphenationPatterns& patterns, const LiangWordConfig& config);
+std::vector<size_t> liangBreakIndexes(const std::vector<CodepointInfo> &cps,
+                                      const SerializedHyphenationPatterns &patterns, const LiangWordConfig &config);

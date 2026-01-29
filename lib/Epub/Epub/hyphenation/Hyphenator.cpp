@@ -5,34 +5,38 @@
 #include "HyphenationCommon.h"
 #include "LanguageRegistry.h"
 
-const LanguageHyphenator* Hyphenator::cachedHyphenator_ = nullptr;
+const LanguageHyphenator *Hyphenator::cachedHyphenator_ = nullptr;
 
 namespace {
 
 // Maps a BCP-47 language tag to a language-specific hyphenator.
-const LanguageHyphenator* hyphenatorForLanguage(const std::string& langTag) {
-  if (langTag.empty()) return nullptr;
+const LanguageHyphenator *hyphenatorForLanguage(const std::string &langTag) {
+  if (langTag.empty())
+    return nullptr;
 
   // Extract primary subtag and normalize to lowercase (e.g., "en-US" -> "en").
   std::string primary;
   primary.reserve(langTag.size());
   for (char c : langTag) {
-    if (c == '-' || c == '_') break;
-    if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+    if (c == '-' || c == '_')
+      break;
+    if (c >= 'A' && c <= 'Z')
+      c = static_cast<char>(c - 'A' + 'a');
     primary.push_back(c);
   }
-  if (primary.empty()) return nullptr;
+  if (primary.empty())
+    return nullptr;
 
   return getLanguageHyphenatorForPrimaryTag(primary);
 }
 
 // Maps a codepoint index back to its byte offset inside the source word.
-size_t byteOffsetForIndex(const std::vector<CodepointInfo>& cps, const size_t index) {
+size_t byteOffsetForIndex(const std::vector<CodepointInfo> &cps, const size_t index) {
   return (index < cps.size()) ? cps[index].byteOffset : (cps.empty() ? 0 : cps.back().byteOffset);
 }
 
 // Builds a vector of break information from explicit hyphen markers in the given codepoints.
-std::vector<Hyphenator::BreakInfo> buildExplicitBreakInfos(const std::vector<CodepointInfo>& cps) {
+std::vector<Hyphenator::BreakInfo> buildExplicitBreakInfos(const std::vector<CodepointInfo> &cps) {
   std::vector<Hyphenator::BreakInfo> breaks;
 
   // Scan every codepoint looking for explicit/soft hyphen markers that are surrounded by letters.
@@ -48,9 +52,9 @@ std::vector<Hyphenator::BreakInfo> buildExplicitBreakInfos(const std::vector<Cod
   return breaks;
 }
 
-}  // namespace
+} // namespace
 
-std::vector<Hyphenator::BreakInfo> Hyphenator::breakOffsets(const std::string& word, const bool includeFallback) {
+std::vector<Hyphenator::BreakInfo> Hyphenator::breakOffsets(const std::string &word, const bool includeFallback) {
   if (word.empty()) {
     return {};
   }
@@ -58,7 +62,7 @@ std::vector<Hyphenator::BreakInfo> Hyphenator::breakOffsets(const std::string& w
   // Convert to codepoints and normalize word boundaries.
   auto cps = collectCodepoints(word);
   trimSurroundingPunctuationAndFootnote(cps);
-  const auto* hyphenator = cachedHyphenator_;
+  const auto *hyphenator = cachedHyphenator_;
 
   // Explicit hyphen markers (soft or hard) take precedence over language breaks.
   auto explicitBreakInfos = buildExplicitBreakInfos(cps);
@@ -94,4 +98,4 @@ std::vector<Hyphenator::BreakInfo> Hyphenator::breakOffsets(const std::string& w
   return breaks;
 }
 
-void Hyphenator::setPreferredLanguage(const std::string& lang) { cachedHyphenator_ = hyphenatorForLanguage(lang); }
+void Hyphenator::setPreferredLanguage(const std::string &lang) { cachedHyphenator_ = hyphenatorForLanguage(lang); }

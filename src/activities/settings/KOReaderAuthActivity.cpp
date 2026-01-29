@@ -9,8 +9,8 @@
 #include "activities/network/WifiSelectionActivity.h"
 #include "fontIds.h"
 
-void KOReaderAuthActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<KOReaderAuthActivity*>(param);
+void KOReaderAuthActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<KOReaderAuthActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -56,10 +56,10 @@ void KOReaderAuthActivity::onEnter() {
   renderingMutex = xSemaphoreCreateMutex();
 
   xTaskCreate(&KOReaderAuthActivity::taskTrampoline, "KOAuthTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 
   // Turn on WiFi
@@ -73,8 +73,8 @@ void KOReaderAuthActivity::onEnter() {
 
     // Perform authentication in a separate task
     xTaskCreate(
-        [](void* param) {
-          auto* self = static_cast<KOReaderAuthActivity*>(param);
+        [](void *param) {
+          auto *self = static_cast<KOReaderAuthActivity *>(param);
           self->performAuthentication();
           vTaskDelete(nullptr);
         },

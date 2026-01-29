@@ -20,10 +20,10 @@ constexpr unsigned long goHomeMs = 1000;
 constexpr int statusBarMargin = 19;
 constexpr int progressBarMarginTop = 1;
 
-}  // namespace
+} // namespace
 
-void EpubReaderActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<EpubReaderActivity*>(param);
+void EpubReaderActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<EpubReaderActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -36,20 +36,20 @@ void EpubReaderActivity::onEnter() {
 
   // Configure screen orientation based on settings
   switch (SETTINGS.orientation) {
-    case CrossPointSettings::ORIENTATION::PORTRAIT:
-      renderer.setOrientation(GfxRenderer::Orientation::Portrait);
-      break;
-    case CrossPointSettings::ORIENTATION::LANDSCAPE_CW:
-      renderer.setOrientation(GfxRenderer::Orientation::LandscapeClockwise);
-      break;
-    case CrossPointSettings::ORIENTATION::INVERTED:
-      renderer.setOrientation(GfxRenderer::Orientation::PortraitInverted);
-      break;
-    case CrossPointSettings::ORIENTATION::LANDSCAPE_CCW:
-      renderer.setOrientation(GfxRenderer::Orientation::LandscapeCounterClockwise);
-      break;
-    default:
-      break;
+  case CrossPointSettings::ORIENTATION::PORTRAIT:
+    renderer.setOrientation(GfxRenderer::Orientation::Portrait);
+    break;
+  case CrossPointSettings::ORIENTATION::LANDSCAPE_CW:
+    renderer.setOrientation(GfxRenderer::Orientation::LandscapeClockwise);
+    break;
+  case CrossPointSettings::ORIENTATION::INVERTED:
+    renderer.setOrientation(GfxRenderer::Orientation::PortraitInverted);
+    break;
+  case CrossPointSettings::ORIENTATION::LANDSCAPE_CCW:
+    renderer.setOrientation(GfxRenderer::Orientation::LandscapeCounterClockwise);
+    break;
+  default:
+    break;
   }
 
   renderingMutex = xSemaphoreCreateMutex();
@@ -91,10 +91,10 @@ void EpubReaderActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&EpubReaderActivity::taskTrampoline, "EpubReaderActivityTask",
-              8192,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              8192,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -373,7 +373,7 @@ void EpubReaderActivity::renderScreen() {
         int newPage = static_cast<int>(progress * section->pageCount);
         section->currentPage = newPage;
       }
-      cachedChapterTotalPageCount = 0;  // resets to 0 to prevent reading cached progress again
+      cachedChapterTotalPageCount = 0; // resets to 0 to prevent reading cached progress again
     }
   }
 

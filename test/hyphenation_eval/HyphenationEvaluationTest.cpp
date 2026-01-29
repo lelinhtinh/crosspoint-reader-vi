@@ -34,7 +34,7 @@ struct EvaluationResult {
 struct LanguageConfig {
   std::string cliName;
   std::string testDataFile;
-  const char* primaryTag;
+  const char *primaryTag;
 };
 
 const std::vector<LanguageConfig> kSupportedLanguages = {
@@ -45,9 +45,9 @@ const std::vector<LanguageConfig> kSupportedLanguages = {
     {"spanish", "test/hyphenation_eval/resources/spanish_hyphenation_tests.txt", "es"},
 };
 
-std::vector<size_t> expectedPositionsFromAnnotatedWord(const std::string& annotated) {
+std::vector<size_t> expectedPositionsFromAnnotatedWord(const std::string &annotated) {
   std::vector<size_t> positions;
-  const unsigned char* ptr = reinterpret_cast<const unsigned char*>(annotated.c_str());
+  const unsigned char *ptr = reinterpret_cast<const unsigned char *>(annotated.c_str());
   size_t codepointIndex = 0;
 
   while (*ptr != 0) {
@@ -64,7 +64,7 @@ std::vector<size_t> expectedPositionsFromAnnotatedWord(const std::string& annota
   return positions;
 }
 
-std::vector<TestCase> loadTestData(const std::string& filename) {
+std::vector<TestCase> loadTestData(const std::string &filename) {
   std::vector<TestCase> testCases;
   std::ifstream file(filename);
 
@@ -98,12 +98,12 @@ std::vector<TestCase> loadTestData(const std::string& filename) {
   return testCases;
 }
 
-std::string positionsToHyphenated(const std::string& word, const std::vector<size_t>& positions) {
+std::string positionsToHyphenated(const std::string &word, const std::vector<size_t> &positions) {
   std::string result;
   std::vector<size_t> sortedPositions = positions;
   std::sort(sortedPositions.begin(), sortedPositions.end());
 
-  const unsigned char* ptr = reinterpret_cast<const unsigned char*>(word.c_str());
+  const unsigned char *ptr = reinterpret_cast<const unsigned char *>(word.c_str());
   size_t codepointIndex = 0;
   size_t posIdx = 0;
 
@@ -113,9 +113,9 @@ std::string positionsToHyphenated(const std::string& word, const std::vector<siz
       ++posIdx;
     }
 
-    const unsigned char* current = ptr;
+    const unsigned char *current = ptr;
     utf8NextCodepoint(&ptr);
-    result.append(reinterpret_cast<const char*>(current), reinterpret_cast<const char*>(ptr));
+    result.append(reinterpret_cast<const char *>(current), reinterpret_cast<const char *>(ptr));
     ++codepointIndex;
   }
 
@@ -127,19 +127,19 @@ std::string positionsToHyphenated(const std::string& word, const std::vector<siz
   return result;
 }
 
-std::vector<size_t> hyphenateWordWithHyphenator(const std::string& word, const LanguageHyphenator& hyphenator) {
+std::vector<size_t> hyphenateWordWithHyphenator(const std::string &word, const LanguageHyphenator &hyphenator) {
   auto cps = collectCodepoints(word);
   trimSurroundingPunctuationAndFootnote(cps);
 
   return hyphenator.breakIndexes(cps);
 }
 
-std::vector<LanguageConfig> resolveLanguages(const std::string& selection) {
+std::vector<LanguageConfig> resolveLanguages(const std::string &selection) {
   if (selection == "all") {
     return kSupportedLanguages;
   }
 
-  for (const auto& config : kSupportedLanguages) {
+  for (const auto &config : kSupportedLanguages) {
     if (config.cliName == selection) {
       return {config};
     }
@@ -148,8 +148,8 @@ std::vector<LanguageConfig> resolveLanguages(const std::string& selection) {
   return {};
 }
 
-EvaluationResult evaluateWord(const TestCase& testCase,
-                              std::function<std::vector<size_t>(const std::string&)> hyphenateFunc) {
+EvaluationResult evaluateWord(const TestCase &testCase,
+                              std::function<std::vector<size_t>(const std::string &)> hyphenateFunc) {
   EvaluationResult result;
 
   std::vector<size_t> actualPositions = hyphenateFunc(testCase.word);
@@ -210,11 +210,11 @@ EvaluationResult evaluateWord(const TestCase& testCase,
   return result;
 }
 
-void printResults(const std::string& language, const std::vector<TestCase>& testCases,
-                  const std::vector<std::pair<TestCase, EvaluationResult>>& worstCases, int perfectMatches,
+void printResults(const std::string &language, const std::vector<TestCase> &testCases,
+                  const std::vector<std::pair<TestCase, EvaluationResult>> &worstCases, int perfectMatches,
                   int partialMatches, int completeMisses, double totalPrecision, double totalRecall, double totalF1,
                   double totalWeighted, int totalTP, int totalFP, int totalFN,
-                  std::function<std::vector<size_t>(const std::string&)> hyphenateFunc) {
+                  std::function<std::vector<size_t>(const std::string &)> hyphenateFunc) {
   std::string lang_upper = language;
   if (!lang_upper.empty()) {
     lang_upper[0] = std::toupper(lang_upper[0]);
@@ -257,10 +257,10 @@ void printResults(const std::string& language, const std::vector<TestCase>& test
   std::cout << std::endl;
 
   // Filter out perfect matches from the “worst cases” section so that only actionable failures appear.
-  auto hasImperfection = [](const EvaluationResult& r) { return r.weightedScore < 0.999999; };
+  auto hasImperfection = [](const EvaluationResult &r) { return r.weightedScore < 0.999999; };
   std::vector<std::pair<TestCase, EvaluationResult>> imperfectCases;
   imperfectCases.reserve(worstCases.size());
-  for (const auto& entry : worstCases) {
+  for (const auto &entry : worstCases) {
     if (hasImperfection(entry.second)) {
       imperfectCases.push_back(entry);
     }
@@ -269,8 +269,8 @@ void printResults(const std::string& language, const std::vector<TestCase>& test
   std::cout << "--- Worst Cases (lowest weighted scores) ---" << std::endl;
   int showCount = std::min(10, static_cast<int>(imperfectCases.size()));
   for (int i = 0; i < showCount; i++) {
-    const auto& testCase = imperfectCases[i].first;
-    const auto& result = imperfectCases[i].second;
+    const auto &testCase = imperfectCases[i].first;
+    const auto &result = imperfectCases[i].second;
 
     std::vector<size_t> actualPositions = hyphenateFunc(testCase.word);
     std::string actualHyphenated = positionsToHyphenated(testCase.word, actualPositions);
@@ -278,10 +278,9 @@ void printResults(const std::string& language, const std::vector<TestCase>& test
     std::cout << "Word: " << testCase.word << " (freq: " << testCase.frequency << ")" << std::endl;
     std::cout << "  Expected:  " << testCase.hyphenated << std::endl;
     std::cout << "  Got:       " << actualHyphenated << std::endl;
-    std::cout << "  Precision: " << (result.precision * 100.0) << "%"
-              << "  Recall: " << (result.recall * 100.0) << "%"
-              << "  F1: " << (result.f1Score * 100.0) << "%"
-              << "  Weighted: " << (result.weightedScore * 100.0) << "%" << std::endl;
+    std::cout << "  Precision: " << (result.precision * 100.0) << "%" << "  Recall: " << (result.recall * 100.0) << "%"
+              << "  F1: " << (result.f1Score * 100.0) << "%" << "  Weighted: " << (result.weightedScore * 100.0) << "%"
+              << std::endl;
     std::cout << "  TP: " << result.truePositives << "  FP: " << result.falsePositives
               << "  FN: " << result.falseNegatives << std::endl;
     std::cout << std::endl;
@@ -292,7 +291,7 @@ void printResults(const std::string& language, const std::vector<TestCase>& test
   if (compactCount > 0) {
     std::cout << "--- Compact Worst Cases (" << compactCount << ") ---" << std::endl;
     for (int i = 0; i < compactCount; i++) {
-      const auto& testCase = imperfectCases[i].first;
+      const auto &testCase = imperfectCases[i].first;
       std::vector<size_t> actualPositions = hyphenateFunc(testCase.word);
       std::string actualHyphenated = positionsToHyphenated(testCase.word, actualPositions);
       std::cout << testCase.word << " | exp:" << testCase.hyphenated << " | got:" << actualHyphenated << std::endl;
@@ -301,7 +300,7 @@ void printResults(const std::string& language, const std::vector<TestCase>& test
   }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   const bool summaryMode = argc <= 1;
   const std::string languageSelection = summaryMode ? "all" : argv[1];
 
@@ -311,13 +310,13 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  for (const auto& lang : languages) {
-    const auto* hyphenator = getLanguageHyphenatorForPrimaryTag(lang.primaryTag);
+  for (const auto &lang : languages) {
+    const auto *hyphenator = getLanguageHyphenatorForPrimaryTag(lang.primaryTag);
     if (!hyphenator) {
       std::cerr << "No hyphenator registered for tag: " << lang.primaryTag << std::endl;
       continue;
     }
-    const auto hyphenateFunc = [hyphenator](const std::string& word) {
+    const auto hyphenateFunc = [hyphenator](const std::string &word) {
       return hyphenateWordWithHyphenator(word, *hyphenator);
     };
 
@@ -349,7 +348,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::pair<TestCase, EvaluationResult>> worstCases;
 
-    for (const auto& testCase : testCases) {
+    for (const auto &testCase : testCases) {
       EvaluationResult result = evaluateWord(testCase, hyphenateFunc);
 
       totalTP += result.truePositives;
@@ -379,7 +378,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::sort(worstCases.begin(), worstCases.end(),
-              [](const auto& a, const auto& b) { return a.second.weightedScore < b.second.weightedScore; });
+              [](const auto &a, const auto &b) { return a.second.weightedScore < b.second.weightedScore; });
 
     printResults(lang.cliName, testCases, worstCases, perfectMatches, partialMatches, completeMisses, totalPrecision,
                  totalRecall, totalF1, totalWeighted, totalTP, totalFP, totalFN, hyphenateFunc);

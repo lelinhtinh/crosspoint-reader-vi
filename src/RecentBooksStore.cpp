@@ -10,14 +10,14 @@ namespace {
 constexpr uint8_t RECENT_BOOKS_FILE_VERSION = 2;
 constexpr char RECENT_BOOKS_FILE[] = "/.crosspoint/recent.bin";
 constexpr int MAX_RECENT_BOOKS = 10;
-}  // namespace
+} // namespace
 
 RecentBooksStore RecentBooksStore::instance;
 
-void RecentBooksStore::addBook(const std::string& path, const std::string& title, const std::string& author) {
+void RecentBooksStore::addBook(const std::string &path, const std::string &title, const std::string &author) {
   // Remove existing entry if present
   auto it =
-      std::find_if(recentBooks.begin(), recentBooks.end(), [&](const RecentBook& book) { return book.path == path; });
+      std::find_if(recentBooks.begin(), recentBooks.end(), [&](const RecentBook &book) { return book.path == path; });
   if (it != recentBooks.end()) {
     recentBooks.erase(it);
   }
@@ -46,7 +46,7 @@ bool RecentBooksStore::saveToFile() const {
   const uint8_t count = static_cast<uint8_t>(recentBooks.size());
   serialization::writePod(outputFile, count);
 
-  for (const auto& book : recentBooks) {
+  for (const auto &book : recentBooks) {
     serialization::writeString(outputFile, book.path);
     serialization::writeString(outputFile, book.title);
     serialization::writeString(outputFile, book.author);

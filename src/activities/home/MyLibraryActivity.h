@@ -11,10 +11,10 @@
 #include "RecentBooksStore.h"
 
 class MyLibraryActivity final : public Activity {
- public:
+public:
   enum class Tab { Recent, Files };
 
- private:
+private:
   TaskHandle_t displayTaskHandle = nullptr;
   SemaphoreHandle_t renderingMutex = nullptr;
 
@@ -31,7 +31,7 @@ class MyLibraryActivity final : public Activity {
 
   // Callbacks
   const std::function<void()> onGoHome;
-  const std::function<void(const std::string& path, Tab fromTab)> onSelectBook;
+  const std::function<void(const std::string &path, Tab fromTab)> onSelectBook;
 
   // Number of items that fit on a page
   int getPageItems() const;
@@ -42,25 +42,22 @@ class MyLibraryActivity final : public Activity {
   // Data loading
   void loadRecentBooks();
   void loadFiles();
-  size_t findEntry(const std::string& name) const;
+  size_t findEntry(const std::string &name) const;
 
   // Rendering
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render() const;
   void renderRecentTab() const;
   void renderFilesTab() const;
 
- public:
-  explicit MyLibraryActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                             const std::function<void()>& onGoHome,
-                             const std::function<void(const std::string& path, Tab fromTab)>& onSelectBook,
+public:
+  explicit MyLibraryActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                             const std::function<void()> &onGoHome,
+                             const std::function<void(const std::string &path, Tab fromTab)> &onSelectBook,
                              Tab initialTab = Tab::Recent, std::string initialPath = "/")
-      : Activity("MyLibrary", renderer, mappedInput),
-        currentTab(initialTab),
-        basepath(initialPath.empty() ? "/" : std::move(initialPath)),
-        onGoHome(onGoHome),
-        onSelectBook(onSelectBook) {}
+      : Activity("MyLibrary", renderer, mappedInput), currentTab(initialTab),
+        basepath(initialPath.empty() ? "/" : std::move(initialPath)), onGoHome(onGoHome), onSelectBook(onSelectBook) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;

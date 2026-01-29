@@ -11,11 +11,11 @@
 
 namespace {
 constexpr int MENU_ITEMS = 3;
-const char* menuNames[MENU_ITEMS] = {"OPDS Server URL", "Username", "Password"};
-}  // namespace
+const char *menuNames[MENU_ITEMS] = {"OPDS Server URL", "Username", "Password"};
+} // namespace
 
-void CalibreSettingsActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<CalibreSettingsActivity*>(param);
+void CalibreSettingsActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<CalibreSettingsActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -27,10 +27,10 @@ void CalibreSettingsActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&CalibreSettingsActivity::taskTrampoline, "CalibreSettingsTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -81,9 +81,9 @@ void CalibreSettingsActivity::handleSelection() {
     exitActivity();
     enterNewActivity(new KeyboardEntryActivity(
         renderer, mappedInput, "OPDS Server URL", SETTINGS.opdsServerUrl, 10,
-        127,    // maxLength
-        false,  // not password
-        [this](const std::string& url) {
+        127,   // maxLength
+        false, // not password
+        [this](const std::string &url) {
           strncpy(SETTINGS.opdsServerUrl, url.c_str(), sizeof(SETTINGS.opdsServerUrl) - 1);
           SETTINGS.opdsServerUrl[sizeof(SETTINGS.opdsServerUrl) - 1] = '\0';
           SETTINGS.saveToFile();
@@ -99,9 +99,9 @@ void CalibreSettingsActivity::handleSelection() {
     exitActivity();
     enterNewActivity(new KeyboardEntryActivity(
         renderer, mappedInput, "Username", SETTINGS.opdsUsername, 10,
-        63,     // maxLength
-        false,  // not password
-        [this](const std::string& username) {
+        63,    // maxLength
+        false, // not password
+        [this](const std::string &username) {
           strncpy(SETTINGS.opdsUsername, username.c_str(), sizeof(SETTINGS.opdsUsername) - 1);
           SETTINGS.opdsUsername[sizeof(SETTINGS.opdsUsername) - 1] = '\0';
           SETTINGS.saveToFile();
@@ -117,9 +117,9 @@ void CalibreSettingsActivity::handleSelection() {
     exitActivity();
     enterNewActivity(new KeyboardEntryActivity(
         renderer, mappedInput, "Password", SETTINGS.opdsPassword, 10,
-        63,     // maxLength
-        false,  // not password mode
-        [this](const std::string& password) {
+        63,    // maxLength
+        false, // not password mode
+        [this](const std::string &password) {
           strncpy(SETTINGS.opdsPassword, password.c_str(), sizeof(SETTINGS.opdsPassword) - 1);
           SETTINGS.opdsPassword[sizeof(SETTINGS.opdsPassword) - 1] = '\0';
           SETTINGS.saveToFile();
@@ -169,7 +169,7 @@ void CalibreSettingsActivity::render() {
     renderer.drawText(UI_10_FONT_ID, 20, settingY, menuNames[i], !isSelected);
 
     // Draw status for each setting
-    const char* status = "[Not Set]";
+    const char *status = "[Not Set]";
     if (i == 0) {
       status = (strlen(SETTINGS.opdsServerUrl) > 0) ? "[Set]" : "[Not Set]";
     } else if (i == 1) {

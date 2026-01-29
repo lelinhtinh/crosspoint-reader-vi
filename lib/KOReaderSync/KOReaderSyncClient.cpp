@@ -15,14 +15,14 @@ namespace {
 constexpr char DEVICE_NAME[] = "CrossPoint";
 constexpr char DEVICE_ID[] = "crosspoint-reader";
 
-void addAuthHeaders(HTTPClient& http) {
+void addAuthHeaders(HTTPClient &http) {
   http.addHeader("Accept", "application/vnd.koreader.v1+json");
   http.addHeader("x-auth-user", KOREADER_STORE.getUsername().c_str());
   http.addHeader("x-auth-key", KOREADER_STORE.getMd5Password().c_str());
 }
 
-bool isHttpsUrl(const std::string& url) { return url.rfind("https://", 0) == 0; }
-}  // namespace
+bool isHttpsUrl(const std::string &url) { return url.rfind("https://", 0) == 0; }
+} // namespace
 
 KOReaderSyncClient::Error KOReaderSyncClient::authenticate() {
   if (!KOREADER_STORE.hasCredentials()) {
@@ -61,8 +61,8 @@ KOReaderSyncClient::Error KOReaderSyncClient::authenticate() {
   return SERVER_ERROR;
 }
 
-KOReaderSyncClient::Error KOReaderSyncClient::getProgress(const std::string& documentHash,
-                                                          KOReaderProgress& outProgress) {
+KOReaderSyncClient::Error KOReaderSyncClient::getProgress(const std::string &documentHash,
+                                                          KOReaderProgress &outProgress) {
   if (!KOREADER_STORE.hasCredentials()) {
     Serial.printf("[%lu] [KOSync] No credentials configured\n", millis());
     return NO_CREDENTIALS;
@@ -125,7 +125,7 @@ KOReaderSyncClient::Error KOReaderSyncClient::getProgress(const std::string& doc
   return SERVER_ERROR;
 }
 
-KOReaderSyncClient::Error KOReaderSyncClient::updateProgress(const KOReaderProgress& progress) {
+KOReaderSyncClient::Error KOReaderSyncClient::updateProgress(const KOReaderProgress &progress) {
   if (!KOREADER_STORE.hasCredentials()) {
     Serial.printf("[%lu] [KOSync] No credentials configured\n", millis());
     return NO_CREDENTIALS;
@@ -176,23 +176,23 @@ KOReaderSyncClient::Error KOReaderSyncClient::updateProgress(const KOReaderProgr
   return SERVER_ERROR;
 }
 
-const char* KOReaderSyncClient::errorString(Error error) {
+const char *KOReaderSyncClient::errorString(Error error) {
   switch (error) {
-    case OK:
-      return "Success";
-    case NO_CREDENTIALS:
-      return "No credentials configured";
-    case NETWORK_ERROR:
-      return "Network error";
-    case AUTH_FAILED:
-      return "Authentication failed";
-    case SERVER_ERROR:
-      return "Server error (try again later)";
-    case JSON_ERROR:
-      return "JSON parse error";
-    case NOT_FOUND:
-      return "No progress found";
-    default:
-      return "Unknown error";
+  case OK:
+    return "Success";
+  case NO_CREDENTIALS:
+    return "No credentials configured";
+  case NETWORK_ERROR:
+    return "Network error";
+  case AUTH_FAILED:
+    return "Authentication failed";
+  case SERVER_ERROR:
+    return "Server error (try again later)";
+  case JSON_ERROR:
+    return "JSON parse error";
+  case NOT_FOUND:
+    return "No progress found";
+  default:
+    return "Unknown error";
   }
 }

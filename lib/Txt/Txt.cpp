@@ -68,10 +68,10 @@ std::string Txt::findCoverImage() const {
   std::string baseName = getTitle();
 
   // Image extensions to try
-  const char* extensions[] = {".bmp", ".jpg", ".jpeg", ".png", ".BMP", ".JPG", ".JPEG", ".PNG"};
+  const char *extensions[] = {".bmp", ".jpg", ".jpeg", ".png", ".BMP", ".JPG", ".JPEG", ".PNG"};
 
   // First priority: look for image with same name as txt file (e.g., mybook.jpg)
-  for (const auto& ext : extensions) {
+  for (const auto &ext : extensions) {
     std::string coverPath = folder + "/" + baseName + ext;
     if (SdMan.exists(coverPath.c_str())) {
       Serial.printf("[%lu] [TXT] Found matching cover image: %s\n", millis(), coverPath.c_str());
@@ -80,9 +80,9 @@ std::string Txt::findCoverImage() const {
   }
 
   // Fallback: look for cover image files
-  const char* coverNames[] = {"cover", "Cover", "COVER"};
-  for (const auto& name : coverNames) {
-    for (const auto& ext : extensions) {
+  const char *coverNames[] = {"cover", "Cover", "COVER"};
+  for (const auto &name : coverNames) {
+    for (const auto &ext : extensions) {
       std::string coverPath = folder + "/" + std::string(name) + ext;
       if (SdMan.exists(coverPath.c_str())) {
         Serial.printf("[%lu] [TXT] Found fallback cover image: %s\n", millis(), coverPath.c_str());
@@ -169,7 +169,7 @@ bool Txt::generateCoverBmp() const {
   return false;
 }
 
-bool Txt::readContent(uint8_t* buffer, size_t offset, size_t length) const {
+bool Txt::readContent(uint8_t *buffer, size_t offset, size_t length) const {
   if (!loaded) {
     return false;
   }

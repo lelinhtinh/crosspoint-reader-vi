@@ -13,11 +13,11 @@
 
 // Web server activity states
 enum class WebServerActivityState {
-  MODE_SELECTION,  // Choosing between Join Network and Create Hotspot
-  WIFI_SELECTION,  // WiFi selection subactivity is active (for Join Network mode)
-  AP_STARTING,     // Starting Access Point mode
-  SERVER_RUNNING,  // Web server is running and handling requests
-  SHUTTING_DOWN    // Shutting down server and WiFi
+  MODE_SELECTION, // Choosing between Join Network and Create Hotspot
+  WIFI_SELECTION, // WiFi selection subactivity is active (for Join Network mode)
+  AP_STARTING,    // Starting Access Point mode
+  SERVER_RUNNING, // Web server is running and handling requests
+  SHUTTING_DOWN   // Shutting down server and WiFi
 };
 
 /**
@@ -46,12 +46,12 @@ class CrossPointWebServerActivity final : public ActivityWithSubactivity {
 
   // Server status
   std::string connectedIP;
-  std::string connectedSSID;  // For STA mode: network name, For AP mode: AP name
+  std::string connectedSSID; // For STA mode: network name, For AP mode: AP name
 
   // Performance monitoring
   unsigned long lastHandleClientTime = 0;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render() const;
   void renderServerRunning() const;
@@ -62,9 +62,9 @@ class CrossPointWebServerActivity final : public ActivityWithSubactivity {
   void startWebServer();
   void stopWebServer();
 
- public:
-  explicit CrossPointWebServerActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                       const std::function<void()>& onGoBack)
+public:
+  explicit CrossPointWebServerActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                       const std::function<void()> &onGoBack)
       : ActivityWithSubactivity("CrossPointWebServer", renderer, mappedInput), onGoBack(onGoBack) {}
   void onEnter() override;
   void onExit() override;

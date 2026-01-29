@@ -8,17 +8,17 @@
  * CrossPoint position representation.
  */
 struct CrossPointPosition {
-  int spineIndex;  // Current spine item (chapter) index
-  int pageNumber;  // Current page within the spine item
-  int totalPages;  // Total pages in the current spine item
+  int spineIndex; // Current spine item (chapter) index
+  int pageNumber; // Current page within the spine item
+  int totalPages; // Total pages in the current spine item
 };
 
 /**
  * KOReader position representation.
  */
 struct KOReaderPosition {
-  std::string xpath;  // XPath-like progress string
-  float percentage;   // Progress percentage (0.0 to 1.0)
+  std::string xpath; // XPath-like progress string
+  float percentage;  // Progress percentage (0.0 to 1.0)
 };
 
 /**
@@ -32,7 +32,7 @@ struct KOReaderPosition {
  * primary sync mechanism.
  */
 class ProgressMapper {
- public:
+public:
   /**
    * Convert CrossPoint position to KOReader format.
    *
@@ -40,7 +40,7 @@ class ProgressMapper {
    * @param pos CrossPoint position
    * @return KOReader position
    */
-  static KOReaderPosition toKOReader(const std::shared_ptr<Epub>& epub, const CrossPointPosition& pos);
+  static KOReaderPosition toKOReader(const std::shared_ptr<Epub> &epub, const CrossPointPosition &pos);
 
   /**
    * Convert KOReader position to CrossPoint format.
@@ -53,10 +53,10 @@ class ProgressMapper {
    * @param totalPagesInSpine Total pages in the target spine item (for page estimation)
    * @return CrossPoint position
    */
-  static CrossPointPosition toCrossPoint(const std::shared_ptr<Epub>& epub, const KOReaderPosition& koPos,
+  static CrossPointPosition toCrossPoint(const std::shared_ptr<Epub> &epub, const KOReaderPosition &koPos,
                                          int totalPagesInSpine = 0);
 
- private:
+private:
   /**
    * Generate XPath for KOReader compatibility.
    * Format: /body/DocFragment[spineIndex+1]/body/p[estimatedParagraph]
@@ -68,5 +68,5 @@ class ProgressMapper {
    * Parse DocFragment index from XPath string.
    * Returns -1 if not found.
    */
-  static int parseDocFragmentIndex(const std::string& xpath);
+  static int parseDocFragmentIndex(const std::string &xpath);
 };

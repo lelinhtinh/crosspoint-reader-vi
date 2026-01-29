@@ -7,7 +7,7 @@
 #include <vector>
 
 class BookMetadataCache {
- public:
+public:
   struct BookMetadata {
     std::string title;
     std::string author;
@@ -35,14 +35,11 @@ class BookMetadataCache {
 
     TocEntry() : level(0), spineIndex(-1) {}
     TocEntry(std::string title, std::string href, std::string anchor, const uint8_t level, const int16_t spineIndex)
-        : title(std::move(title)),
-          href(std::move(href)),
-          anchor(std::move(anchor)),
-          level(level),
+        : title(std::move(title)), href(std::move(href)), anchor(std::move(anchor)), level(level),
           spineIndex(spineIndex) {}
   };
 
- private:
+private:
   std::string cachePath;
   size_t lutOffset;
   uint16_t spineCount;
@@ -57,8 +54,8 @@ class BookMetadataCache {
 
   // Index for fast href→spineIndex lookup (used only for large EPUBs)
   struct SpineHrefIndexEntry {
-    uint64_t hrefHash;  // FNV-1a 64-bit hash
-    uint16_t hrefLen;   // length for collision reduction
+    uint64_t hrefHash; // FNV-1a 64-bit hash
+    uint16_t hrefLen;  // length for collision reduction
     int16_t spineIndex;
   };
   std::vector<SpineHrefIndexEntry> spineHrefIndex;
@@ -67,7 +64,7 @@ class BookMetadataCache {
   static constexpr uint16_t LARGE_SPINE_THRESHOLD = 400;
 
   // FNV-1a 64-bit hash function
-  static uint64_t fnvHash64(const std::string& s) {
+  static uint64_t fnvHash64(const std::string &s) {
     uint64_t hash = 14695981039346656037ull;
     for (char c : s) {
       hash ^= static_cast<uint8_t>(c);
@@ -76,12 +73,12 @@ class BookMetadataCache {
     return hash;
   }
 
-  uint32_t writeSpineEntry(FsFile& file, const SpineEntry& entry) const;
-  uint32_t writeTocEntry(FsFile& file, const TocEntry& entry) const;
-  SpineEntry readSpineEntry(FsFile& file) const;
-  TocEntry readTocEntry(FsFile& file) const;
+  uint32_t writeSpineEntry(FsFile &file, const SpineEntry &entry) const;
+  uint32_t writeTocEntry(FsFile &file, const TocEntry &entry) const;
+  SpineEntry readSpineEntry(FsFile &file) const;
+  TocEntry readTocEntry(FsFile &file) const;
 
- public:
+public:
   BookMetadata coreMetadata;
 
   explicit BookMetadataCache(std::string cachePath)
@@ -91,16 +88,16 @@ class BookMetadataCache {
   // Building phase (stream to disk immediately)
   bool beginWrite();
   bool beginContentOpfPass();
-  void createSpineEntry(const std::string& href);
+  void createSpineEntry(const std::string &href);
   bool endContentOpfPass();
   bool beginTocPass();
-  void createTocEntry(const std::string& title, const std::string& href, const std::string& anchor, uint8_t level);
+  void createTocEntry(const std::string &title, const std::string &href, const std::string &anchor, uint8_t level);
   bool endTocPass();
   bool endWrite();
   bool cleanupTmpFiles() const;
 
   // Post-processing to update mappings and sizes
-  bool buildBookBin(const std::string& epubPath, const BookMetadata& metadata);
+  bool buildBookBin(const std::string &epubPath, const BookMetadata &metadata);
 
   // Reading phase (read mode)
   bool load();

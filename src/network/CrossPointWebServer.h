@@ -17,7 +17,7 @@ struct FileInfo {
 };
 
 class CrossPointWebServer {
- public:
+public:
   struct WsUploadStatus {
     bool inProgress = false;
     size_t received = 0;
@@ -48,24 +48,24 @@ class CrossPointWebServer {
   // Get the port number
   uint16_t getPort() const { return port; }
 
- private:
+private:
   std::unique_ptr<WebServer> server = nullptr;
   std::unique_ptr<WebSocketsServer> wsServer = nullptr;
   bool running = false;
-  bool apMode = false;  // true when running in AP mode, false for STA mode
+  bool apMode = false; // true when running in AP mode, false for STA mode
   uint16_t port = 80;
-  uint16_t wsPort = 81;  // WebSocket port
+  uint16_t wsPort = 81; // WebSocket port
   WiFiUDP udp;
   bool udpActive = false;
 
   // WebSocket upload state
-  void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length);
-  static void wsEventCallback(uint8_t num, WStype_t type, uint8_t* payload, size_t length);
+  void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
+  static void wsEventCallback(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
 
   // File scanning
-  void scanFiles(const char* path, const std::function<void(FileInfo)>& callback) const;
+  void scanFiles(const char *path, const std::function<void(FileInfo)> &callback) const;
   String formatFileSize(size_t bytes) const;
-  bool isEpubFile(const String& filename) const;
+  bool isEpubFile(const String &filename) const;
 
   // Request handlers
   void handleRoot() const;

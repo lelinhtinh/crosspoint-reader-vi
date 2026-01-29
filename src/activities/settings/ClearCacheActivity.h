@@ -9,16 +9,16 @@
 #include "activities/ActivityWithSubactivity.h"
 
 class ClearCacheActivity final : public ActivityWithSubactivity {
- public:
-  explicit ClearCacheActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                              const std::function<void()>& goBack)
+public:
+  explicit ClearCacheActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                              const std::function<void()> &goBack)
       : ActivityWithSubactivity("ClearCache", renderer, mappedInput), goBack(goBack) {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
 
- private:
+private:
   enum State { WARNING, CLEARING, SUCCESS, FAILED };
 
   State state = WARNING;
@@ -30,7 +30,7 @@ class ClearCacheActivity final : public ActivityWithSubactivity {
   int clearedCount = 0;
   int failedCount = 0;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render();
   void clearCache();

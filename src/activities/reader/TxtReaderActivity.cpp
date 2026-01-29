@@ -16,15 +16,15 @@ namespace {
 constexpr unsigned long goHomeMs = 1000;
 constexpr int statusBarMargin = 25;
 constexpr int progressBarMarginTop = 1;
-constexpr size_t CHUNK_SIZE = 8 * 1024;  // 8KB chunk for reading
+constexpr size_t CHUNK_SIZE = 8 * 1024; // 8KB chunk for reading
 
 // Cache file magic and version
-constexpr uint32_t CACHE_MAGIC = 0x54585449;  // "TXTI"
-constexpr uint8_t CACHE_VERSION = 2;          // Increment when cache format changes
-}  // namespace
+constexpr uint32_t CACHE_MAGIC = 0x54585449; // "TXTI"
+constexpr uint8_t CACHE_VERSION = 2;         // Increment when cache format changes
+} // namespace
 
-void TxtReaderActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<TxtReaderActivity*>(param);
+void TxtReaderActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<TxtReaderActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -37,20 +37,20 @@ void TxtReaderActivity::onEnter() {
 
   // Configure screen orientation based on settings
   switch (SETTINGS.orientation) {
-    case CrossPointSettings::ORIENTATION::PORTRAIT:
-      renderer.setOrientation(GfxRenderer::Orientation::Portrait);
-      break;
-    case CrossPointSettings::ORIENTATION::LANDSCAPE_CW:
-      renderer.setOrientation(GfxRenderer::Orientation::LandscapeClockwise);
-      break;
-    case CrossPointSettings::ORIENTATION::INVERTED:
-      renderer.setOrientation(GfxRenderer::Orientation::PortraitInverted);
-      break;
-    case CrossPointSettings::ORIENTATION::LANDSCAPE_CCW:
-      renderer.setOrientation(GfxRenderer::Orientation::LandscapeCounterClockwise);
-      break;
-    default:
-      break;
+  case CrossPointSettings::ORIENTATION::PORTRAIT:
+    renderer.setOrientation(GfxRenderer::Orientation::Portrait);
+    break;
+  case CrossPointSettings::ORIENTATION::LANDSCAPE_CW:
+    renderer.setOrientation(GfxRenderer::Orientation::LandscapeClockwise);
+    break;
+  case CrossPointSettings::ORIENTATION::INVERTED:
+    renderer.setOrientation(GfxRenderer::Orientation::PortraitInverted);
+    break;
+  case CrossPointSettings::ORIENTATION::LANDSCAPE_CCW:
+    renderer.setOrientation(GfxRenderer::Orientation::LandscapeCounterClockwise);
+    break;
+  default:
+    break;
   }
 
   renderingMutex = xSemaphoreCreateMutex();
@@ -66,10 +66,10 @@ void TxtReaderActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&TxtReaderActivity::taskTrampoline, "TxtReaderActivityTask",
-              6144,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              6144,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -182,7 +182,8 @@ void TxtReaderActivity::initializeReader() {
   const int lineHeight = renderer.getLineHeight(cachedFontId);
 
   linesPerPage = viewportHeight / lineHeight;
-  if (linesPerPage < 1) linesPerPage = 1;
+  if (linesPerPage < 1)
+    linesPerPage = 1;
 
   Serial.printf("[%lu] [TRS] Viewport: %dx%d, lines per page: %d\n", millis(), viewportWidth, viewportHeight,
                 linesPerPage);
@@ -203,7 +204,7 @@ void TxtReaderActivity::initializeReader() {
 
 void TxtReaderActivity::buildPageIndex() {
   pageOffsets.clear();
-  pageOffsets.push_back(0);  // First page starts at offset 0
+  pageOffsets.push_back(0); // First page starts at offset 0
 
   size_t offset = 0;
   const size_t fileSize = txt->getFileSize();
@@ -269,7 +270,7 @@ void TxtReaderActivity::buildPageIndex() {
   Serial.printf("[%lu] [TRS] Built page index: %d pages\n", millis(), totalPages);
 }
 
-bool TxtReaderActivity::loadPageAtOffset(size_t offset, std::vector<std::string>& outLines, size_t& nextOffset) {
+bool TxtReaderActivity::loadPageAtOffset(size_t offset, std::vector<std::string> &outLines, size_t &nextOffset) {
   outLines.clear();
   const size_t fileSize = txt->getFileSize();
 
@@ -279,7 +280,7 @@ bool TxtReaderActivity::loadPageAtOffset(size_t offset, std::vector<std::string>
 
   // Read a chunk from file
   size_t chunkSize = std::min(CHUNK_SIZE, fileSize - offset);
-  auto* buffer = static_cast<uint8_t*>(malloc(chunkSize + 1));
+  auto *buffer = static_cast<uint8_t *>(malloc(chunkSize + 1));
   if (!buffer) {
     Serial.printf("[%lu] [TRS] Failed to allocate %zu bytes\n", millis(), chunkSize);
     return false;
@@ -317,7 +318,7 @@ bool TxtReaderActivity::loadPageAtOffset(size_t offset, std::vector<std::string>
     size_t displayLen = hasCR ? lineContentLen - 1 : lineContentLen;
 
     // Extract line content for display (without CR/LF)
-    std::string line(reinterpret_cast<char*>(buffer + pos), displayLen);
+    std::string line(reinterpret_cast<char *>(buffer + pos), displayLen);
 
     // Track position within this source line (in bytes from pos)
     size_t lineBytePos = 0;
@@ -328,7 +329,7 @@ bool TxtReaderActivity::loadPageAtOffset(size_t offset, std::vector<std::string>
 
       if (lineWidth <= viewportWidth) {
         outLines.push_back(line);
-        lineBytePos = displayLen;  // Consumed entire display content
+        lineBytePos = displayLen; // Consumed entire display content
         line.clear();
         break;
       }
@@ -416,8 +417,10 @@ void TxtReaderActivity::renderScreen() {
   }
 
   // Bounds check
-  if (currentPage < 0) currentPage = 0;
-  if (currentPage >= totalPages) currentPage = totalPages - 1;
+  if (currentPage < 0)
+    currentPage = 0;
+  if (currentPage >= totalPages)
+    currentPage = totalPages - 1;
 
   // Load current page content
   size_t offset = pageOffsets[currentPage];
@@ -447,30 +450,30 @@ void TxtReaderActivity::renderPage() {
   // Render text lines with alignment
   auto renderLines = [&]() {
     int y = orientedMarginTop;
-    for (const auto& line : currentPageLines) {
+    for (const auto &line : currentPageLines) {
       if (!line.empty()) {
         int x = orientedMarginLeft;
 
         // Apply text alignment
         switch (cachedParagraphAlignment) {
-          case CrossPointSettings::LEFT_ALIGN:
-          default:
-            // x already set to left margin
-            break;
-          case CrossPointSettings::CENTER_ALIGN: {
-            int textWidth = renderer.getTextWidth(cachedFontId, line.c_str());
-            x = orientedMarginLeft + (contentWidth - textWidth) / 2;
-            break;
-          }
-          case CrossPointSettings::RIGHT_ALIGN: {
-            int textWidth = renderer.getTextWidth(cachedFontId, line.c_str());
-            x = orientedMarginLeft + contentWidth - textWidth;
-            break;
-          }
-          case CrossPointSettings::JUSTIFIED:
-            // For plain text, justified is treated as left-aligned
-            // (true justification would require word spacing adjustments)
-            break;
+        case CrossPointSettings::LEFT_ALIGN:
+        default:
+          // x already set to left margin
+          break;
+        case CrossPointSettings::CENTER_ALIGN: {
+          int textWidth = renderer.getTextWidth(cachedFontId, line.c_str());
+          x = orientedMarginLeft + (contentWidth - textWidth) / 2;
+          break;
+        }
+        case CrossPointSettings::RIGHT_ALIGN: {
+          int textWidth = renderer.getTextWidth(cachedFontId, line.c_str());
+          x = orientedMarginLeft + contentWidth - textWidth;
+          break;
+        }
+        case CrossPointSettings::JUSTIFIED:
+          // For plain text, justified is treated as left-aligned
+          // (true justification would require word spacing adjustments)
+          break;
         }
 
         renderer.drawText(cachedFontId, x, y, line.c_str());

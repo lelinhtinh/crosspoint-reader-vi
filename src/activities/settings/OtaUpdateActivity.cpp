@@ -8,8 +8,8 @@
 #include "fontIds.h"
 #include "network/OtaUpdater.h"
 
-void OtaUpdateActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<OtaUpdateActivity*>(param);
+void OtaUpdateActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<OtaUpdateActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -60,10 +60,10 @@ void OtaUpdateActivity::onEnter() {
   renderingMutex = xSemaphoreCreateMutex();
 
   xTaskCreate(&OtaUpdateActivity::taskTrampoline, "OtaUpdateActivityTask",
-              2048,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              2048,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 
   // Turn on WiFi immediately
@@ -80,10 +80,10 @@ void OtaUpdateActivity::onExit() {
   ActivityWithSubactivity::onExit();
 
   // Turn off wifi
-  WiFi.disconnect(false);  // false = don't erase credentials, send disconnect frame
-  delay(100);              // Allow disconnect frame to be sent
+  WiFi.disconnect(false); // false = don't erase credentials, send disconnect frame
+  delay(100);             // Allow disconnect frame to be sent
   WiFi.mode(WIFI_OFF);
-  delay(100);  // Allow WiFi hardware to fully power down
+  delay(100); // Allow WiFi hardware to fully power down
 
   // Wait until not rendering to delete task to avoid killing mid-instruction to EPD
   xSemaphoreTake(renderingMutex, portMAX_DELAY);

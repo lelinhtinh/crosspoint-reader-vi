@@ -46,7 +46,7 @@ enum {
   PJPG_NOTENOUGHMEM,
   PJPG_UNSUPPORTED_COMP_IDENT,
   PJPG_UNSUPPORTED_QUANT_TABLE,
-  PJPG_UNSUPPORTED_MODE,  // picojpeg doesn't support progressive JPEG's
+  PJPG_UNSUPPORTED_MODE, // picojpeg doesn't support progressive JPEG's
 };
 
 // Scan types
@@ -97,20 +97,20 @@ typedef struct {
   //                                                   128, 192
   //
   // It is up to the caller to copy or blit these pixels from these buffers into the destination bitmap.
-  unsigned char* m_pMCUBufR;
-  unsigned char* m_pMCUBufG;
-  unsigned char* m_pMCUBufB;
+  unsigned char *m_pMCUBufR;
+  unsigned char *m_pMCUBufG;
+  unsigned char *m_pMCUBufB;
 } pjpeg_image_info_t;
 
-typedef unsigned char (*pjpeg_need_bytes_callback_t)(unsigned char* pBuf, unsigned char buf_size,
-                                                     unsigned char* pBytes_actually_read, void* pCallback_data);
+typedef unsigned char (*pjpeg_need_bytes_callback_t)(unsigned char *pBuf, unsigned char buf_size,
+                                                     unsigned char *pBytes_actually_read, void *pCallback_data);
 
 // Initializes the decompressor. Returns 0 on success, or one of the above error codes on failure.
 // pNeed_bytes_callback will be called to fill the decompressor's internal input buffer.
 // If reduce is 1, only the first pixel of each block will be decoded. This mode is much faster because it skips the AC
 // dequantization, IDCT and chroma upsampling of every image pixel. Not thread safe.
-unsigned char pjpeg_decode_init(pjpeg_image_info_t* pInfo, pjpeg_need_bytes_callback_t pNeed_bytes_callback,
-                                void* pCallback_data, unsigned char reduce);
+unsigned char pjpeg_decode_init(pjpeg_image_info_t *pInfo, pjpeg_need_bytes_callback_t pNeed_bytes_callback,
+                                void *pCallback_data, unsigned char reduce);
 
 // Decompresses the file's next MCU. Returns 0 on success, PJPG_NO_MORE_BLOCKS if no more blocks are available, or an
 // error code. Must be called a total of m_MCUSPerRow*m_MCUSPerCol times to completely decompress the image. Not thread
@@ -121,4 +121,4 @@ unsigned char pjpeg_decode_mcu(void);
 }
 #endif
 
-#endif  // PICOJPEG_H
+#endif // PICOJPEG_H

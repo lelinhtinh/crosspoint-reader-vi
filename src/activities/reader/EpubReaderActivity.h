@@ -21,19 +21,17 @@ class EpubReaderActivity final : public ActivityWithSubactivity {
   const std::function<void()> onGoBack;
   const std::function<void()> onGoHome;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void renderScreen();
   void renderContents(std::unique_ptr<Page> page, int orientedMarginTop, int orientedMarginRight,
                       int orientedMarginBottom, int orientedMarginLeft);
   void renderStatusBar(int orientedMarginRight, int orientedMarginBottom, int orientedMarginLeft) const;
 
- public:
-  explicit EpubReaderActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, std::unique_ptr<Epub> epub,
-                              const std::function<void()>& onGoBack, const std::function<void()>& onGoHome)
-      : ActivityWithSubactivity("EpubReader", renderer, mappedInput),
-        epub(std::move(epub)),
-        onGoBack(onGoBack),
+public:
+  explicit EpubReaderActivity(GfxRenderer &renderer, MappedInputManager &mappedInput, std::unique_ptr<Epub> epub,
+                              const std::function<void()> &onGoBack, const std::function<void()> &onGoHome)
+      : ActivityWithSubactivity("EpubReader", renderer, mappedInput), epub(std::move(epub)), onGoBack(onGoBack),
         onGoHome(onGoHome) {}
   void onEnter() override;
   void onExit() override;

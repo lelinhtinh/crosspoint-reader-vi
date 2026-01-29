@@ -22,50 +22,52 @@ typedef signed short int16;
 #if PJPG_RIGHT_SHIFT_IS_ALWAYS_UNSIGNED
 static int16 replicateSignBit16(int8 n) {
   switch (n) {
-    case 0:
-      return 0x0000;
-    case 1:
-      return 0x8000;
-    case 2:
-      return 0xC000;
-    case 3:
-      return 0xE000;
-    case 4:
-      return 0xF000;
-    case 5:
-      return 0xF800;
-    case 6:
-      return 0xFC00;
-    case 7:
-      return 0xFE00;
-    case 8:
-      return 0xFF00;
-    case 9:
-      return 0xFF80;
-    case 10:
-      return 0xFFC0;
-    case 11:
-      return 0xFFE0;
-    case 12:
-      return 0xFFF0;
-    case 13:
-      return 0xFFF8;
-    case 14:
-      return 0xFFFC;
-    case 15:
-      return 0xFFFE;
-    default:
-      return 0xFFFF;
+  case 0:
+    return 0x0000;
+  case 1:
+    return 0x8000;
+  case 2:
+    return 0xC000;
+  case 3:
+    return 0xE000;
+  case 4:
+    return 0xF000;
+  case 5:
+    return 0xF800;
+  case 6:
+    return 0xFC00;
+  case 7:
+    return 0xFE00;
+  case 8:
+    return 0xFF00;
+  case 9:
+    return 0xFF80;
+  case 10:
+    return 0xFFC0;
+  case 11:
+    return 0xFFE0;
+  case 12:
+    return 0xFFF0;
+  case 13:
+    return 0xFFF8;
+  case 14:
+    return 0xFFFC;
+  case 15:
+    return 0xFFFE;
+  default:
+    return 0xFFFF;
   }
 }
 static PJPG_INLINE int16 arithmeticRightShiftN16(int16 x, int8 n) {
   int16 r = (uint16)x >> (uint8)n;
-  if (x < 0) r |= replicateSignBit16(n);
+  if (x < 0)
+    r |= replicateSignBit16(n);
   return r;
 }
 static PJPG_INLINE long arithmeticRightShift8L(long x) {
   long r = (unsigned long)x >> 8U;
-  if (x < 0) r |= ~(~(unsigned long)0U >> 8U);
+  if (x < 0)
+    r |= ~(~(unsigned long)0U >> 8U);
   return r;
 }
 #define PJPG_ARITH_SHIFT_RIGHT_N_16(x, n) arithmeticRightShiftN16(x, n)
@@ -204,8 +206,8 @@ static uint16 gRestartsLeft;
 
 static uint8 gCompsInScan;
 static uint8 gCompList[3];
-static uint8 gCompDCTab[3];  // 0,1
-static uint8 gCompACTab[3];  // 0,1
+static uint8 gCompDCTab[3]; // 0,1
+static uint8 gCompACTab[3]; // 0,1
 
 static pjpeg_scan_type_t gScanType;
 
@@ -220,7 +222,7 @@ static uint16 gNumMCUSRemainingX, gNumMCUSRemainingY;
 static uint8 gMCUOrg[6];
 
 static pjpeg_need_bytes_callback_t g_pNeedBytesCallback;
-static void* g_pCallback_data;
+static void *g_pCallback_data;
 static uint8 gCallbackStatus;
 static uint8 gReduce;
 //------------------------------------------------------------------------------
@@ -311,7 +313,8 @@ static PJPG_INLINE uint16 getBits2(uint8 numBits) { return getBits(numBits, 1); 
 //------------------------------------------------------------------------------
 static PJPG_INLINE uint8 getBit(void) {
   uint8 ret = 0;
-  if (gBitBuf & 0x8000) ret = 1;
+  if (gBitBuf & 0x8000)
+    ret = 1;
 
   if (!gBitsLeft) {
     gBitBuf |= getOctet(1);
@@ -327,79 +330,79 @@ static PJPG_INLINE uint8 getBit(void) {
 //------------------------------------------------------------------------------
 static uint16 getExtendTest(uint8 i) {
   switch (i) {
-    case 0:
-      return 0;
-    case 1:
-      return 0x0001;
-    case 2:
-      return 0x0002;
-    case 3:
-      return 0x0004;
-    case 4:
-      return 0x0008;
-    case 5:
-      return 0x0010;
-    case 6:
-      return 0x0020;
-    case 7:
-      return 0x0040;
-    case 8:
-      return 0x0080;
-    case 9:
-      return 0x0100;
-    case 10:
-      return 0x0200;
-    case 11:
-      return 0x0400;
-    case 12:
-      return 0x0800;
-    case 13:
-      return 0x1000;
-    case 14:
-      return 0x2000;
-    case 15:
-      return 0x4000;
-    default:
-      return 0;
+  case 0:
+    return 0;
+  case 1:
+    return 0x0001;
+  case 2:
+    return 0x0002;
+  case 3:
+    return 0x0004;
+  case 4:
+    return 0x0008;
+  case 5:
+    return 0x0010;
+  case 6:
+    return 0x0020;
+  case 7:
+    return 0x0040;
+  case 8:
+    return 0x0080;
+  case 9:
+    return 0x0100;
+  case 10:
+    return 0x0200;
+  case 11:
+    return 0x0400;
+  case 12:
+    return 0x0800;
+  case 13:
+    return 0x1000;
+  case 14:
+    return 0x2000;
+  case 15:
+    return 0x4000;
+  default:
+    return 0;
   }
 }
 //------------------------------------------------------------------------------
 static int16 getExtendOffset(uint8 i) {
   switch (i) {
-    case 0:
-      return 0;
-    case 1:
-      return ((-1) << 1) + 1;
-    case 2:
-      return ((-1) << 2) + 1;
-    case 3:
-      return ((-1) << 3) + 1;
-    case 4:
-      return ((-1) << 4) + 1;
-    case 5:
-      return ((-1) << 5) + 1;
-    case 6:
-      return ((-1) << 6) + 1;
-    case 7:
-      return ((-1) << 7) + 1;
-    case 8:
-      return ((-1) << 8) + 1;
-    case 9:
-      return ((-1) << 9) + 1;
-    case 10:
-      return ((-1) << 10) + 1;
-    case 11:
-      return ((-1) << 11) + 1;
-    case 12:
-      return ((-1) << 12) + 1;
-    case 13:
-      return ((-1) << 13) + 1;
-    case 14:
-      return ((-1) << 14) + 1;
-    case 15:
-      return ((-1) << 15) + 1;
-    default:
-      return 0;
+  case 0:
+    return 0;
+  case 1:
+    return ((-1) << 1) + 1;
+  case 2:
+    return ((-1) << 2) + 1;
+  case 3:
+    return ((-1) << 3) + 1;
+  case 4:
+    return ((-1) << 4) + 1;
+  case 5:
+    return ((-1) << 5) + 1;
+  case 6:
+    return ((-1) << 6) + 1;
+  case 7:
+    return ((-1) << 7) + 1;
+  case 8:
+    return ((-1) << 8) + 1;
+  case 9:
+    return ((-1) << 9) + 1;
+  case 10:
+    return ((-1) << 10) + 1;
+  case 11:
+    return ((-1) << 11) + 1;
+  case 12:
+    return ((-1) << 12) + 1;
+  case 13:
+    return ((-1) << 13) + 1;
+  case 14:
+    return ((-1) << 14) + 1;
+  case 15:
+    return ((-1) << 15) + 1;
+  default:
+    return 0;
   }
 };
 //------------------------------------------------------------------------------
@@ -407,7 +410,7 @@ static PJPG_INLINE int16 huffExtend(uint16 x, uint8 s) {
   return ((x < getExtendTest(s)) ? ((int16)x + getExtendOffset(s)) : (int16)x);
 }
 //------------------------------------------------------------------------------
-static PJPG_INLINE uint8 huffDecode(const HuffTable* pHuffTable, const uint8* pHuffVal) {
+static PJPG_INLINE uint8 huffDecode(const HuffTable *pHuffTable, const uint8 *pHuffVal) {
   uint8 i = 0;
   uint8 j;
   uint16 code = getBit();
@@ -418,10 +421,12 @@ static PJPG_INLINE uint8 huffDecode(const HuffTable* pHuffTable, const uint8* pH
   for (;;) {
     uint16 maxCode;
 
-    if (i == 16) return 0;
+    if (i == 16)
+      return 0;
 
     maxCode = pHuffTable->mMaxCode[i];
-    if ((code <= maxCode) && (maxCode != 0xFFFF)) break;
+    if ((code <= maxCode) && (maxCode != 0xFFFF))
+      break;
 
     i++;
     code <<= 1;
@@ -434,7 +439,7 @@ static PJPG_INLINE uint8 huffDecode(const HuffTable* pHuffTable, const uint8* pH
   return pHuffVal[j];
 }
 //------------------------------------------------------------------------------
-static void huffCreate(const uint8* pBits, HuffTable* pHuffTable) {
+static void huffCreate(const uint8 *pBits, HuffTable *pHuffTable) {
   uint8 i = 0;
   uint8 j = 0;
 
@@ -460,41 +465,42 @@ static void huffCreate(const uint8* pBits, HuffTable* pHuffTable) {
     code <<= 1;
 
     i++;
-    if (i > 15) break;
+    if (i > 15)
+      break;
   }
 }
 //------------------------------------------------------------------------------
-static HuffTable* getHuffTable(uint8 index) {
+static HuffTable *getHuffTable(uint8 index) {
   // 0-1 = DC
   // 2-3 = AC
   switch (index) {
-    case 0:
-      return &gHuffTab0;
-    case 1:
-      return &gHuffTab1;
-    case 2:
-      return &gHuffTab2;
-    case 3:
-      return &gHuffTab3;
-    default:
-      return 0;
+  case 0:
+    return &gHuffTab0;
+  case 1:
+    return &gHuffTab1;
+  case 2:
+    return &gHuffTab2;
+  case 3:
+    return &gHuffTab3;
+  default:
+    return 0;
   }
 }
 //------------------------------------------------------------------------------
-static uint8* getHuffVal(uint8 index) {
+static uint8 *getHuffVal(uint8 index) {
   // 0-1 = DC
   // 2-3 = AC
   switch (index) {
-    case 0:
-      return gHuffVal0;
-    case 1:
-      return gHuffVal1;
-    case 2:
-      return gHuffVal2;
-    case 3:
-      return gHuffVal3;
-    default:
-      return 0;
+  case 0:
+    return gHuffVal0;
+  case 1:
+    return gHuffVal1;
+  case 2:
+    return gHuffVal2;
+  case 3:
+    return gHuffVal3;
+  default:
+    return 0;
   }
 }
 //------------------------------------------------------------------------------
@@ -504,19 +510,21 @@ static uint8 readDHTMarker(void) {
   uint8 bits[16];
   uint16 left = getBits1(16);
 
-  if (left < 2) return PJPG_BAD_DHT_MARKER;
+  if (left < 2)
+    return PJPG_BAD_DHT_MARKER;
 
   left -= 2;
 
   while (left) {
     uint8 i, tableIndex, index;
-    uint8* pHuffVal;
-    HuffTable* pHuffTable;
+    uint8 *pHuffVal;
+    HuffTable *pHuffTable;
     uint16 count, totalRead;
 
     index = (uint8)getBits1(8);
 
-    if (((index & 0xF) > 1) || ((index & 0xF0) > 0x10)) return PJPG_BAD_DHT_INDEX;
+    if (((index & 0xF) > 1) || ((index & 0xF0) > 0x10))
+      return PJPG_BAD_DHT_INDEX;
 
     tableIndex = ((index >> 3) & 2) + (index & 1);
 
@@ -532,13 +540,16 @@ static uint8 readDHTMarker(void) {
       count = (uint16)(count + n);
     }
 
-    if (count > getMaxHuffCodes(tableIndex)) return PJPG_BAD_DHT_COUNTS;
+    if (count > getMaxHuffCodes(tableIndex))
+      return PJPG_BAD_DHT_COUNTS;
 
-    for (i = 0; i < count; i++) pHuffVal[i] = (uint8)getBits1(8);
+    for (i = 0; i < count; i++)
+      pHuffVal[i] = (uint8)getBits1(8);
 
     totalRead = 1 + 16 + count;
 
-    if (left < totalRead) return PJPG_BAD_DHT_MARKER;
+    if (left < totalRead)
+      return PJPG_BAD_DHT_MARKER;
 
     left = (uint16)(left - totalRead);
 
@@ -548,12 +559,13 @@ static uint8 readDHTMarker(void) {
   return 0;
 }
 //------------------------------------------------------------------------------
-static void createWinogradQuant(int16* pQuant);
+static void createWinogradQuant(int16 *pQuant);
 
 static uint8 readDQTMarker(void) {
   uint16 left = getBits1(16);
 
-  if (left < 2) return PJPG_BAD_DQT_MARKER;
+  if (left < 2)
+    return PJPG_BAD_DQT_MARKER;
 
   left -= 2;
 
@@ -565,7 +577,8 @@ static uint8 readDQTMarker(void) {
 
     n &= 0x0F;
 
-    if (n > 1) return PJPG_BAD_DQT_TABLE;
+    if (n > 1)
+      return PJPG_BAD_DQT_TABLE;
 
     gValidQuantTables |= (n ? 2 : 1);
 
@@ -573,7 +586,8 @@ static uint8 readDQTMarker(void) {
     for (i = 0; i < 64; i++) {
       uint16 temp = getBits1(8);
 
-      if (prec) temp = (temp << 8) + getBits1(8);
+      if (prec)
+        temp = (temp << 8) + getBits1(8);
 
       if (n)
         gQuant1[i] = (int16)temp;
@@ -585,9 +599,11 @@ static uint8 readDQTMarker(void) {
 
     totalRead = 64 + 1;
 
-    if (prec) totalRead += 64;
+    if (prec)
+      totalRead += 64;
 
-    if (left < totalRead) return PJPG_BAD_DQT_LENGTH;
+    if (left < totalRead)
+      return PJPG_BAD_DQT_LENGTH;
 
     left = (uint16)(left - totalRead);
   }
@@ -599,21 +615,26 @@ static uint8 readSOFMarker(void) {
   uint8 i;
   uint16 left = getBits1(16);
 
-  if (getBits1(8) != 8) return PJPG_BAD_PRECISION;
+  if (getBits1(8) != 8)
+    return PJPG_BAD_PRECISION;
 
   gImageYSize = getBits1(16);
 
-  if ((!gImageYSize) || (gImageYSize > PJPG_MAX_HEIGHT)) return PJPG_BAD_HEIGHT;
+  if ((!gImageYSize) || (gImageYSize > PJPG_MAX_HEIGHT))
+    return PJPG_BAD_HEIGHT;
 
   gImageXSize = getBits1(16);
 
-  if ((!gImageXSize) || (gImageXSize > PJPG_MAX_WIDTH)) return PJPG_BAD_WIDTH;
+  if ((!gImageXSize) || (gImageXSize > PJPG_MAX_WIDTH))
+    return PJPG_BAD_WIDTH;
 
   gCompsInFrame = (uint8)getBits1(8);
 
-  if (gCompsInFrame > 3) return PJPG_TOO_MANY_COMPONENTS;
+  if (gCompsInFrame > 3)
+    return PJPG_TOO_MANY_COMPONENTS;
 
-  if (left != (gCompsInFrame + gCompsInFrame + gCompsInFrame + 8)) return PJPG_BAD_SOF_LENGTH;
+  if (left != (gCompsInFrame + gCompsInFrame + gCompsInFrame + 8))
+    return PJPG_BAD_SOF_LENGTH;
 
   for (i = 0; i < gCompsInFrame; i++) {
     gCompIdent[i] = (uint8)getBits1(8);
@@ -621,7 +642,8 @@ static uint8 readSOFMarker(void) {
     gCompVSamp[i] = (uint8)getBits1(4);
     gCompQuant[i] = (uint8)getBits1(8);
 
-    if (gCompQuant[i] > 1) return PJPG_UNSUPPORTED_QUANT_TABLE;
+    if (gCompQuant[i] > 1)
+      return PJPG_UNSUPPORTED_QUANT_TABLE;
   }
 
   return 0;
@@ -631,7 +653,8 @@ static uint8 readSOFMarker(void) {
 static uint8 skipVariableMarker(void) {
   uint16 left = getBits1(16);
 
-  if (left < 2) return PJPG_BAD_VARIABLE_MARKER;
+  if (left < 2)
+    return PJPG_BAD_VARIABLE_MARKER;
 
   left -= 2;
 
@@ -645,7 +668,8 @@ static uint8 skipVariableMarker(void) {
 //------------------------------------------------------------------------------
 // Read a define restart interval (DRI) marker.
 static uint8 readDRIMarker(void) {
-  if (getBits1(16) != 4) return PJPG_BAD_DRI_LENGTH;
+  if (getBits1(16) != 4)
+    return PJPG_BAD_DRI_LENGTH;
 
   gRestartInterval = getBits1(16);
 
@@ -673,9 +697,11 @@ static uint8 readSOSMarker(void) {
     left -= 2;
 
     for (ci = 0; ci < gCompsInFrame; ci++)
-      if (cc == gCompIdent[ci]) break;
+      if (cc == gCompIdent[ci])
+        break;
 
-    if (ci >= gCompsInFrame) return PJPG_BAD_SOS_COMP_ID;
+    if (ci >= gCompsInFrame)
+      return PJPG_BAD_SOS_COMP_ID;
 
     gCompList[i] = ci;
     gCompDCTab[ci] = (c >> 4) & 15;
@@ -723,66 +749,66 @@ static uint8 nextMarker(void) {
 //------------------------------------------------------------------------------
 // Process markers. Returns when an SOFx, SOI, EOI, or SOS marker is
 // encountered.
-static uint8 processMarkers(uint8* pMarker) {
+static uint8 processMarkers(uint8 *pMarker) {
   for (;;) {
     uint8 c = nextMarker();
 
     switch (c) {
-      case M_SOF0:
-      case M_SOF1:
-      case M_SOF2:
-      case M_SOF3:
-      case M_SOF5:
-      case M_SOF6:
-      case M_SOF7:
-      //      case M_JPG:
-      case M_SOF9:
-      case M_SOF10:
-      case M_SOF11:
-      case M_SOF13:
-      case M_SOF14:
-      case M_SOF15:
-      case M_SOI:
-      case M_EOI:
-      case M_SOS: {
-        *pMarker = c;
-        return 0;
-      }
-      case M_DHT: {
-        readDHTMarker();
-        break;
-      }
-      // Sorry, no arithmetic support at this time. Dumb patents!
-      case M_DAC: {
-        return PJPG_NO_ARITHMITIC_SUPPORT;
-      }
-      case M_DQT: {
-        readDQTMarker();
-        break;
-      }
-      case M_DRI: {
-        readDRIMarker();
-        break;
-      }
-        // case M_APP0:  /* no need to read the JFIF marker */
+    case M_SOF0:
+    case M_SOF1:
+    case M_SOF2:
+    case M_SOF3:
+    case M_SOF5:
+    case M_SOF6:
+    case M_SOF7:
+    //      case M_JPG:
+    case M_SOF9:
+    case M_SOF10:
+    case M_SOF11:
+    case M_SOF13:
+    case M_SOF14:
+    case M_SOF15:
+    case M_SOI:
+    case M_EOI:
+    case M_SOS: {
+      *pMarker = c;
+      return 0;
+    }
+    case M_DHT: {
+      readDHTMarker();
+      break;
+    }
+    // Sorry, no arithmetic support at this time. Dumb patents!
+    case M_DAC: {
+      return PJPG_NO_ARITHMITIC_SUPPORT;
+    }
+    case M_DQT: {
+      readDQTMarker();
+      break;
+    }
+    case M_DRI: {
+      readDRIMarker();
+      break;
+    }
+      // case M_APP0:  /* no need to read the JFIF marker */
 
-      case M_JPG:
-      case M_RST0: /* no parameters */
-      case M_RST1:
-      case M_RST2:
-      case M_RST3:
-      case M_RST4:
-      case M_RST5:
-      case M_RST6:
-      case M_RST7:
-      case M_TEM: {
-        return PJPG_UNEXPECTED_MARKER;
-      }
-      default: /* must be DNL, DHP, EXP, APPn, JPGn, COM, or RESn or APP0 */
-      {
-        skipVariableMarker();
-        break;
-      }
+    case M_JPG:
+    case M_RST0: /* no parameters */
+    case M_RST1:
+    case M_RST2:
+    case M_RST3:
+    case M_RST4:
+    case M_RST5:
+    case M_RST6:
+    case M_RST7:
+    case M_TEM: {
+      return PJPG_UNEXPECTED_MARKER;
+    }
+    default: /* must be DNL, DHP, EXP, APPn, JPGn, COM, or RESn or APP0 */
+    {
+      skipVariableMarker();
+      break;
+    }
     }
   }
   //   return 0;
@@ -798,12 +824,14 @@ static uint8 locateSOIMarker(void) {
 
   /* ok if it's a normal JPEG file without a special header */
 
-  if ((lastchar == 0xFF) && (thischar == M_SOI)) return 0;
+  if ((lastchar == 0xFF) && (thischar == M_SOI))
+    return 0;
 
-  bytesleft = 4096;  // 512;
+  bytesleft = 4096; // 512;
 
   for (;;) {
-    if (--bytesleft == 0) return PJPG_NOT_JPEG;
+    if (--bytesleft == 0)
+      return PJPG_NOT_JPEG;
 
     lastchar = thischar;
 
@@ -812,7 +840,7 @@ static uint8 locateSOIMarker(void) {
     if (lastchar == 0xFF) {
       if (thischar == M_SOI)
         break;
-      else if (thischar == M_EOI)  // getBits1 will keep returning M_EOI if we read past the end
+      else if (thischar == M_EOI) // getBits1 will keep returning M_EOI if we read past the end
         return PJPG_NOT_JPEG;
     }
   }
@@ -822,7 +850,8 @@ static uint8 locateSOIMarker(void) {
 
   thischar = (uint8)((gBitBuf >> 8) & 0xFF);
 
-  if (thischar != 0xFF) return PJPG_NOT_JPEG;
+  if (thischar != 0xFF)
+    return PJPG_NOT_JPEG;
 
   return 0;
 }
@@ -832,45 +861,49 @@ static uint8 locateSOFMarker(void) {
   uint8 c;
 
   uint8 status = locateSOIMarker();
-  if (status) return status;
+  if (status)
+    return status;
 
   status = processMarkers(&c);
-  if (status) return status;
+  if (status)
+    return status;
 
   switch (c) {
-    case M_SOF2: {
-      // Progressive JPEG - not supported by picojpeg (would require too
-      // much memory, or too many IDCT's for embedded systems).
-      return PJPG_UNSUPPORTED_MODE;
-    }
-    case M_SOF0: /* baseline DCT */
-    {
-      status = readSOFMarker();
-      if (status) return status;
+  case M_SOF2: {
+    // Progressive JPEG - not supported by picojpeg (would require too
+    // much memory, or too many IDCT's for embedded systems).
+    return PJPG_UNSUPPORTED_MODE;
+  }
+  case M_SOF0: /* baseline DCT */
+  {
+    status = readSOFMarker();
+    if (status)
+      return status;
 
-      break;
-    }
-    case M_SOF9: {
-      return PJPG_NO_ARITHMITIC_SUPPORT;
-    }
-    case M_SOF1: /* extended sequential DCT */
-    default: {
-      return PJPG_UNSUPPORTED_MARKER;
-    }
+    break;
+  }
+  case M_SOF9: {
+    return PJPG_NO_ARITHMITIC_SUPPORT;
+  }
+  case M_SOF1: /* extended sequential DCT */
+  default: {
+    return PJPG_UNSUPPORTED_MARKER;
+  }
   }
 
   return 0;
 }
 //------------------------------------------------------------------------------
 // Find a start of scan (SOS) marker.
-static uint8 locateSOSMarker(uint8* pFoundEOI) {
+static uint8 locateSOSMarker(uint8 *pFoundEOI) {
   uint8 c;
   uint8 status;
 
   *pFoundEOI = 0;
 
   status = processMarkers(&c);
-  if (status) return status;
+  if (status)
+    return status;
 
   if (c == M_EOI) {
     *pFoundEOI = 1;
@@ -906,7 +939,8 @@ static uint8 init(void) {
 static void fixInBuffer(void) {
   /* In case any 0xFF's where pulled into the buffer during marker scanning */
 
-  if (gBitsLeft > 0) stuffChar((uint8)gBitBuf);
+  if (gBitsLeft > 0)
+    stuffChar((uint8)gBitBuf);
 
   stuffChar((uint8)(gBitBuf >> 8));
 
@@ -923,17 +957,22 @@ static uint8 processRestart(void) {
   uint8 c = 0;
 
   for (i = 1536; i > 0; i--)
-    if (getChar() == 0xFF) break;
+    if (getChar() == 0xFF)
+      break;
 
-  if (i == 0) return PJPG_BAD_RESTART_MARKER;
+  if (i == 0)
+    return PJPG_BAD_RESTART_MARKER;
 
   for (; i > 0; i--)
-    if ((c = getChar()) != 0xFF) break;
+    if ((c = getChar()) != 0xFF)
+      break;
 
-  if (i == 0) return PJPG_BAD_RESTART_MARKER;
+  if (i == 0)
+    return PJPG_BAD_RESTART_MARKER;
 
   // Is it the expected marker? If not, something bad happened.
-  if (c != (gNextRestartNum + M_RST0)) return PJPG_BAD_RESTART_MARKER;
+  if (c != (gNextRestartNum + M_RST0))
+    return PJPG_BAD_RESTART_MARKER;
 
   // Reset each component's DC prediction values.
   gLastDC[0] = 0;
@@ -972,7 +1011,8 @@ static uint8 findEOI(void) {
     return gCallbackStatus;
 
   // gTotalBytesRead -= in_buf_left;
-  if (c != M_EOI) return PJPG_UNEXPECTED_MARKER;
+  if (c != M_EOI)
+    return PJPG_UNEXPECTED_MARKER;
 
   return 0;
 }
@@ -997,7 +1037,8 @@ static uint8 checkQuantTables(void) {
   for (i = 0; i < gCompsInScan; i++) {
     uint8 compQuantMask = gCompQuant[gCompList[i]] ? 2 : 1;
 
-    if ((gValidQuantTables & compQuantMask) == 0) return PJPG_UNDEFINED_QUANT_TABLE;
+    if ((gValidQuantTables & compQuantMask) == 0)
+      return PJPG_UNDEFINED_QUANT_TABLE;
   }
 
   return 0;
@@ -1006,14 +1047,18 @@ static uint8 checkQuantTables(void) {
 static uint8 initScan(void) {
   uint8 foundEOI;
   uint8 status = locateSOSMarker(&foundEOI);
-  if (status) return status;
-  if (foundEOI) return PJPG_UNEXPECTED_MARKER;
+  if (status)
+    return status;
+  if (foundEOI)
+    return PJPG_UNEXPECTED_MARKER;
 
   status = checkHuffTables();
-  if (status) return status;
+  if (status)
+    return status;
 
   status = checkQuantTables();
-  if (status) return status;
+  if (status)
+    return status;
 
   gLastDC[0] = 0;
   gLastDC[1] = 0;
@@ -1031,7 +1076,8 @@ static uint8 initScan(void) {
 //------------------------------------------------------------------------------
 static uint8 initFrame(void) {
   if (gCompsInFrame == 1) {
-    if ((gCompHSamp[0] != 1) || (gCompVSamp[0] != 1)) return PJPG_UNSUPPORTED_SAMP_FACTORS;
+    if ((gCompHSamp[0] != 1) || (gCompVSamp[0] != 1))
+      return PJPG_UNSUPPORTED_SAMP_FACTORS;
 
     gScanType = PJPG_GRAYSCALE;
 
@@ -1124,7 +1170,7 @@ const uint8 gWinogradQuant[] = {
 };
 
 // Multiply quantization matrix by the Winograd IDCT scale factors
-static void createWinogradQuant(int16* pQuant) {
+static void createWinogradQuant(int16 *pQuant) {
   uint8 i;
 
   for (i = 0; i < 64; i++) {
@@ -1184,7 +1230,7 @@ static PJPG_INLINE uint8 clamp(int16 s) {
 
 static void idctRows(void) {
   uint8 i;
-  int16* pSrc = gCoeffBuf;
+  int16 *pSrc = gCoeffBuf;
 
   for (i = 0; i < 8; i++) {
     if ((pSrc[1] | pSrc[2] | pSrc[3] | pSrc[4] | pSrc[5] | pSrc[6] | pSrc[7]) == 0) {
@@ -1255,7 +1301,7 @@ static void idctRows(void) {
 static void idctCols(void) {
   uint8 i;
 
-  int16* pSrc = gCoeffBuf;
+  int16 *pSrc = gCoeffBuf;
 
   for (i = 0; i < 8; i++) {
     if ((pSrc[1 * 8] | pSrc[2 * 8] | pSrc[3 * 8] | pSrc[4 * 8] | pSrc[5 * 8] | pSrc[6 * 8] | pSrc[7 * 8]) == 0) {
@@ -1364,9 +1410,9 @@ static PJPG_INLINE uint8 subAndClamp(uint8 a, int16 b) {
 static void upsampleCb(uint8 srcOfs, uint8 dstOfs) {
   // Cb - affects G and B
   uint8 x, y;
-  int16* pSrc = gCoeffBuf + srcOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
-  uint8* pDstB = gMCUBufB + dstOfs;
+  int16 *pSrc = gCoeffBuf + srcOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
+  uint8 *pDstB = gMCUBufB + dstOfs;
   for (y = 0; y < 4; y++) {
     for (x = 0; x < 4; x++) {
       uint8 cb = (uint8)*pSrc++;
@@ -1398,9 +1444,9 @@ static void upsampleCb(uint8 srcOfs, uint8 dstOfs) {
 static void upsampleCbH(uint8 srcOfs, uint8 dstOfs) {
   // Cb - affects G and B
   uint8 x, y;
-  int16* pSrc = gCoeffBuf + srcOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
-  uint8* pDstB = gMCUBufB + dstOfs;
+  int16 *pSrc = gCoeffBuf + srcOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
+  uint8 *pDstB = gMCUBufB + dstOfs;
   for (y = 0; y < 8; y++) {
     for (x = 0; x < 4; x++) {
       uint8 cb = (uint8)*pSrc++;
@@ -1426,9 +1472,9 @@ static void upsampleCbH(uint8 srcOfs, uint8 dstOfs) {
 static void upsampleCbV(uint8 srcOfs, uint8 dstOfs) {
   // Cb - affects G and B
   uint8 x, y;
-  int16* pSrc = gCoeffBuf + srcOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
-  uint8* pDstB = gMCUBufB + dstOfs;
+  int16 *pSrc = gCoeffBuf + srcOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
+  uint8 *pDstB = gMCUBufB + dstOfs;
   for (y = 0; y < 4; y++) {
     for (x = 0; x < 8; x++) {
       uint8 cb = (uint8)*pSrc++;
@@ -1464,9 +1510,9 @@ static void upsampleCbV(uint8 srcOfs, uint8 dstOfs) {
 static void upsampleCr(uint8 srcOfs, uint8 dstOfs) {
   // Cr - affects R and G
   uint8 x, y;
-  int16* pSrc = gCoeffBuf + srcOfs;
-  uint8* pDstR = gMCUBufR + dstOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
+  int16 *pSrc = gCoeffBuf + srcOfs;
+  uint8 *pDstR = gMCUBufR + dstOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
   for (y = 0; y < 4; y++) {
     for (x = 0; x < 4; x++) {
       uint8 cr = (uint8)*pSrc++;
@@ -1498,9 +1544,9 @@ static void upsampleCr(uint8 srcOfs, uint8 dstOfs) {
 static void upsampleCrH(uint8 srcOfs, uint8 dstOfs) {
   // Cr - affects R and G
   uint8 x, y;
-  int16* pSrc = gCoeffBuf + srcOfs;
-  uint8* pDstR = gMCUBufR + dstOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
+  int16 *pSrc = gCoeffBuf + srcOfs;
+  uint8 *pDstR = gMCUBufR + dstOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
   for (y = 0; y < 8; y++) {
     for (x = 0; x < 4; x++) {
       uint8 cr = (uint8)*pSrc++;
@@ -1526,9 +1572,9 @@ static void upsampleCrH(uint8 srcOfs, uint8 dstOfs) {
 static void upsampleCrV(uint8 srcOfs, uint8 dstOfs) {
   // Cr - affects R and G
   uint8 x, y;
-  int16* pSrc = gCoeffBuf + srcOfs;
-  uint8* pDstR = gMCUBufR + dstOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
+  int16 *pSrc = gCoeffBuf + srcOfs;
+  uint8 *pDstR = gMCUBufR + dstOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
   for (y = 0; y < 4; y++) {
     for (x = 0; x < 8; x++) {
       uint8 cr = (uint8)*pSrc++;
@@ -1554,10 +1600,10 @@ static void upsampleCrV(uint8 srcOfs, uint8 dstOfs) {
 // Convert Y to RGB
 static void copyY(uint8 dstOfs) {
   uint8 i;
-  uint8* pRDst = gMCUBufR + dstOfs;
-  uint8* pGDst = gMCUBufG + dstOfs;
-  uint8* pBDst = gMCUBufB + dstOfs;
-  int16* pSrc = gCoeffBuf;
+  uint8 *pRDst = gMCUBufR + dstOfs;
+  uint8 *pGDst = gMCUBufG + dstOfs;
+  uint8 *pBDst = gMCUBufB + dstOfs;
+  int16 *pSrc = gCoeffBuf;
 
   for (i = 64; i > 0; i--) {
     uint8 c = (uint8)*pSrc++;
@@ -1571,9 +1617,9 @@ static void copyY(uint8 dstOfs) {
 // Cb convert to RGB and accumulate
 static void convertCb(uint8 dstOfs) {
   uint8 i;
-  uint8* pDstG = gMCUBufG + dstOfs;
-  uint8* pDstB = gMCUBufB + dstOfs;
-  int16* pSrc = gCoeffBuf;
+  uint8 *pDstG = gMCUBufG + dstOfs;
+  uint8 *pDstB = gMCUBufB + dstOfs;
+  int16 *pSrc = gCoeffBuf;
 
   for (i = 64; i > 0; i--) {
     uint8 cb = (uint8)*pSrc++;
@@ -1590,9 +1636,9 @@ static void convertCb(uint8 dstOfs) {
 // Cr convert to RGB and accumulate
 static void convertCr(uint8 dstOfs) {
   uint8 i;
-  uint8* pDstR = gMCUBufR + dstOfs;
-  uint8* pDstG = gMCUBufG + dstOfs;
-  int16* pSrc = gCoeffBuf;
+  uint8 *pDstR = gMCUBufR + dstOfs;
+  uint8 *pDstG = gMCUBufG + dstOfs;
+  int16 *pSrc = gCoeffBuf;
 
   for (i = 64; i > 0; i--) {
     uint8 cr = (uint8)*pSrc++;
@@ -1611,117 +1657,117 @@ static void transformBlock(uint8 mcuBlock) {
   idctCols();
 
   switch (gScanType) {
-    case PJPG_GRAYSCALE: {
-      // MCU size: 1, 1 block per MCU
+  case PJPG_GRAYSCALE: {
+    // MCU size: 1, 1 block per MCU
+    copyY(0);
+    break;
+  }
+  case PJPG_YH1V1: {
+    // MCU size: 8x8, 3 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
       copyY(0);
       break;
     }
-    case PJPG_YH1V1: {
-      // MCU size: 8x8, 3 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          copyY(0);
-          break;
-        }
-        case 1: {
-          convertCb(0);
-          break;
-        }
-        case 2: {
-          convertCr(0);
-          break;
-        }
-      }
-
+    case 1: {
+      convertCb(0);
       break;
     }
-    case PJPG_YH1V2: {
-      // MCU size: 8x16, 4 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          copyY(0);
-          break;
-        }
-        case 1: {
-          copyY(128);
-          break;
-        }
-        case 2: {
-          upsampleCbV(0, 0);
-          upsampleCbV(4 * 8, 128);
-          break;
-        }
-        case 3: {
-          upsampleCrV(0, 0);
-          upsampleCrV(4 * 8, 128);
-          break;
-        }
-      }
-
+    case 2: {
+      convertCr(0);
       break;
     }
-    case PJPG_YH2V1: {
-      // MCU size: 16x8, 4 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          copyY(0);
-          break;
-        }
-        case 1: {
-          copyY(64);
-          break;
-        }
-        case 2: {
-          upsampleCbH(0, 0);
-          upsampleCbH(4, 64);
-          break;
-        }
-        case 3: {
-          upsampleCrH(0, 0);
-          upsampleCrH(4, 64);
-          break;
-        }
-      }
+    }
 
+    break;
+  }
+  case PJPG_YH1V2: {
+    // MCU size: 8x16, 4 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
+      copyY(0);
       break;
     }
-    case PJPG_YH2V2: {
-      // MCU size: 16x16, 6 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          copyY(0);
-          break;
-        }
-        case 1: {
-          copyY(64);
-          break;
-        }
-        case 2: {
-          copyY(128);
-          break;
-        }
-        case 3: {
-          copyY(192);
-          break;
-        }
-        case 4: {
-          upsampleCb(0, 0);
-          upsampleCb(4, 64);
-          upsampleCb(4 * 8, 128);
-          upsampleCb(4 + 4 * 8, 192);
-          break;
-        }
-        case 5: {
-          upsampleCr(0, 0);
-          upsampleCr(4, 64);
-          upsampleCr(4 * 8, 128);
-          upsampleCr(4 + 4 * 8, 192);
-          break;
-        }
-      }
-
+    case 1: {
+      copyY(128);
       break;
     }
+    case 2: {
+      upsampleCbV(0, 0);
+      upsampleCbV(4 * 8, 128);
+      break;
+    }
+    case 3: {
+      upsampleCrV(0, 0);
+      upsampleCrV(4 * 8, 128);
+      break;
+    }
+    }
+
+    break;
+  }
+  case PJPG_YH2V1: {
+    // MCU size: 16x8, 4 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
+      copyY(0);
+      break;
+    }
+    case 1: {
+      copyY(64);
+      break;
+    }
+    case 2: {
+      upsampleCbH(0, 0);
+      upsampleCbH(4, 64);
+      break;
+    }
+    case 3: {
+      upsampleCrH(0, 0);
+      upsampleCrH(4, 64);
+      break;
+    }
+    }
+
+    break;
+  }
+  case PJPG_YH2V2: {
+    // MCU size: 16x16, 6 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
+      copyY(0);
+      break;
+    }
+    case 1: {
+      copyY(64);
+      break;
+    }
+    case 2: {
+      copyY(128);
+      break;
+    }
+    case 3: {
+      copyY(192);
+      break;
+    }
+    case 4: {
+      upsampleCb(0, 0);
+      upsampleCb(4, 64);
+      upsampleCb(4 * 8, 128);
+      upsampleCb(4 + 4 * 8, 192);
+      break;
+    }
+    case 5: {
+      upsampleCr(0, 0);
+      upsampleCr(4, 64);
+      upsampleCr(4 * 8, 128);
+      upsampleCr(4 + 4 * 8, 192);
+      break;
+    }
+    }
+
+    break;
+  }
   }
 }
 //------------------------------------------------------------------------------
@@ -1730,180 +1776,180 @@ static void transformBlockReduce(uint8 mcuBlock) {
   int16 cbG, cbB, crR, crG;
 
   switch (gScanType) {
-    case PJPG_GRAYSCALE: {
-      // MCU size: 1, 1 block per MCU
+  case PJPG_GRAYSCALE: {
+    // MCU size: 1, 1 block per MCU
+    gMCUBufR[0] = c;
+    break;
+  }
+  case PJPG_YH1V1: {
+    // MCU size: 8x8, 3 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
       gMCUBufR[0] = c;
+      gMCUBufG[0] = c;
+      gMCUBufB[0] = c;
       break;
     }
-    case PJPG_YH1V1: {
-      // MCU size: 8x8, 3 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          gMCUBufR[0] = c;
-          gMCUBufG[0] = c;
-          gMCUBufB[0] = c;
-          break;
-        }
-        case 1: {
-          cbG = ((c * 88U) >> 8U) - 44U;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
+    case 1: {
+      cbG = ((c * 88U) >> 8U) - 44U;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
 
-          cbB = (c + ((c * 198U) >> 8U)) - 227U;
-          gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
-          break;
-        }
-        case 2: {
-          crR = (c + ((c * 103U) >> 8U)) - 179;
-          gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
+      cbB = (c + ((c * 198U) >> 8U)) - 227U;
+      gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
+      break;
+    }
+    case 2: {
+      crR = (c + ((c * 103U) >> 8U)) - 179;
+      gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
 
-          crG = ((c * 183U) >> 8U) - 91;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
-          break;
-        }
-      }
+      crG = ((c * 183U) >> 8U) - 91;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
+      break;
+    }
+    }
+
+    break;
+  }
+  case PJPG_YH1V2: {
+    // MCU size: 8x16, 4 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
+      gMCUBufR[0] = c;
+      gMCUBufG[0] = c;
+      gMCUBufB[0] = c;
+      break;
+    }
+    case 1: {
+      gMCUBufR[128] = c;
+      gMCUBufG[128] = c;
+      gMCUBufB[128] = c;
+      break;
+    }
+    case 2: {
+      cbG = ((c * 88U) >> 8U) - 44U;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
+      gMCUBufG[128] = subAndClamp(gMCUBufG[128], cbG);
+
+      cbB = (c + ((c * 198U) >> 8U)) - 227U;
+      gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
+      gMCUBufB[128] = addAndClamp(gMCUBufB[128], cbB);
 
       break;
     }
-    case PJPG_YH1V2: {
-      // MCU size: 8x16, 4 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          gMCUBufR[0] = c;
-          gMCUBufG[0] = c;
-          gMCUBufB[0] = c;
-          break;
-        }
-        case 1: {
-          gMCUBufR[128] = c;
-          gMCUBufG[128] = c;
-          gMCUBufB[128] = c;
-          break;
-        }
-        case 2: {
-          cbG = ((c * 88U) >> 8U) - 44U;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
-          gMCUBufG[128] = subAndClamp(gMCUBufG[128], cbG);
+    case 3: {
+      crR = (c + ((c * 103U) >> 8U)) - 179;
+      gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
+      gMCUBufR[128] = addAndClamp(gMCUBufR[128], crR);
 
-          cbB = (c + ((c * 198U) >> 8U)) - 227U;
-          gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
-          gMCUBufB[128] = addAndClamp(gMCUBufB[128], cbB);
+      crG = ((c * 183U) >> 8U) - 91;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
+      gMCUBufG[128] = subAndClamp(gMCUBufG[128], crG);
 
-          break;
-        }
-        case 3: {
-          crR = (c + ((c * 103U) >> 8U)) - 179;
-          gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
-          gMCUBufR[128] = addAndClamp(gMCUBufR[128], crR);
-
-          crG = ((c * 183U) >> 8U) - 91;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
-          gMCUBufG[128] = subAndClamp(gMCUBufG[128], crG);
-
-          break;
-        }
-      }
       break;
     }
-    case PJPG_YH2V1: {
-      // MCU size: 16x8, 4 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          gMCUBufR[0] = c;
-          gMCUBufG[0] = c;
-          gMCUBufB[0] = c;
-          break;
-        }
-        case 1: {
-          gMCUBufR[64] = c;
-          gMCUBufG[64] = c;
-          gMCUBufB[64] = c;
-          break;
-        }
-        case 2: {
-          cbG = ((c * 88U) >> 8U) - 44U;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
-          gMCUBufG[64] = subAndClamp(gMCUBufG[64], cbG);
-
-          cbB = (c + ((c * 198U) >> 8U)) - 227U;
-          gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
-          gMCUBufB[64] = addAndClamp(gMCUBufB[64], cbB);
-
-          break;
-        }
-        case 3: {
-          crR = (c + ((c * 103U) >> 8U)) - 179;
-          gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
-          gMCUBufR[64] = addAndClamp(gMCUBufR[64], crR);
-
-          crG = ((c * 183U) >> 8U) - 91;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
-          gMCUBufG[64] = subAndClamp(gMCUBufG[64], crG);
-
-          break;
-        }
-      }
+    }
+    break;
+  }
+  case PJPG_YH2V1: {
+    // MCU size: 16x8, 4 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
+      gMCUBufR[0] = c;
+      gMCUBufG[0] = c;
+      gMCUBufB[0] = c;
       break;
     }
-    case PJPG_YH2V2: {
-      // MCU size: 16x16, 6 blocks per MCU
-      switch (mcuBlock) {
-        case 0: {
-          gMCUBufR[0] = c;
-          gMCUBufG[0] = c;
-          gMCUBufB[0] = c;
-          break;
-        }
-        case 1: {
-          gMCUBufR[64] = c;
-          gMCUBufG[64] = c;
-          gMCUBufB[64] = c;
-          break;
-        }
-        case 2: {
-          gMCUBufR[128] = c;
-          gMCUBufG[128] = c;
-          gMCUBufB[128] = c;
-          break;
-        }
-        case 3: {
-          gMCUBufR[192] = c;
-          gMCUBufG[192] = c;
-          gMCUBufB[192] = c;
-          break;
-        }
-        case 4: {
-          cbG = ((c * 88U) >> 8U) - 44U;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
-          gMCUBufG[64] = subAndClamp(gMCUBufG[64], cbG);
-          gMCUBufG[128] = subAndClamp(gMCUBufG[128], cbG);
-          gMCUBufG[192] = subAndClamp(gMCUBufG[192], cbG);
-
-          cbB = (c + ((c * 198U) >> 8U)) - 227U;
-          gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
-          gMCUBufB[64] = addAndClamp(gMCUBufB[64], cbB);
-          gMCUBufB[128] = addAndClamp(gMCUBufB[128], cbB);
-          gMCUBufB[192] = addAndClamp(gMCUBufB[192], cbB);
-
-          break;
-        }
-        case 5: {
-          crR = (c + ((c * 103U) >> 8U)) - 179;
-          gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
-          gMCUBufR[64] = addAndClamp(gMCUBufR[64], crR);
-          gMCUBufR[128] = addAndClamp(gMCUBufR[128], crR);
-          gMCUBufR[192] = addAndClamp(gMCUBufR[192], crR);
-
-          crG = ((c * 183U) >> 8U) - 91;
-          gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
-          gMCUBufG[64] = subAndClamp(gMCUBufG[64], crG);
-          gMCUBufG[128] = subAndClamp(gMCUBufG[128], crG);
-          gMCUBufG[192] = subAndClamp(gMCUBufG[192], crG);
-
-          break;
-        }
-      }
+    case 1: {
+      gMCUBufR[64] = c;
+      gMCUBufG[64] = c;
+      gMCUBufB[64] = c;
       break;
     }
+    case 2: {
+      cbG = ((c * 88U) >> 8U) - 44U;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
+      gMCUBufG[64] = subAndClamp(gMCUBufG[64], cbG);
+
+      cbB = (c + ((c * 198U) >> 8U)) - 227U;
+      gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
+      gMCUBufB[64] = addAndClamp(gMCUBufB[64], cbB);
+
+      break;
+    }
+    case 3: {
+      crR = (c + ((c * 103U) >> 8U)) - 179;
+      gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
+      gMCUBufR[64] = addAndClamp(gMCUBufR[64], crR);
+
+      crG = ((c * 183U) >> 8U) - 91;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
+      gMCUBufG[64] = subAndClamp(gMCUBufG[64], crG);
+
+      break;
+    }
+    }
+    break;
+  }
+  case PJPG_YH2V2: {
+    // MCU size: 16x16, 6 blocks per MCU
+    switch (mcuBlock) {
+    case 0: {
+      gMCUBufR[0] = c;
+      gMCUBufG[0] = c;
+      gMCUBufB[0] = c;
+      break;
+    }
+    case 1: {
+      gMCUBufR[64] = c;
+      gMCUBufG[64] = c;
+      gMCUBufB[64] = c;
+      break;
+    }
+    case 2: {
+      gMCUBufR[128] = c;
+      gMCUBufG[128] = c;
+      gMCUBufB[128] = c;
+      break;
+    }
+    case 3: {
+      gMCUBufR[192] = c;
+      gMCUBufG[192] = c;
+      gMCUBufB[192] = c;
+      break;
+    }
+    case 4: {
+      cbG = ((c * 88U) >> 8U) - 44U;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], cbG);
+      gMCUBufG[64] = subAndClamp(gMCUBufG[64], cbG);
+      gMCUBufG[128] = subAndClamp(gMCUBufG[128], cbG);
+      gMCUBufG[192] = subAndClamp(gMCUBufG[192], cbG);
+
+      cbB = (c + ((c * 198U) >> 8U)) - 227U;
+      gMCUBufB[0] = addAndClamp(gMCUBufB[0], cbB);
+      gMCUBufB[64] = addAndClamp(gMCUBufB[64], cbB);
+      gMCUBufB[128] = addAndClamp(gMCUBufB[128], cbB);
+      gMCUBufB[192] = addAndClamp(gMCUBufB[192], cbB);
+
+      break;
+    }
+    case 5: {
+      crR = (c + ((c * 103U) >> 8U)) - 179;
+      gMCUBufR[0] = addAndClamp(gMCUBufR[0], crR);
+      gMCUBufR[64] = addAndClamp(gMCUBufR[64], crR);
+      gMCUBufR[128] = addAndClamp(gMCUBufR[128], crR);
+      gMCUBufR[192] = addAndClamp(gMCUBufR[192], crR);
+
+      crG = ((c * 183U) >> 8U) - 91;
+      gMCUBufG[0] = subAndClamp(gMCUBufG[0], crG);
+      gMCUBufG[64] = subAndClamp(gMCUBufG[64], crG);
+      gMCUBufG[128] = subAndClamp(gMCUBufG[128], crG);
+      gMCUBufG[192] = subAndClamp(gMCUBufG[192], crG);
+
+      break;
+    }
+    }
+    break;
+  }
   }
 }
 //------------------------------------------------------------------------------
@@ -1914,7 +1960,8 @@ static uint8 decodeNextMCU(void) {
   if (gRestartInterval) {
     if (gRestartsLeft == 0) {
       status = processRestart();
-      if (status) return status;
+      if (status)
+        return status;
     }
     gRestartsLeft--;
   }
@@ -1924,14 +1971,15 @@ static uint8 decodeNextMCU(void) {
     uint8 compQuant = gCompQuant[componentID];
     uint8 compDCTab = gCompDCTab[componentID];
     uint8 numExtraBits, compACTab, k;
-    const int16* pQ = compQuant ? gQuant1 : gQuant0;
+    const int16 *pQ = compQuant ? gQuant1 : gQuant0;
     uint16 r, dc;
 
     uint8 s = huffDecode(compDCTab ? &gHuffTab1 : &gHuffTab0, compDCTab ? gHuffVal1 : gHuffVal0);
 
     r = 0;
     numExtraBits = s & 0xF;
-    if (numExtraBits) r = getBits2(numExtraBits);
+    if (numExtraBits)
+      r = getBits2(numExtraBits);
     dc = huffExtend(r, s);
 
     dc = dc + gLastDC[componentID];
@@ -1947,22 +1995,25 @@ static uint8 decodeNextMCU(void) {
         s = huffDecode(compACTab ? &gHuffTab3 : &gHuffTab2, compACTab ? gHuffVal3 : gHuffVal2);
 
         numExtraBits = s & 0xF;
-        if (numExtraBits) getBits2(numExtraBits);
+        if (numExtraBits)
+          getBits2(numExtraBits);
 
         r = s >> 4;
         s &= 15;
 
         if (s) {
           if (r) {
-            if ((k + r) > 63) return PJPG_DECODE_ERROR;
+            if ((k + r) > 63)
+              return PJPG_DECODE_ERROR;
 
             k = (uint8)(k + r);
           }
         } else {
           if (r == 15) {
-            if ((k + 16) > 64) return PJPG_DECODE_ERROR;
+            if ((k + 16) > 64)
+              return PJPG_DECODE_ERROR;
 
-            k += (16 - 1);  // - 1 because the loop counter is k
+            k += (16 - 1); // - 1 because the loop counter is k
           } else
             break;
         }
@@ -1978,7 +2029,8 @@ static uint8 decodeNextMCU(void) {
 
         extraBits = 0;
         numExtraBits = s & 0xF;
-        if (numExtraBits) extraBits = getBits2(numExtraBits);
+        if (numExtraBits)
+          extraBits = getBits2(numExtraBits);
 
         r = s >> 4;
         s &= 15;
@@ -1987,7 +2039,8 @@ static uint8 decodeNextMCU(void) {
           int16 ac;
 
           if (r) {
-            if ((k + r) > 63) return PJPG_DECODE_ERROR;
+            if ((k + r) > 63)
+              return PJPG_DECODE_ERROR;
 
             while (r) {
               gCoeffBuf[ZAG[k++]] = 0;
@@ -2000,17 +2053,20 @@ static uint8 decodeNextMCU(void) {
           gCoeffBuf[ZAG[k]] = ac * pQ[k];
         } else {
           if (r == 15) {
-            if ((k + 16) > 64) return PJPG_DECODE_ERROR;
+            if ((k + 16) > 64)
+              return PJPG_DECODE_ERROR;
 
-            for (r = 16; r > 0; r--) gCoeffBuf[ZAG[k++]] = 0;
+            for (r = 16; r > 0; r--)
+              gCoeffBuf[ZAG[k++]] = 0;
 
-            k--;  // - 1 because the loop counter is k
+            k--; // - 1 because the loop counter is k
           } else
             break;
         }
       }
 
-      while (k < 64) gCoeffBuf[ZAG[k++]] = 0;
+      while (k < 64)
+        gCoeffBuf[ZAG[k++]] = 0;
 
       transformBlock(mcuBlock);
     }
@@ -2022,24 +2078,28 @@ static uint8 decodeNextMCU(void) {
 unsigned char pjpeg_decode_mcu(void) {
   uint8 status;
 
-  if (gCallbackStatus) return gCallbackStatus;
+  if (gCallbackStatus)
+    return gCallbackStatus;
 
-  if ((!gNumMCUSRemainingX) && (!gNumMCUSRemainingY)) return PJPG_NO_MORE_BLOCKS;
+  if ((!gNumMCUSRemainingX) && (!gNumMCUSRemainingY))
+    return PJPG_NO_MORE_BLOCKS;
 
   status = decodeNextMCU();
-  if ((status) || (gCallbackStatus)) return gCallbackStatus ? gCallbackStatus : status;
+  if ((status) || (gCallbackStatus))
+    return gCallbackStatus ? gCallbackStatus : status;
 
   gNumMCUSRemainingX--;
   if (!gNumMCUSRemainingX) {
     gNumMCUSRemainingY--;
-    if (gNumMCUSRemainingY > 0) gNumMCUSRemainingX = gMaxMCUSPerRow;
+    if (gNumMCUSRemainingY > 0)
+      gNumMCUSRemainingX = gMaxMCUSPerRow;
   }
 
   return 0;
 }
 //------------------------------------------------------------------------------
-unsigned char pjpeg_decode_init(pjpeg_image_info_t* pInfo, pjpeg_need_bytes_callback_t pNeed_bytes_callback,
-                                void* pCallback_data, unsigned char reduce) {
+unsigned char pjpeg_decode_init(pjpeg_image_info_t *pInfo, pjpeg_need_bytes_callback_t pNeed_bytes_callback,
+                                void *pCallback_data, unsigned char reduce) {
   uint8 status;
 
   pInfo->m_width = 0;
@@ -2050,9 +2110,9 @@ unsigned char pjpeg_decode_init(pjpeg_image_info_t* pInfo, pjpeg_need_bytes_call
   pInfo->m_scanType = PJPG_GRAYSCALE;
   pInfo->m_MCUWidth = 0;
   pInfo->m_MCUHeight = 0;
-  pInfo->m_pMCUBufR = (unsigned char*)0;
-  pInfo->m_pMCUBufG = (unsigned char*)0;
-  pInfo->m_pMCUBufB = (unsigned char*)0;
+  pInfo->m_pMCUBufR = (unsigned char *)0;
+  pInfo->m_pMCUBufG = (unsigned char *)0;
+  pInfo->m_pMCUBufB = (unsigned char *)0;
 
   g_pNeedBytesCallback = pNeed_bytes_callback;
   g_pCallback_data = pCallback_data;
@@ -2060,16 +2120,20 @@ unsigned char pjpeg_decode_init(pjpeg_image_info_t* pInfo, pjpeg_need_bytes_call
   gReduce = reduce;
 
   status = init();
-  if ((status) || (gCallbackStatus)) return gCallbackStatus ? gCallbackStatus : status;
+  if ((status) || (gCallbackStatus))
+    return gCallbackStatus ? gCallbackStatus : status;
 
   status = locateSOFMarker();
-  if ((status) || (gCallbackStatus)) return gCallbackStatus ? gCallbackStatus : status;
+  if ((status) || (gCallbackStatus))
+    return gCallbackStatus ? gCallbackStatus : status;
 
   status = initFrame();
-  if ((status) || (gCallbackStatus)) return gCallbackStatus ? gCallbackStatus : status;
+  if ((status) || (gCallbackStatus))
+    return gCallbackStatus ? gCallbackStatus : status;
 
   status = initScan();
-  if ((status) || (gCallbackStatus)) return gCallbackStatus ? gCallbackStatus : status;
+  if ((status) || (gCallbackStatus))
+    return gCallbackStatus ? gCallbackStatus : status;
 
   pInfo->m_width = gImageXSize;
   pInfo->m_height = gImageYSize;

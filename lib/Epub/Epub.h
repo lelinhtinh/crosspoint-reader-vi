@@ -25,34 +25,34 @@ class Epub {
   // Spine and TOC cache
   std::unique_ptr<BookMetadataCache> bookMetadataCache;
 
-  bool findContentOpfFile(std::string* contentOpfFile) const;
-  bool parseContentOpf(BookMetadataCache::BookMetadata& bookMetadata);
+  bool findContentOpfFile(std::string *contentOpfFile) const;
+  bool parseContentOpf(BookMetadataCache::BookMetadata &bookMetadata);
   bool parseTocNcxFile() const;
   bool parseTocNavFile() const;
 
- public:
-  explicit Epub(std::string filepath, const std::string& cacheDir) : filepath(std::move(filepath)) {
+public:
+  explicit Epub(std::string filepath, const std::string &cacheDir) : filepath(std::move(filepath)) {
     // create a cache key based on the filepath
     cachePath = cacheDir + "/epub_" + std::to_string(std::hash<std::string>{}(this->filepath));
   }
   ~Epub() = default;
-  std::string& getBasePath() { return contentBasePath; }
+  std::string &getBasePath() { return contentBasePath; }
   bool load(bool buildIfMissing = true);
   bool clearCache() const;
   void setupCacheDir() const;
-  const std::string& getCachePath() const;
-  const std::string& getPath() const;
-  const std::string& getTitle() const;
-  const std::string& getAuthor() const;
-  const std::string& getLanguage() const;
+  const std::string &getCachePath() const;
+  const std::string &getPath() const;
+  const std::string &getTitle() const;
+  const std::string &getAuthor() const;
+  const std::string &getLanguage() const;
   std::string getCoverBmpPath(bool cropped = false) const;
   bool generateCoverBmp(bool cropped = false) const;
   std::string getThumbBmpPath() const;
   bool generateThumbBmp() const;
-  uint8_t* readItemContentsToBytes(const std::string& itemHref, size_t* size = nullptr,
+  uint8_t *readItemContentsToBytes(const std::string &itemHref, size_t *size = nullptr,
                                    bool trailingNullByte = false) const;
-  bool readItemContentsToStream(const std::string& itemHref, Print& out, size_t chunkSize) const;
-  bool getItemSize(const std::string& itemHref, size_t* size) const;
+  bool readItemContentsToStream(const std::string &itemHref, Print &out, size_t chunkSize) const;
+  bool getItemSize(const std::string &itemHref, size_t *size) const;
   BookMetadataCache::SpineEntry getSpineItem(int spineIndex) const;
   BookMetadataCache::TocEntry getTocItem(int tocIndex) const;
   int getSpineItemsCount() const;

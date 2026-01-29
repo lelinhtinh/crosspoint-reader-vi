@@ -7,8 +7,8 @@
 #include "MappedInputManager.h"
 #include "fontIds.h"
 
-void ClearCacheActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<ClearCacheActivity*>(param);
+void ClearCacheActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<ClearCacheActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -20,10 +20,10 @@ void ClearCacheActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&ClearCacheActivity::taskTrampoline, "ClearCacheActivityTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -109,7 +109,8 @@ void ClearCacheActivity::clearCache() {
   auto root = SdMan.open("/.crosspoint");
   if (!root || !root.isDirectory()) {
     Serial.printf("[%lu] [CLEAR_CACHE] Failed to open cache directory\n", millis());
-    if (root) root.close();
+    if (root)
+      root.close();
     state = FAILED;
     updateRequired = true;
     return;
@@ -129,7 +130,7 @@ void ClearCacheActivity::clearCache() {
       String fullPath = "/.crosspoint/" + itemName;
       Serial.printf("[%lu] [CLEAR_CACHE] Removing cache: %s\n", millis(), fullPath.c_str());
 
-      file.close();  // Close before attempting to delete
+      file.close(); // Close before attempting to delete
 
       if (SdMan.removeDir(fullPath.c_str())) {
         clearedCount++;

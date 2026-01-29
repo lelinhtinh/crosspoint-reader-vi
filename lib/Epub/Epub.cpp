@@ -11,7 +11,7 @@
 #include "Epub/parsers/TocNavParser.h"
 #include "Epub/parsers/TocNcxParser.h"
 
-bool Epub::findContentOpfFile(std::string* contentOpfFile) const {
+bool Epub::findContentOpfFile(std::string *contentOpfFile) const {
   const auto containerPath = "META-INF/container.xml";
   size_t containerSize;
 
@@ -43,7 +43,7 @@ bool Epub::findContentOpfFile(std::string* contentOpfFile) const {
   return true;
 }
 
-bool Epub::parseContentOpf(BookMetadataCache::BookMetadata& bookMetadata) {
+bool Epub::parseContentOpf(BookMetadataCache::BookMetadata &bookMetadata) {
   std::string contentOpfFilePath;
   if (!findContentOpfFile(&contentOpfFilePath)) {
     Serial.printf("[%lu] [EBP] Could not find content.opf in zip\n", millis());
@@ -119,7 +119,7 @@ bool Epub::parseTocNcxFile() const {
     return false;
   }
 
-  const auto ncxBuffer = static_cast<uint8_t*>(malloc(1024));
+  const auto ncxBuffer = static_cast<uint8_t *>(malloc(1024));
   if (!ncxBuffer) {
     Serial.printf("[%lu] [EBP] Could not allocate memory for toc ncx parser\n", millis());
     tempNcxFile.close();
@@ -128,7 +128,8 @@ bool Epub::parseTocNcxFile() const {
 
   while (tempNcxFile.available()) {
     const auto readSize = tempNcxFile.read(ncxBuffer, 1024);
-    if (readSize == 0) break;
+    if (readSize == 0)
+      break;
     const auto processedSize = ncxParser.write(ncxBuffer, readSize);
 
     if (processedSize != readSize) {
@@ -178,7 +179,7 @@ bool Epub::parseTocNavFile() const {
     return false;
   }
 
-  const auto navBuffer = static_cast<uint8_t*>(malloc(1024));
+  const auto navBuffer = static_cast<uint8_t *>(malloc(1024));
   if (!navBuffer) {
     Serial.printf("[%lu] [EBP] Could not allocate memory for toc nav parser\n", millis());
     return false;
@@ -336,11 +337,11 @@ void Epub::setupCacheDir() const {
   SdMan.mkdir(cachePath.c_str());
 }
 
-const std::string& Epub::getCachePath() const { return cachePath; }
+const std::string &Epub::getCachePath() const { return cachePath; }
 
-const std::string& Epub::getPath() const { return filepath; }
+const std::string &Epub::getPath() const { return filepath; }
 
-const std::string& Epub::getTitle() const {
+const std::string &Epub::getTitle() const {
   static std::string blank;
   if (!bookMetadataCache || !bookMetadataCache->isLoaded()) {
     return blank;
@@ -349,7 +350,7 @@ const std::string& Epub::getTitle() const {
   return bookMetadataCache->coreMetadata.title;
 }
 
-const std::string& Epub::getAuthor() const {
+const std::string &Epub::getAuthor() const {
   static std::string blank;
   if (!bookMetadataCache || !bookMetadataCache->isLoaded()) {
     return blank;
@@ -358,7 +359,7 @@ const std::string& Epub::getAuthor() const {
   return bookMetadataCache->coreMetadata.author;
 }
 
-const std::string& Epub::getLanguage() const {
+const std::string &Epub::getLanguage() const {
   static std::string blank;
   if (!bookMetadataCache || !bookMetadataCache->isLoaded()) {
     return blank;
@@ -492,7 +493,7 @@ bool Epub::generateThumbBmp() const {
   return false;
 }
 
-uint8_t* Epub::readItemContentsToBytes(const std::string& itemHref, size_t* size, const bool trailingNullByte) const {
+uint8_t *Epub::readItemContentsToBytes(const std::string &itemHref, size_t *size, const bool trailingNullByte) const {
   if (itemHref.empty()) {
     Serial.printf("[%lu] [EBP] Failed to read item, empty href\n", millis());
     return nullptr;
@@ -509,7 +510,7 @@ uint8_t* Epub::readItemContentsToBytes(const std::string& itemHref, size_t* size
   return content;
 }
 
-bool Epub::readItemContentsToStream(const std::string& itemHref, Print& out, const size_t chunkSize) const {
+bool Epub::readItemContentsToStream(const std::string &itemHref, Print &out, const size_t chunkSize) const {
   if (itemHref.empty()) {
     Serial.printf("[%lu] [EBP] Failed to read item, empty href\n", millis());
     return false;
@@ -519,7 +520,7 @@ bool Epub::readItemContentsToStream(const std::string& itemHref, Print& out, con
   return ZipFile(filepath).readFileToStream(path.c_str(), out, chunkSize);
 }
 
-bool Epub::getItemSize(const std::string& itemHref, size_t* size) const {
+bool Epub::getItemSize(const std::string &itemHref, size_t *size) const {
   const std::string path = FsHelpers::normalisePath(itemHref);
   return ZipFile(filepath).getInflatedFileSize(path.c_str(), size);
 }

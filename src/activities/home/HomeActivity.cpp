@@ -17,15 +17,17 @@
 #include "fontIds.h"
 #include "util/StringUtils.h"
 
-void HomeActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<HomeActivity*>(param);
+void HomeActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<HomeActivity *>(param);
   self->displayTaskLoop();
 }
 
 int HomeActivity::getMenuItemCount() const {
-  int count = 3;  // My Library, File transfer, Settings
-  if (hasContinueReading) count++;
-  if (hasOpdsUrl) count++;
+  int count = 3; // My Library, File transfer, Settings
+  if (hasContinueReading)
+    count++;
+  if (hasOpdsUrl)
+    count++;
   return count;
 }
 
@@ -95,10 +97,10 @@ void HomeActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&HomeActivity::taskTrampoline, "HomeActivityTask",
-              4096,               // Stack size (increased for cover image rendering)
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size (increased for cover image rendering)
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -119,7 +121,7 @@ void HomeActivity::onExit() {
 }
 
 bool HomeActivity::storeCoverBuffer() {
-  uint8_t* frameBuffer = renderer.getFrameBuffer();
+  uint8_t *frameBuffer = renderer.getFrameBuffer();
   if (!frameBuffer) {
     return false;
   }
@@ -128,7 +130,7 @@ bool HomeActivity::storeCoverBuffer() {
   freeCoverBuffer();
 
   const size_t bufferSize = GfxRenderer::getBufferSize();
-  coverBuffer = static_cast<uint8_t*>(malloc(bufferSize));
+  coverBuffer = static_cast<uint8_t *>(malloc(bufferSize));
   if (!coverBuffer) {
     return false;
   }
@@ -142,7 +144,7 @@ bool HomeActivity::restoreCoverBuffer() {
     return false;
   }
 
-  uint8_t* frameBuffer = renderer.getFrameBuffer();
+  uint8_t *frameBuffer = renderer.getFrameBuffer();
   if (!frameBuffer) {
     return false;
   }
@@ -298,18 +300,18 @@ void HomeActivity::render() {
         const int centerX = bookmarkX + bookmarkWidth / 2;
 
         const int xPoints[5] = {
-            bookmarkX,                  // top-left
-            bookmarkX + bookmarkWidth,  // top-right
-            bookmarkX + bookmarkWidth,  // bottom-right
-            centerX,                    // center notch point
-            bookmarkX                   // bottom-left
+            bookmarkX,                 // top-left
+            bookmarkX + bookmarkWidth, // top-right
+            bookmarkX + bookmarkWidth, // bottom-right
+            centerX,                   // center notch point
+            bookmarkX                  // bottom-left
         };
         const int yPoints[5] = {
-            bookmarkY,                                // top-left
-            bookmarkY,                                // top-right
-            bookmarkY + bookmarkHeight,               // bottom-right
-            bookmarkY + bookmarkHeight - notchDepth,  // center notch point
-            bookmarkY + bookmarkHeight                // bottom-left
+            bookmarkY,                               // top-left
+            bookmarkY,                               // top-right
+            bookmarkY + bookmarkHeight,              // bottom-right
+            bookmarkY + bookmarkHeight - notchDepth, // center notch point
+            bookmarkY + bookmarkHeight               // bottom-left
         };
 
         // Draw bookmark ribbon (inverted if selected)
@@ -356,7 +358,7 @@ void HomeActivity::render() {
     const int maxLineWidth = bookWidth - 40;
     const int spaceWidth = renderer.getSpaceWidth(UI_12_FONT_ID);
 
-    for (auto& i : words) {
+    for (auto &i : words) {
       // If we just hit the line limit (3), stop processing words
       if (lines.size() >= 3) {
         // Limit to 3 lines
@@ -365,7 +367,7 @@ void HomeActivity::render() {
 
         while (!lines.back().empty() && renderer.getTextWidth(UI_12_FONT_ID, lines.back().c_str()) > maxLineWidth) {
           // Remove "..." first, then remove one UTF-8 char, then add "..." back
-          lines.back().resize(lines.back().size() - 3);  // Remove "..."
+          lines.back().resize(lines.back().size() - 3); // Remove "..."
           StringUtils::utf8RemoveLastChar(lines.back());
           lines.back().append("...");
         }
@@ -419,7 +421,7 @@ void HomeActivity::render() {
       constexpr int boxPadding = 8;
       // Calculate the max text width for the box
       int maxTextWidth = 0;
-      for (const auto& line : lines) {
+      for (const auto &line : lines) {
         const int lineWidth = renderer.getTextWidth(UI_12_FONT_ID, line.c_str());
         if (lineWidth > maxTextWidth) {
           maxTextWidth = lineWidth;
@@ -451,7 +453,7 @@ void HomeActivity::render() {
       renderer.drawRect(boxX, boxY, boxWidth, boxHeight, !bookSelected);
     }
 
-    for (const auto& line : lines) {
+    for (const auto &line : lines) {
       renderer.drawCenteredText(UI_12_FONT_ID, titleYStart, line.c_str(), !bookSelected);
       titleYStart += renderer.getLineHeight(UI_12_FONT_ID);
     }
@@ -480,7 +482,7 @@ void HomeActivity::render() {
     const int continueY = bookY + bookHeight - renderer.getLineHeight(UI_10_FONT_ID) * 3 / 2;
     if (coverRendered) {
       // Draw box behind "Continue Reading" text (inverted when selected: black box instead of white)
-      const char* continueText = "Continue Reading";
+      const char *continueText = "Continue Reading";
       const int continueTextWidth = renderer.getTextWidth(UI_10_FONT_ID, continueText);
       constexpr int continuePadding = 6;
       const int continueBoxWidth = continueTextWidth + continuePadding * 2;
@@ -503,7 +505,7 @@ void HomeActivity::render() {
 
   // --- Bottom menu tiles ---
   // Build menu items dynamically
-  std::vector<const char*> menuItems = {"My Library", "File Transfer", "Settings"};
+  std::vector<const char *> menuItems = {"My Library", "File Transfer", "Settings"};
   if (hasOpdsUrl) {
     // Insert OPDS Browser after My Library
     menuItems.insert(menuItems.begin() + 1, "OPDS Browser");
@@ -534,11 +536,11 @@ void HomeActivity::render() {
       renderer.drawRect(tileX, tileY, menuTileWidth, menuTileHeight);
     }
 
-    const char* label = menuItems[i];
+    const char *label = menuItems[i];
     const int textWidth = renderer.getTextWidth(UI_10_FONT_ID, label);
     const int textX = tileX + (menuTileWidth - textWidth) / 2;
     const int lineHeight = renderer.getLineHeight(UI_10_FONT_ID);
-    const int textY = tileY + (menuTileHeight - lineHeight) / 2;  // vertically centered assuming y is top of text
+    const int textY = tileY + (menuTileHeight - lineHeight) / 2; // vertically centered assuming y is top of text
 
     // Invert text when the tile is selected, to contrast with the filled background
     renderer.drawText(UI_10_FONT_ID, textX, textY, label, !selected);

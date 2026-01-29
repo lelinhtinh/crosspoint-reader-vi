@@ -10,7 +10,7 @@
 namespace {
 // Time threshold for treating a long press as a page-up/page-down
 constexpr int SKIP_PAGE_MS = 700;
-}  // namespace
+} // namespace
 
 bool EpubReaderChapterSelectionActivity::hasSyncOption() const { return KOREADER_STORE.hasCredentials(); }
 
@@ -21,7 +21,8 @@ int EpubReaderChapterSelectionActivity::getTotalItems() const {
 }
 
 bool EpubReaderChapterSelectionActivity::isSyncItem(int index) const {
-  if (!hasSyncOption()) return false;
+  if (!hasSyncOption())
+    return false;
   // First item and last item are sync options
   return index == 0 || index == getTotalItems() - 1;
 }
@@ -50,8 +51,8 @@ int EpubReaderChapterSelectionActivity::getPageItems() const {
   return items;
 }
 
-void EpubReaderChapterSelectionActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<EpubReaderChapterSelectionActivity*>(param);
+void EpubReaderChapterSelectionActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<EpubReaderChapterSelectionActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -70,15 +71,15 @@ void EpubReaderChapterSelectionActivity::onEnter() {
   if (selectorIndex == -1) {
     selectorIndex = 0;
   }
-  selectorIndex += syncOffset;  // Offset for top sync option
+  selectorIndex += syncOffset; // Offset for top sync option
 
   // Trigger first update
   updateRequired = true;
   xTaskCreate(&EpubReaderChapterSelectionActivity::taskTrampoline, "EpubReaderChapterSelectionActivityTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -190,7 +191,8 @@ void EpubReaderChapterSelectionActivity::renderScreen() {
 
   for (int i = 0; i < pageItems; i++) {
     int itemIndex = pageStartIndex + i;
-    if (itemIndex >= totalItems) break;
+    if (itemIndex >= totalItems)
+      break;
     const int displayY = 60 + i * 30;
     const bool isSelected = (itemIndex == selectorIndex);
 

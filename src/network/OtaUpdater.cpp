@@ -10,7 +10,7 @@ namespace {
 constexpr char latestReleaseUrl[] = "https://api.github.com/repos/lelinhtinh/crosspoint-reader-vi/releases/latest";
 
 /* This is buffer and size holder to keep upcoming data from latestReleaseUrl */
-char* local_buf;
+char *local_buf;
 int output_len;
 
 /*
@@ -19,16 +19,17 @@ int output_len;
  * To manage this obstacle, don't include anything, just extern and it will point correct one.
  */
 extern "C" {
-extern esp_err_t esp_crt_bundle_attach(void* conf);
+extern esp_err_t esp_crt_bundle_attach(void *conf);
 }
 
 esp_err_t http_client_set_header_cb(esp_http_client_handle_t http_client) {
   return esp_http_client_set_header(http_client, "User-Agent", "CrossPoint-ESP32-" CROSSPOINT_VERSION);
 }
 
-esp_err_t event_handler(esp_http_client_event_t* event) {
+esp_err_t event_handler(esp_http_client_event_t *event) {
   /* We do interested in only HTTP_EVENT_ON_DATA event only */
-  if (event->event_id != HTTP_EVENT_ON_DATA) return ESP_OK;
+  if (event->event_id != HTTP_EVENT_ON_DATA)
+    return ESP_OK;
 
   if (!esp_http_client_is_chunked_response(event->client)) {
     int content_len = esp_http_client_get_content_length(event->client);
@@ -36,7 +37,7 @@ esp_err_t event_handler(esp_http_client_event_t* event) {
 
     if (local_buf == NULL) {
       /* local_buf life span is tracked by caller checkForUpdate */
-      local_buf = static_cast<char*>(calloc(content_len + 1, sizeof(char)));
+      local_buf = static_cast<char *>(calloc(content_len + 1, sizeof(char)));
       output_len = 0;
       if (local_buf == NULL) {
         Serial.printf("[%lu] [OTA] HTTP Client Out of Memory Failed, Allocation %d\n", millis(), content_len);
@@ -77,7 +78,7 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
 
   /* To track life time of local_buf, dtor will be called on exit from that function */
   struct localBufCleaner {
-    char** bufPtr;
+    char **bufPtr;
     ~localBufCleaner() {
       if (*bufPtr) {
         free(*bufPtr);
@@ -173,14 +174,16 @@ bool OtaUpdater::isUpdateNewer() const {
    * If they differ, return true if latest major version greater than current major version
    * otherwise return false.
    */
-  if (latestMajor != currentMajor) return latestMajor > currentMajor;
+  if (latestMajor != currentMajor)
+    return latestMajor > currentMajor;
 
   /*
    * Compare minor versions.
    * If they differ, return true if latest minor version greater than current minor version
    * otherwise return false.
    */
-  if (latestMinor != currentMinor) return latestMinor > currentMinor;
+  if (latestMinor != currentMinor)
+    return latestMinor > currentMinor;
 
   /*
    * Check patch versions.
@@ -188,7 +191,7 @@ bool OtaUpdater::isUpdateNewer() const {
   return latestPatch > currentPatch;
 }
 
-const std::string& OtaUpdater::getLatestVersion() const { return latestVersion; }
+const std::string &OtaUpdater::getLatestVersion() const { return latestVersion; }
 
 OtaUpdater::OtaUpdaterError OtaUpdater::installUpdate() {
   if (!isUpdateNewer()) {

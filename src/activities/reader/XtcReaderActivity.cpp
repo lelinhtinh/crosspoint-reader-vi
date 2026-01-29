@@ -21,10 +21,10 @@
 namespace {
 constexpr unsigned long skipPageMs = 700;
 constexpr unsigned long goHomeMs = 1000;
-}  // namespace
+} // namespace
 
-void XtcReaderActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<XtcReaderActivity*>(param);
+void XtcReaderActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<XtcReaderActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -51,10 +51,10 @@ void XtcReaderActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&XtcReaderActivity::taskTrampoline, "XtcReaderActivityTask",
-              4096,               // Stack size (smaller than EPUB since no parsing needed)
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size (smaller than EPUB since no parsing needed)
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -149,7 +149,7 @@ void XtcReaderActivity::loop() {
   } else if (nextTriggered) {
     currentPage += skipAmount;
     if (currentPage >= xtc->getPageCount()) {
-      currentPage = xtc->getPageCount();  // Allow showing "End of book"
+      currentPage = xtc->getPageCount(); // Allow showing "End of book"
     }
     updateRequired = true;
   }
@@ -201,7 +201,7 @@ void XtcReaderActivity::renderPage() {
   }
 
   // Allocate page buffer
-  uint8_t* pageBuffer = static_cast<uint8_t*>(malloc(pageBufferSize));
+  uint8_t *pageBuffer = static_cast<uint8_t *>(malloc(pageBufferSize));
   if (!pageBuffer) {
     Serial.printf("[%lu] [XTR] Failed to allocate page buffer (%lu bytes)\n", millis(), pageBufferSize);
     renderer.clearScreen();
@@ -237,9 +237,9 @@ void XtcReaderActivity::renderPage() {
     // - Grayscale: 0=White, 1=Dark Grey, 2=Light Grey, 3=Black
 
     const size_t planeSize = (static_cast<size_t>(pageWidth) * pageHeight + 7) / 8;
-    const uint8_t* plane1 = pageBuffer;              // Bit1 plane
-    const uint8_t* plane2 = pageBuffer + planeSize;  // Bit2 plane
-    const size_t colBytes = (pageHeight + 7) / 8;    // Bytes per column (100 for 800 height)
+    const uint8_t *plane1 = pageBuffer;             // Bit1 plane
+    const uint8_t *plane2 = pageBuffer + planeSize; // Bit2 plane
+    const size_t colBytes = (pageHeight + 7) / 8;   // Bytes per column (100 for 800 height)
 
     // Lambda to get pixel value at (x, y)
     auto getPixelValue = [&](uint16_t x, uint16_t y) -> uint8_t {
@@ -288,7 +288,7 @@ void XtcReaderActivity::renderPage() {
     renderer.clearScreen(0x00);
     for (uint16_t y = 0; y < pageHeight; y++) {
       for (uint16_t x = 0; x < pageWidth; x++) {
-        if (getPixelValue(x, y) == 1) {  // Dark grey only
+        if (getPixelValue(x, y) == 1) { // Dark grey only
           renderer.drawPixel(x, y, false);
         }
       }
@@ -301,7 +301,7 @@ void XtcReaderActivity::renderPage() {
     for (uint16_t y = 0; y < pageHeight; y++) {
       for (uint16_t x = 0; x < pageWidth; x++) {
         const uint8_t pv = getPixelValue(x, y);
-        if (pv == 1 || pv == 2) {  // Dark grey or Light grey
+        if (pv == 1 || pv == 2) { // Dark grey or Light grey
           renderer.drawPixel(x, y, false);
         }
       }
@@ -331,7 +331,7 @@ void XtcReaderActivity::renderPage() {
     return;
   } else {
     // 1-bit mode: 8 pixels per byte, MSB first
-    const size_t srcRowBytes = (pageWidth + 7) / 8;  // 60 bytes for 480 width
+    const size_t srcRowBytes = (pageWidth + 7) / 8; // 60 bytes for 480 width
 
     for (uint16_t srcY = 0; srcY < maxSrcY; srcY++) {
       const size_t srcRowStart = srcY * srcRowBytes;
@@ -340,7 +340,7 @@ void XtcReaderActivity::renderPage() {
         // Read source pixel (MSB first, bit 7 = leftmost pixel)
         const size_t srcByte = srcRowStart + srcX / 8;
         const size_t srcBit = 7 - (srcX % 8);
-        const bool isBlack = !((pageBuffer[srcByte] >> srcBit) & 1);  // XTC: 0 = black, 1 = white
+        const bool isBlack = !((pageBuffer[srcByte] >> srcBit) & 1); // XTC: 0 = black, 1 = white
 
         if (isBlack) {
           renderer.drawPixel(srcX, srcY, true);

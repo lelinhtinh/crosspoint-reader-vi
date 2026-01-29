@@ -20,8 +20,8 @@ bool TocNcxParser::setup() {
 
 TocNcxParser::~TocNcxParser() {
   if (parser) {
-    XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-    XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+    XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+    XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
     XML_SetCharacterDataHandler(parser, nullptr);
     XML_ParserFree(parser);
     parser = nullptr;
@@ -30,18 +30,19 @@ TocNcxParser::~TocNcxParser() {
 
 size_t TocNcxParser::write(const uint8_t data) { return write(&data, 1); }
 
-size_t TocNcxParser::write(const uint8_t* buffer, const size_t size) {
-  if (!parser) return 0;
+size_t TocNcxParser::write(const uint8_t *buffer, const size_t size) {
+  if (!parser)
+    return 0;
 
-  const uint8_t* currentBufferPos = buffer;
+  const uint8_t *currentBufferPos = buffer;
   auto remainingInBuffer = size;
 
   while (remainingInBuffer > 0) {
-    void* const buf = XML_GetBuffer(parser, 1024);
+    void *const buf = XML_GetBuffer(parser, 1024);
     if (!buf) {
       Serial.printf("[%lu] [TOC] Couldn't allocate memory for buffer\n", millis());
-      XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-      XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+      XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+      XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
       XML_SetCharacterDataHandler(parser, nullptr);
       XML_ParserFree(parser);
       parser = nullptr;
@@ -54,8 +55,8 @@ size_t TocNcxParser::write(const uint8_t* buffer, const size_t size) {
     if (XML_ParseBuffer(parser, static_cast<int>(toRead), remainingSize == toRead) == XML_STATUS_ERROR) {
       Serial.printf("[%lu] [TOC] Parse error at line %lu: %s\n", millis(), XML_GetCurrentLineNumber(parser),
                     XML_ErrorString(XML_GetErrorCode(parser)));
-      XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-      XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+      XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+      XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
       XML_SetCharacterDataHandler(parser, nullptr);
       XML_ParserFree(parser);
       parser = nullptr;
@@ -69,7 +70,7 @@ size_t TocNcxParser::write(const uint8_t* buffer, const size_t size) {
   return size;
 }
 
-void XMLCALL TocNcxParser::startElement(void* userData, const XML_Char* name, const XML_Char** atts) {
+void XMLCALL TocNcxParser::startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   // NOTE: We rely on navPoint label and content coming before any nested navPoints, this will be fine:
   // <navPoint>
   //   <navLabel><text>Chapter 1</text></navLabel>
@@ -84,7 +85,7 @@ void XMLCALL TocNcxParser::startElement(void* userData, const XML_Char* name, co
   //   <content src="ch1.html"/>
   // </navPoint>
 
-  auto* self = static_cast<TocNcxParser*>(userData);
+  auto *self = static_cast<TocNcxParser *>(userData);
 
   if (self->state == START && strcmp(name, "ncx") == 0) {
     self->state = IN_NCX;
@@ -127,15 +128,15 @@ void XMLCALL TocNcxParser::startElement(void* userData, const XML_Char* name, co
   }
 }
 
-void XMLCALL TocNcxParser::characterData(void* userData, const XML_Char* s, const int len) {
-  auto* self = static_cast<TocNcxParser*>(userData);
+void XMLCALL TocNcxParser::characterData(void *userData, const XML_Char *s, const int len) {
+  auto *self = static_cast<TocNcxParser *>(userData);
   if (self->state == IN_NAV_LABEL_TEXT) {
     self->currentLabel.append(s, len);
   }
 }
 
-void XMLCALL TocNcxParser::endElement(void* userData, const XML_Char* name) {
-  auto* self = static_cast<TocNcxParser*>(userData);
+void XMLCALL TocNcxParser::endElement(void *userData, const XML_Char *name) {
+  auto *self = static_cast<TocNcxParser *>(userData);
 
   if (self->state == IN_NAV_LABEL_TEXT && strcmp(name, "text") == 0) {
     self->state = IN_NAV_LABEL;

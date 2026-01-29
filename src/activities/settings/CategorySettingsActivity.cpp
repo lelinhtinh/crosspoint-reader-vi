@@ -13,8 +13,8 @@
 #include "OtaUpdateActivity.h"
 #include "fontIds.h"
 
-void CategorySettingsActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<CategorySettingsActivity*>(param);
+void CategorySettingsActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<CategorySettingsActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -78,7 +78,7 @@ void CategorySettingsActivity::toggleCurrentSetting() {
     return;
   }
 
-  const auto& setting = settingsList[selectedSettingIndex];
+  const auto &setting = settingsList[selectedSettingIndex];
 
   if (setting.type == SettingType::TOGGLE && setting.valuePtr != nullptr) {
     // Toggle the boolean value using the member pointer
@@ -160,7 +160,7 @@ void CategorySettingsActivity::render() const {
 
   // Draw all settings
   for (int i = 0; i < settingsCount; i++) {
-    const int settingY = 60 + i * 30;  // 30 pixels between settings
+    const int settingY = 60 + i * 30; // 30 pixels between settings
     const bool isSelected = (i == selectedSettingIndex);
 
     // Draw setting name

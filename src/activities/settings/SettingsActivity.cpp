@@ -8,7 +8,7 @@
 #include "MappedInputManager.h"
 #include "fontIds.h"
 
-const char* SettingsActivity::categoryNames[categoryCount] = {"Display", "Reader", "Controls", "System"};
+const char *SettingsActivity::categoryNames[categoryCount] = {"Display", "Reader", "Controls", "System"};
 
 namespace {
 constexpr int displaySettingsCount = 6;
@@ -52,12 +52,15 @@ constexpr int systemSettingsCount = 6;
 const SettingInfo systemSettings[systemSettingsCount] = {
     SettingInfo::Enum("Time to Sleep", &CrossPointSettings::sleepTimeout,
                       {"1 min", "5 min", "10 min", "15 min", "30 min"}),
-    SettingInfo::Action("KOReader Sync"), SettingInfo::Action("OPDS Browser"), SettingInfo::Action("Clear Cache"),
-    SettingInfo::Toggle("Enable Screenshot", &CrossPointSettings::screenshotEnabled), SettingInfo::Action("Check for updates")};
-}  // namespace
+    SettingInfo::Action("KOReader Sync"),
+    SettingInfo::Action("OPDS Browser"),
+    SettingInfo::Action("Clear Cache"),
+    SettingInfo::Toggle("Enable Screenshot", &CrossPointSettings::screenshotEnabled),
+    SettingInfo::Action("Check for updates")};
+} // namespace
 
-void SettingsActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<SettingsActivity*>(param);
+void SettingsActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<SettingsActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -72,10 +75,10 @@ void SettingsActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&SettingsActivity::taskTrampoline, "SettingsActivityTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -132,26 +135,26 @@ void SettingsActivity::enterCategory(int categoryIndex) {
   xSemaphoreTake(renderingMutex, portMAX_DELAY);
   exitActivity();
 
-  const SettingInfo* settingsList = nullptr;
+  const SettingInfo *settingsList = nullptr;
   int settingsCount = 0;
 
   switch (categoryIndex) {
-    case 0:  // Display
-      settingsList = displaySettings;
-      settingsCount = displaySettingsCount;
-      break;
-    case 1:  // Reader
-      settingsList = readerSettings;
-      settingsCount = readerSettingsCount;
-      break;
-    case 2:  // Controls
-      settingsList = controlsSettings;
-      settingsCount = controlsSettingsCount;
-      break;
-    case 3:  // System
-      settingsList = systemSettings;
-      settingsCount = systemSettingsCount;
-      break;
+  case 0: // Display
+    settingsList = displaySettings;
+    settingsCount = displaySettingsCount;
+    break;
+  case 1: // Reader
+    settingsList = readerSettings;
+    settingsCount = readerSettingsCount;
+    break;
+  case 2: // Controls
+    settingsList = controlsSettings;
+    settingsCount = controlsSettingsCount;
+    break;
+  case 3: // System
+    settingsList = systemSettings;
+    settingsCount = systemSettingsCount;
+    break;
   }
 
   enterNewActivity(new CategorySettingsActivity(renderer, mappedInput, categoryNames[categoryIndex], settingsList,
@@ -188,7 +191,7 @@ void SettingsActivity::render() const {
 
   // Draw all categories
   for (int i = 0; i < categoryCount; i++) {
-    const int categoryY = 60 + i * 30;  // 30 pixels between categories
+    const int categoryY = 60 + i * 30; // 30 pixels between categories
 
     // Draw category name
     renderer.drawText(UI_10_FONT_ID, 20, categoryY, categoryNames[i], i != selectedCategoryIndex);

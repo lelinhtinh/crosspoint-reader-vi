@@ -14,9 +14,9 @@ class CrossPointSettings;
 enum class SettingType { TOGGLE, ENUM, ACTION, VALUE };
 
 struct SettingInfo {
-  const char* name;
+  const char *name;
   SettingType type;
-  uint8_t CrossPointSettings::* valuePtr;
+  uint8_t CrossPointSettings::*valuePtr;
   std::vector<std::string> enumValues;
 
   struct ValueRange {
@@ -26,17 +26,17 @@ struct SettingInfo {
   };
   ValueRange valueRange;
 
-  static SettingInfo Toggle(const char* name, uint8_t CrossPointSettings::* ptr) {
+  static SettingInfo Toggle(const char *name, uint8_t CrossPointSettings::*ptr) {
     return {name, SettingType::TOGGLE, ptr};
   }
 
-  static SettingInfo Enum(const char* name, uint8_t CrossPointSettings::* ptr, std::vector<std::string> values) {
+  static SettingInfo Enum(const char *name, uint8_t CrossPointSettings::*ptr, std::vector<std::string> values) {
     return {name, SettingType::ENUM, ptr, std::move(values)};
   }
 
-  static SettingInfo Action(const char* name) { return {name, SettingType::ACTION, nullptr}; }
+  static SettingInfo Action(const char *name) { return {name, SettingType::ACTION, nullptr}; }
 
-  static SettingInfo Value(const char* name, uint8_t CrossPointSettings::* ptr, const ValueRange valueRange) {
+  static SettingInfo Value(const char *name, uint8_t CrossPointSettings::*ptr, const ValueRange valueRange) {
     return {name, SettingType::VALUE, ptr, {}, valueRange};
   }
 };
@@ -46,24 +46,21 @@ class CategorySettingsActivity final : public ActivityWithSubactivity {
   SemaphoreHandle_t renderingMutex = nullptr;
   bool updateRequired = false;
   int selectedSettingIndex = 0;
-  const char* categoryName;
-  const SettingInfo* settingsList;
+  const char *categoryName;
+  const SettingInfo *settingsList;
   int settingsCount;
   const std::function<void()> onGoBack;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render() const;
   void toggleCurrentSetting();
 
- public:
-  CategorySettingsActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, const char* categoryName,
-                           const SettingInfo* settingsList, int settingsCount, const std::function<void()>& onGoBack)
-      : ActivityWithSubactivity("CategorySettings", renderer, mappedInput),
-        categoryName(categoryName),
-        settingsList(settingsList),
-        settingsCount(settingsCount),
-        onGoBack(onGoBack) {}
+public:
+  CategorySettingsActivity(GfxRenderer &renderer, MappedInputManager &mappedInput, const char *categoryName,
+                           const SettingInfo *settingsList, int settingsCount, const std::function<void()> &onGoBack)
+      : ActivityWithSubactivity("CategorySettings", renderer, mappedInput), categoryName(categoryName),
+        settingsList(settingsList), settingsCount(settingsCount), onGoBack(onGoBack) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;

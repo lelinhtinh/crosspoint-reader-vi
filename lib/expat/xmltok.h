@@ -42,15 +42,15 @@ extern "C" {
 #endif
 
 /* The following token may be returned by XmlContentTok */
-#define XML_TOK_TRAILING_RSQB                    \
-  -5 /* ] or ]] at the end of the scan; might be \
+#define XML_TOK_TRAILING_RSQB                                                                                          \
+  -5 /* ] or ]] at the end of the scan; might be                                                                       \
         start of illegal ]]> sequence */
 /* The following tokens may be returned by both XmlPrologTok and
    XmlContentTok.
 */
 #define XML_TOK_NONE -4 /* The string to be scanned is empty */
-#define XML_TOK_TRAILING_CR                                     \
-  -3                            /* A CR at the end of the scan; \
+#define XML_TOK_TRAILING_CR                                                                                            \
+  -3                            /* A CR at the end of the scan;                                                        \
                                    might be part of CRLF sequence */
 #define XML_TOK_PARTIAL_CHAR -2 /* only part of a multibyte sequence */
 #define XML_TOK_PARTIAL -1      /* only part of a token */
@@ -150,16 +150,16 @@ typedef struct position {
 } POSITION;
 
 typedef struct {
-  const char* name;
-  const char* valuePtr;
-  const char* valueEnd;
+  const char *name;
+  const char *valuePtr;
+  const char *valueEnd;
   char normalized;
 } ATTRIBUTE;
 
 struct encoding;
 typedef struct encoding ENCODING;
 
-typedef int(PTRCALL* SCANNER)(const ENCODING*, const char*, const char*, const char**);
+typedef int(PTRCALL *SCANNER)(const ENCODING *, const char *, const char *, const char **);
 
 enum XML_Convert_Result {
   XML_CONVERT_COMPLETED = 0,
@@ -170,18 +170,18 @@ enum XML_Convert_Result {
 struct encoding {
   SCANNER scanners[XML_N_STATES];
   SCANNER literalScanners[XML_N_LITERAL_TYPES];
-  int(PTRCALL* nameMatchesAscii)(const ENCODING*, const char*, const char*, const char*);
-  int(PTRFASTCALL* nameLength)(const ENCODING*, const char*);
-  const char*(PTRFASTCALL* skipS)(const ENCODING*, const char*);
-  int(PTRCALL* getAtts)(const ENCODING* enc, const char* ptr, int attsMax, ATTRIBUTE* atts);
-  int(PTRFASTCALL* charRefNumber)(const ENCODING* enc, const char* ptr);
-  int(PTRCALL* predefinedEntityName)(const ENCODING*, const char*, const char*);
-  void(PTRCALL* updatePosition)(const ENCODING*, const char* ptr, const char* end, POSITION*);
-  int(PTRCALL* isPublicId)(const ENCODING* enc, const char* ptr, const char* end, const char** badPtr);
-  enum XML_Convert_Result(PTRCALL* utf8Convert)(const ENCODING* enc, const char** fromP, const char* fromLim,
-                                                char** toP, const char* toLim);
-  enum XML_Convert_Result(PTRCALL* utf16Convert)(const ENCODING* enc, const char** fromP, const char* fromLim,
-                                                 unsigned short** toP, const unsigned short* toLim);
+  int(PTRCALL *nameMatchesAscii)(const ENCODING *, const char *, const char *, const char *);
+  int(PTRFASTCALL *nameLength)(const ENCODING *, const char *);
+  const char *(PTRFASTCALL *skipS)(const ENCODING *, const char *);
+  int(PTRCALL *getAtts)(const ENCODING *enc, const char *ptr, int attsMax, ATTRIBUTE *atts);
+  int(PTRFASTCALL *charRefNumber)(const ENCODING *enc, const char *ptr);
+  int(PTRCALL *predefinedEntityName)(const ENCODING *, const char *, const char *);
+  void(PTRCALL *updatePosition)(const ENCODING *, const char *ptr, const char *end, POSITION *);
+  int(PTRCALL *isPublicId)(const ENCODING *enc, const char *ptr, const char *end, const char **badPtr);
+  enum XML_Convert_Result(PTRCALL *utf8Convert)(const ENCODING *enc, const char **fromP, const char *fromLim,
+                                                char **toP, const char *toLim);
+  enum XML_Convert_Result(PTRCALL *utf16Convert)(const ENCODING *enc, const char **fromP, const char *fromLim,
+                                                 unsigned short **toP, const unsigned short *toLim);
   int minBytesPerChar;
   char isUtf8;
   char isUtf16;
@@ -225,10 +225,10 @@ struct encoding {
 /* This is used for performing a 2nd-level tokenization on the content
    of a literal that has already been returned by XmlTok.
 */
-#define XmlLiteralTok(enc, literalType, ptr, end, nextTokPtr) \
+#define XmlLiteralTok(enc, literalType, ptr, end, nextTokPtr)                                                          \
   (((enc)->literalScanners[literalType])(enc, ptr, end, nextTokPtr))
 
-#define XmlAttributeValueTok(enc, ptr, end, nextTokPtr) \
+#define XmlAttributeValueTok(enc, ptr, end, nextTokPtr)                                                                \
   XmlLiteralTok(enc, XML_ATTRIBUTE_VALUE_LITERAL, ptr, end, nextTokPtr)
 
 #define XmlEntityValueTok(enc, ptr, end, nextTokPtr) XmlLiteralTok(enc, XML_ENTITY_VALUE_LITERAL, ptr, end, nextTokPtr)
@@ -255,32 +255,32 @@ struct encoding {
 
 typedef struct {
   ENCODING initEnc;
-  const ENCODING** encPtr;
+  const ENCODING **encPtr;
 } INIT_ENCODING;
 
-int XmlParseXmlDecl(int isGeneralTextEntity, const ENCODING* enc, const char* ptr, const char* end, const char** badPtr,
-                    const char** versionPtr, const char** versionEndPtr, const char** encodingNamePtr,
-                    const ENCODING** namedEncodingPtr, int* standalonePtr);
+int XmlParseXmlDecl(int isGeneralTextEntity, const ENCODING *enc, const char *ptr, const char *end, const char **badPtr,
+                    const char **versionPtr, const char **versionEndPtr, const char **encodingNamePtr,
+                    const ENCODING **namedEncodingPtr, int *standalonePtr);
 
-int XmlInitEncoding(INIT_ENCODING* p, const ENCODING** encPtr, const char* name);
-const ENCODING* XmlGetUtf8InternalEncoding(void);
-const ENCODING* XmlGetUtf16InternalEncoding(void);
-int FASTCALL XmlUtf8Encode(int charNumber, char* buf);
-int FASTCALL XmlUtf16Encode(int charNumber, unsigned short* buf);
+int XmlInitEncoding(INIT_ENCODING *p, const ENCODING **encPtr, const char *name);
+const ENCODING *XmlGetUtf8InternalEncoding(void);
+const ENCODING *XmlGetUtf16InternalEncoding(void);
+int FASTCALL XmlUtf8Encode(int charNumber, char *buf);
+int FASTCALL XmlUtf16Encode(int charNumber, unsigned short *buf);
 int XmlSizeOfUnknownEncoding(void);
 
-typedef int(XMLCALL* CONVERTER)(void* userData, const char* p);
+typedef int(XMLCALL *CONVERTER)(void *userData, const char *p);
 
-ENCODING* XmlInitUnknownEncoding(void* mem, const int* table, CONVERTER convert, void* userData);
+ENCODING *XmlInitUnknownEncoding(void *mem, const int *table, CONVERTER convert, void *userData);
 
-int XmlParseXmlDeclNS(int isGeneralTextEntity, const ENCODING* enc, const char* ptr, const char* end,
-                      const char** badPtr, const char** versionPtr, const char** versionEndPtr,
-                      const char** encodingNamePtr, const ENCODING** namedEncodingPtr, int* standalonePtr);
+int XmlParseXmlDeclNS(int isGeneralTextEntity, const ENCODING *enc, const char *ptr, const char *end,
+                      const char **badPtr, const char **versionPtr, const char **versionEndPtr,
+                      const char **encodingNamePtr, const ENCODING **namedEncodingPtr, int *standalonePtr);
 
-int XmlInitEncodingNS(INIT_ENCODING* p, const ENCODING** encPtr, const char* name);
-const ENCODING* XmlGetUtf8InternalEncodingNS(void);
-const ENCODING* XmlGetUtf16InternalEncodingNS(void);
-ENCODING* XmlInitUnknownEncodingNS(void* mem, const int* table, CONVERTER convert, void* userData);
+int XmlInitEncodingNS(INIT_ENCODING *p, const ENCODING **encPtr, const char *name);
+const ENCODING *XmlGetUtf8InternalEncodingNS(void);
+const ENCODING *XmlGetUtf16InternalEncodingNS(void);
+ENCODING *XmlInitUnknownEncodingNS(void *mem, const int *table, CONVERTER convert, void *userData);
 #ifdef __cplusplus
 }
 #endif

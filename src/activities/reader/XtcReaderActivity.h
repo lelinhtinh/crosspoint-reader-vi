@@ -24,19 +24,17 @@ class XtcReaderActivity final : public ActivityWithSubactivity {
   const std::function<void()> onGoBack;
   const std::function<void()> onGoHome;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void renderScreen();
   void renderPage();
   void saveProgress() const;
   void loadProgress();
 
- public:
-  explicit XtcReaderActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, std::unique_ptr<Xtc> xtc,
-                             const std::function<void()>& onGoBack, const std::function<void()>& onGoHome)
-      : ActivityWithSubactivity("XtcReader", renderer, mappedInput),
-        xtc(std::move(xtc)),
-        onGoBack(onGoBack),
+public:
+  explicit XtcReaderActivity(GfxRenderer &renderer, MappedInputManager &mappedInput, std::unique_ptr<Xtc> xtc,
+                             const std::function<void()> &onGoBack, const std::function<void()> &onGoHome)
+      : ActivityWithSubactivity("XtcReader", renderer, mappedInput), xtc(std::move(xtc)), onGoBack(onGoBack),
         onGoHome(onGoHome) {}
   void onEnter() override;
   void onExit() override;

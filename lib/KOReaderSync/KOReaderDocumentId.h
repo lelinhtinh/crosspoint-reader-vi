@@ -15,14 +15,14 @@
  * If an offset is beyond the file size, it is skipped.
  */
 class KOReaderDocumentId {
- public:
+public:
   /**
    * Calculate the KOReader document hash for a file (binary/content-based).
    *
    * @param filePath Path to the file (typically an EPUB)
    * @return 32-character lowercase hex string, or empty string on failure
    */
-  static std::string calculate(const std::string& filePath);
+  static std::string calculate(const std::string &filePath);
 
   /**
    * Calculate document hash from filename only (filename-based sync mode).
@@ -31,9 +31,9 @@ class KOReaderDocumentId {
    * @param filePath Path to the file (only the filename portion is used)
    * @return 32-character lowercase hex MD5 of the filename
    */
-  static std::string calculateFromFilename(const std::string& filePath);
+  static std::string calculateFromFilename(const std::string &filePath);
 
- private:
+private:
   // Size of each chunk to read at each offset
   static constexpr size_t CHUNK_SIZE = 1024;
 

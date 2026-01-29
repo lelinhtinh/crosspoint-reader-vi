@@ -13,11 +13,11 @@
 #include "CrossPointSettings.h"
 #include "util/UrlUtils.h"
 
-bool HttpDownloader::fetchUrl(const std::string& url, Stream& outContent) {
+bool HttpDownloader::fetchUrl(const std::string &url, Stream &outContent) {
   // Use WiFiClientSecure for HTTPS, regular WiFiClient for HTTP
   std::unique_ptr<WiFiClient> client;
   if (UrlUtils::isHttpsUrl(url)) {
-    auto* secureClient = new WiFiClientSecure();
+    auto *secureClient = new WiFiClientSecure();
     secureClient->setInsecure();
     client.reset(secureClient);
   } else {
@@ -53,7 +53,7 @@ bool HttpDownloader::fetchUrl(const std::string& url, Stream& outContent) {
   return true;
 }
 
-bool HttpDownloader::fetchUrl(const std::string& url, std::string& outContent) {
+bool HttpDownloader::fetchUrl(const std::string &url, std::string &outContent) {
   StreamString stream;
   if (!fetchUrl(url, stream)) {
     return false;
@@ -62,12 +62,12 @@ bool HttpDownloader::fetchUrl(const std::string& url, std::string& outContent) {
   return true;
 }
 
-HttpDownloader::DownloadError HttpDownloader::downloadToFile(const std::string& url, const std::string& destPath,
+HttpDownloader::DownloadError HttpDownloader::downloadToFile(const std::string &url, const std::string &destPath,
                                                              ProgressCallback progress) {
   // Use WiFiClientSecure for HTTPS, regular WiFiClient for HTTP
   std::unique_ptr<WiFiClient> client;
   if (UrlUtils::isHttpsUrl(url)) {
-    auto* secureClient = new WiFiClientSecure();
+    auto *secureClient = new WiFiClientSecure();
     secureClient->setInsecure();
     client.reset(secureClient);
   } else {
@@ -113,7 +113,7 @@ HttpDownloader::DownloadError HttpDownloader::downloadToFile(const std::string& 
   }
 
   // Get the stream for chunked reading
-  WiFiClient* stream = http.getStreamPtr();
+  WiFiClient *stream = http.getStreamPtr();
   if (!stream) {
     Serial.printf("[%lu] [HTTP] Failed to get stream\n", millis());
     file.close();

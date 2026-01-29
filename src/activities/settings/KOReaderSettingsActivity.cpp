@@ -12,11 +12,11 @@
 
 namespace {
 constexpr int MENU_ITEMS = 5;
-const char* menuNames[MENU_ITEMS] = {"Username", "Password", "Sync Server URL", "Document Matching", "Authenticate"};
-}  // namespace
+const char *menuNames[MENU_ITEMS] = {"Username", "Password", "Sync Server URL", "Document Matching", "Authenticate"};
+} // namespace
 
-void KOReaderSettingsActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<KOReaderSettingsActivity*>(param);
+void KOReaderSettingsActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<KOReaderSettingsActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -28,10 +28,10 @@ void KOReaderSettingsActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&KOReaderSettingsActivity::taskTrampoline, "KOReaderSettingsTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -82,9 +82,9 @@ void KOReaderSettingsActivity::handleSelection() {
     exitActivity();
     enterNewActivity(new KeyboardEntryActivity(
         renderer, mappedInput, "KOReader Username", KOREADER_STORE.getUsername(), 10,
-        64,     // maxLength
-        false,  // not password
-        [this](const std::string& username) {
+        64,    // maxLength
+        false, // not password
+        [this](const std::string &username) {
           KOREADER_STORE.setCredentials(username, KOREADER_STORE.getPassword());
           KOREADER_STORE.saveToFile();
           exitActivity();
@@ -99,9 +99,9 @@ void KOReaderSettingsActivity::handleSelection() {
     exitActivity();
     enterNewActivity(new KeyboardEntryActivity(
         renderer, mappedInput, "KOReader Password", KOREADER_STORE.getPassword(), 10,
-        64,     // maxLength
-        false,  // show characters
-        [this](const std::string& password) {
+        64,    // maxLength
+        false, // show characters
+        [this](const std::string &password) {
           KOREADER_STORE.setCredentials(KOREADER_STORE.getUsername(), password);
           KOREADER_STORE.saveToFile();
           exitActivity();
@@ -118,9 +118,9 @@ void KOReaderSettingsActivity::handleSelection() {
     exitActivity();
     enterNewActivity(new KeyboardEntryActivity(
         renderer, mappedInput, "Sync Server URL", prefillUrl, 10,
-        128,    // maxLength - URLs can be long
-        false,  // not password
-        [this](const std::string& url) {
+        128,   // maxLength - URLs can be long
+        false, // not password
+        [this](const std::string &url) {
           // Clear if user just left the prefilled https://
           const std::string urlToSave = (url == "https://" || url == "http://") ? "" : url;
           KOREADER_STORE.setServerUrl(urlToSave);
@@ -188,7 +188,7 @@ void KOReaderSettingsActivity::render() {
     renderer.drawText(UI_10_FONT_ID, 20, settingY, menuNames[i], !isSelected);
 
     // Draw status for each item
-    const char* status = "";
+    const char *status = "";
     if (i == 0) {
       status = KOREADER_STORE.getUsername().empty() ? "[Not Set]" : "[Set]";
     } else if (i == 1) {

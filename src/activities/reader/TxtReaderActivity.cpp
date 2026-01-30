@@ -79,6 +79,9 @@ void TxtReaderActivity::onExit() {
   // Reset orientation back to portrait for the rest of the UI
   renderer.setOrientation(GfxRenderer::Orientation::Portrait);
 
+  // Persist current page on exit (TXT has no chapters)
+  saveProgress();
+
   // Wait until not rendering to delete task
   xSemaphoreTake(renderingMutex, portMAX_DELAY);
   if (displayTaskHandle) {
@@ -431,9 +434,9 @@ void TxtReaderActivity::renderScreen() {
   renderer.clearScreen();
   renderPage();
 
-  // Save progress
-  saveProgress();
+  // Do not persist on every page render to reduce SD writes; save on exit only
 }
+
 
 void TxtReaderActivity::renderPage() {
   int orientedMarginTop, orientedMarginRight, orientedMarginBottom, orientedMarginLeft;

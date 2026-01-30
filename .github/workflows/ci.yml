@@ -1,6 +1,12 @@
 name: CI
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
@@ -31,3 +37,8 @@ jobs:
 
       - name: Build CrossPoint
         run: pio run
+
+      - name: Build and run semver tests
+        run: |
+          g++ -std=c++17 tools/test_semver.cpp src/network/semver.cpp -o tools/test_semver
+          ./tools/test_semver

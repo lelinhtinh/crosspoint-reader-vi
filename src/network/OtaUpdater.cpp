@@ -60,8 +60,7 @@ esp_err_t event_handler(esp_http_client_event_t *event) {
 } /* event_handler */
 } /* namespace */
 
-// helper forward declaration
-static void parseSemver(const std::string &ver, int &major, int &minor, int &patch);
+#include "network/semver.h"
 
 OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
   JsonDocument filter;
@@ -188,40 +187,6 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
   return OK;
 }
 
-static void parseSemver(const std::string &ver, int &major, int &minor, int &patch) {
-  // Initialize defaults
-  major = minor = patch = 0;
-  size_t i = 0;
-
-  // Skip any leading non-digit characters (e.g., 'v')
-  while (i < ver.size() && !isdigit(static_cast<unsigned char>(ver[i])))
-    ++i;
-
-  // Helper to parse next integer starting at i
-  auto parseInt = [&](int &out) {
-    out = 0;
-    bool found = false;
-    while (i < ver.size() && isdigit(static_cast<unsigned char>(ver[i]))) {
-      found = true;
-      out = out * 10 + (ver[i] - '0');
-      ++i;
-    }
-    return found;
-  };
-
-  // Parse major
-  parseInt(major);
-  // Skip non-digit separators
-  while (i < ver.size() && !isdigit(static_cast<unsigned char>(ver[i])))
-    ++i;
-  // Parse minor
-  parseInt(minor);
-  // Skip non-digit separators
-  while (i < ver.size() && !isdigit(static_cast<unsigned char>(ver[i])))
-    ++i;
-  // Parse patch
-  parseInt(patch);
-}
 
 bool OtaUpdater::isUpdateNewer() const {
   if (latestVersion.empty()) {

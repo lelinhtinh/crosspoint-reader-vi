@@ -1,5 +1,6 @@
 name: Compile Release
 on:
+  workflow_dispatch:
   push:
     tags:
       - "*"

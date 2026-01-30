@@ -16,6 +16,7 @@
 #include "ScreenComponents.h"
 #include "fontIds.h"
 #include "util/StringUtils.h"
+#include "util/ProgressUtils.h"
 
 void HomeActivity::taskTrampoline(void *param) {
   auto *self = static_cast<HomeActivity *>(param);
@@ -409,8 +410,17 @@ void HomeActivity::render() {
 
     // Book title text
     int totalTextHeight = renderer.getLineHeight(UI_12_FONT_ID) * static_cast<int>(lines.size());
+
+    // Compute whether we have progress to show and include its height in the box
+    int cur = 0, tot = 0;
+    const bool hasProgress = ProgressUtils::getBookProgress(APP_STATE.openEpubPath, cur, tot) && tot > 0;
+
     if (!lastBookAuthor.empty()) {
       totalTextHeight += renderer.getLineHeight(UI_10_FONT_ID) * 3 / 2;
+    }
+    if (hasProgress) {
+      // Additional line for the progress text
+      totalTextHeight += renderer.getLineHeight(UI_10_FONT_ID);
     }
 
     // Vertically center the title block within the card
@@ -427,6 +437,7 @@ void HomeActivity::render() {
           maxTextWidth = lineWidth;
         }
       }
+
       if (!lastBookAuthor.empty()) {
         std::string trimmedAuthor = lastBookAuthor;
         while (renderer.getTextWidth(UI_10_FONT_ID, trimmedAuthor.c_str()) > maxLineWidth && !trimmedAuthor.empty()) {
@@ -439,6 +450,15 @@ void HomeActivity::render() {
         const int authorWidth = renderer.getTextWidth(UI_10_FONT_ID, trimmedAuthor.c_str());
         if (authorWidth > maxTextWidth) {
           maxTextWidth = authorWidth;
+        }
+      }
+
+      // Also consider progress width so box doesn't clip progress text
+      if (hasProgress) {
+        std::string prog = std::to_string(cur) + "/" + std::to_string(tot);
+        const int progWidth = renderer.getTextWidth(UI_10_FONT_ID, prog.c_str());
+        if (progWidth > maxTextWidth) {
+          maxTextWidth = progWidth;
         }
       }
 
@@ -458,8 +478,10 @@ void HomeActivity::render() {
       titleYStart += renderer.getLineHeight(UI_12_FONT_ID);
     }
 
+    int afterTextY = titleYStart;
+
     if (!lastBookAuthor.empty()) {
-      titleYStart += renderer.getLineHeight(UI_10_FONT_ID) / 2;
+      afterTextY += renderer.getLineHeight(UI_10_FONT_ID) / 2;
       std::string trimmedAuthor = lastBookAuthor;
       // Trim author if too long (UTF-8 safe)
       bool wasTrimmed = false;
@@ -475,25 +497,33 @@ void HomeActivity::render() {
         }
         trimmedAuthor.append("...");
       }
-      renderer.drawCenteredText(UI_10_FONT_ID, titleYStart, trimmedAuthor.c_str(), !bookSelected);
+      renderer.drawCenteredText(UI_10_FONT_ID, afterTextY, trimmedAuthor.c_str(), !bookSelected);
+      afterTextY += renderer.getLineHeight(UI_10_FONT_ID);
     }
 
-    // "Continue Reading" label at the bottom
+
+    // Footer area: show progress if available, otherwise "Continue Reading"
     const int continueY = bookY + bookHeight - renderer.getLineHeight(UI_10_FONT_ID) * 3 / 2;
+    std::string footerText;
+    if (hasProgress) {
+      footerText = std::to_string(cur) + "/" + std::to_string(tot);
+    } else {
+      footerText = "Continue Reading";
+    }
+
     if (coverRendered) {
-      // Draw box behind "Continue Reading" text (inverted when selected: black box instead of white)
-      const char *continueText = "Continue Reading";
-      const int continueTextWidth = renderer.getTextWidth(UI_10_FONT_ID, continueText);
+      // Draw box behind footer text (inverted when selected: black box instead of white)
+      const int footerTextWidth = renderer.getTextWidth(UI_10_FONT_ID, footerText.c_str());
       constexpr int continuePadding = 6;
-      const int continueBoxWidth = continueTextWidth + continuePadding * 2;
+      const int continueBoxWidth = footerTextWidth + continuePadding * 2;
       const int continueBoxHeight = renderer.getLineHeight(UI_10_FONT_ID) + continuePadding;
       const int continueBoxX = (pageWidth - continueBoxWidth) / 2;
       const int continueBoxY = continueY - continuePadding / 2;
       renderer.fillRect(continueBoxX, continueBoxY, continueBoxWidth, continueBoxHeight, bookSelected);
       renderer.drawRect(continueBoxX, continueBoxY, continueBoxWidth, continueBoxHeight, !bookSelected);
-      renderer.drawCenteredText(UI_10_FONT_ID, continueY, continueText, !bookSelected);
+      renderer.drawCenteredText(UI_10_FONT_ID, continueY, footerText.c_str(), !bookSelected);
     } else {
-      renderer.drawCenteredText(UI_10_FONT_ID, continueY, "Continue Reading", !bookSelected);
+      renderer.drawCenteredText(UI_10_FONT_ID, continueY, footerText.c_str(), !bookSelected);
     }
   } else {
     // No book to continue reading

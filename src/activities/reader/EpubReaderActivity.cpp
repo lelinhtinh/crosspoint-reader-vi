@@ -106,6 +106,10 @@ void EpubReaderActivity::onExit() {
 
   // Wait until not rendering to delete task to avoid killing mid-instruction to EPD
   xSemaphoreTake(renderingMutex, portMAX_DELAY);
+
+  // Ensure progress is persisted at least once when exiting (force save)
+  saveProgressToDisk(true);
+
   if (displayTaskHandle) {
     vTaskDelete(displayTaskHandle);
     displayTaskHandle = nullptr;
@@ -141,6 +145,8 @@ void EpubReaderActivity::loop() {
             currentSpineIndex = newSpineIndex;
             nextPageNumber = 0;
             section.reset();
+            // Save progress immediately so Recents/Home reflect the current chapter (not furthest read)
+            saveProgressToDisk();
           }
           exitActivity();
           updateRequired = true;
@@ -151,6 +157,8 @@ void EpubReaderActivity::loop() {
             currentSpineIndex = newSpineIndex;
             nextPageNumber = newPage;
             section.reset();
+            // Persist sync changes immediately
+            saveProgressToDisk();
           }
           exitActivity();
           updateRequired = true;
@@ -192,6 +200,8 @@ void EpubReaderActivity::loop() {
   if (currentSpineIndex > 0 && currentSpineIndex >= epub->getSpineItemsCount()) {
     currentSpineIndex = epub->getSpineItemsCount() - 1;
     nextPageNumber = UINT16_MAX;
+    // Persist change immediately
+    saveProgressToDisk();
     updateRequired = true;
     return;
   }
@@ -202,8 +212,13 @@ void EpubReaderActivity::loop() {
     // We don't want to delete the section mid-render, so grab the semaphore
     xSemaphoreTake(renderingMutex, portMAX_DELAY);
     nextPageNumber = 0;
+    const int oldSpine = currentSpineIndex;
     currentSpineIndex = nextTriggered ? currentSpineIndex + 1 : currentSpineIndex - 1;
     section.reset();
+    // Persist change immediately so UI reflects new position
+    if (currentSpineIndex != oldSpine) {
+      saveProgressToDisk();
+    }
     xSemaphoreGive(renderingMutex);
     updateRequired = true;
     return;
@@ -224,6 +239,8 @@ void EpubReaderActivity::loop() {
       nextPageNumber = UINT16_MAX;
       currentSpineIndex--;
       section.reset();
+      // Persist change immediately so UI reflects current chapter if the user exits right away
+      saveProgressToDisk();
       xSemaphoreGive(renderingMutex);
     }
     updateRequired = true;
@@ -236,6 +253,8 @@ void EpubReaderActivity::loop() {
       nextPageNumber = 0;
       currentSpineIndex++;
       section.reset();
+      // Persist change immediately so UI reflects current chapter if the user exits right away
+      saveProgressToDisk();
       xSemaphoreGive(renderingMutex);
     }
     updateRequired = true;
@@ -408,17 +427,39 @@ void EpubReaderActivity::renderScreen() {
     Serial.printf("[%lu] [ERS] Rendered page in %dms\n", millis(), millis() - start);
   }
 
+  // Note: we intentionally do not persist progress on every render to avoid frequent SD writes.
+  // Progress should be saved when chapter (spine) changes via explicit calls to saveProgressToDisk().
+}
+
+void EpubReaderActivity::saveProgressToDisk(bool force) {
+  // Only write to disk when the chapter changed (spine index) unless forced.
+  if (!force && lastSavedSpineIndex == currentSpineIndex) {
+    return;
+  }
+
+  uint16_t page = 0;
+  uint16_t pageCount = 0;
+  if (section) {
+    page = static_cast<uint16_t>(section->currentPage);
+    pageCount = static_cast<uint16_t>(section->pageCount);
+  } else {
+    page = static_cast<uint16_t>(nextPageNumber);
+    pageCount = 0;
+  }
+
   FsFile f;
   if (SdMan.openFileForWrite("ERS", epub->getCachePath() + "/progress.bin", f)) {
     uint8_t data[6];
     data[0] = currentSpineIndex & 0xFF;
     data[1] = (currentSpineIndex >> 8) & 0xFF;
-    data[2] = section->currentPage & 0xFF;
-    data[3] = (section->currentPage >> 8) & 0xFF;
-    data[4] = section->pageCount & 0xFF;
-    data[5] = (section->pageCount >> 8) & 0xFF;
+    data[2] = page & 0xFF;
+    data[3] = (page >> 8) & 0xFF;
+    data[4] = pageCount & 0xFF;
+    data[5] = (pageCount >> 8) & 0xFF;
     f.write(data, 6);
     f.close();
+    lastSavedSpineIndex = currentSpineIndex;
+    Serial.printf("[%lu] [ERS] Progress saved: spine=%d, page=%d\n", millis(), currentSpineIndex, page);
   }
 }
 

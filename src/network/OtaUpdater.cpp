@@ -60,6 +60,9 @@ esp_err_t event_handler(esp_http_client_event_t *event) {
 } /* event_handler */
 } /* namespace */
 
+// helper forward declaration
+static void parseSemver(const std::string &ver, int &major, int &minor, int &patch);
+
 OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
   JsonDocument filter;
   esp_err_t esp_err;

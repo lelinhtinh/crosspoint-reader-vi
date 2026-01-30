@@ -415,7 +415,6 @@ uint32_t utf8NextCodepointNFC(const unsigned char **string) {
   }
 
   // Get the first codepoint
-  const unsigned char *savedPos = *string;
   uint32_t cp = utf8NextCodepoint(string);
 
   // Check if there's a combining mark following

@@ -35,10 +35,20 @@ jobs:
       - name: Run clang-format
         run: ./bin/clang-format-fix && git diff --exit-code || (echo "Please run 'bin/clang-format-fix' to fix formatting issues" && git --no-pager diff --name-only && exit 1)
 
-      - name: Build CrossPoint
-        run: pio run
-
       - name: Build and run semver tests
         run: |
-          g++ -std=c++17 tools/test_semver.cpp src/network/semver.cpp -o tools/test_semver
-          ./tools/test_semver
+          g++ -I src -std=c++17 test/semver/test_semver.cpp src/network/semver.cpp -o test/semver/test_semver
+          ./test/semver/test_semver
+
+      - name: Run hyphenation evaluation tests
+        run: |
+          chmod +x test/hyphenation_eval/run_hyphenation_eval.sh
+          ./test/hyphenation_eval/run_hyphenation_eval.sh
+
+      - name: Run Vietnamese font tests
+        run: |
+          chmod +x test/vietnamese_font_test/run_test.sh
+          ./test/vietnamese_font_test/run_test.sh
+
+      - name: Build CrossPoint
+        run: pio run

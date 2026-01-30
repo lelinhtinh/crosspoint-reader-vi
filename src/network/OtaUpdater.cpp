@@ -136,58 +136,120 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
 
   latestVersion = doc["tag_name"].as<std::string>();
 
+  bool foundFirmware = false;
   for (int i = 0; i < doc["assets"].size(); i++) {
     if (doc["assets"][i]["name"] == "firmware.bin") {
       otaUrl = doc["assets"][i]["browser_download_url"].as<std::string>();
       otaSize = doc["assets"][i]["size"].as<size_t>();
       totalSize = otaSize;
-      updateAvailable = true;
+      foundFirmware = true;
       break;
     }
   }
 
-  if (!updateAvailable) {
+  if (!foundFirmware) {
     Serial.printf("[%lu] [OTA] No firmware.bin asset found\n", millis());
     return NO_UPDATE;
   }
 
-  Serial.printf("[%lu] [OTA] Found update: %s\n", millis(), latestVersion.c_str());
+  // Parse semver for debug and to determine if it's actually newer
+  int latestMajor = 0, latestMinor = 0, latestPatch = 0;
+  int currentMajor = 0, currentMinor = 0, currentPatch = 0;
+  parseSemver(latestVersion, latestMajor, latestMinor, latestPatch);
+  parseSemver(std::string(CROSSPOINT_VERSION), currentMajor, currentMinor, currentPatch);
+
+  Serial.printf("[%lu] [OTA] Found release: %s (parsed %d.%d.%d) | Current: %s (parsed %d.%d.%d)\n",
+                millis(), latestVersion.c_str(), latestMajor, latestMinor, latestPatch, CROSSPOINT_VERSION,
+                currentMajor, currentMinor, currentPatch);
+
+  // Only mark updateAvailable if the remote version is actually newer
+  if (latestMajor == 0 && latestMinor == 0 && latestPatch == 0 && currentMajor == 0 && currentMinor == 0 &&
+      currentPatch == 0) {
+    // fallback to string comparison
+    updateAvailable = latestVersion > std::string(CROSSPOINT_VERSION);
+  } else {
+    if (latestMajor != currentMajor)
+      updateAvailable = latestMajor > currentMajor;
+    else if (latestMinor != currentMinor)
+      updateAvailable = latestMinor > currentMinor;
+    else
+      updateAvailable = latestPatch > currentPatch;
+  }
+
+  if (!updateAvailable) {
+    Serial.printf("[%lu] [OTA] Latest release is not newer; skipping update\n", millis());
+    return NO_UPDATE;
+  }
+
+  Serial.printf("[%lu] [OTA] Update available: %s (size %zu)\n", millis(), latestVersion.c_str(), otaSize);
   return OK;
 }
 
+static void parseSemver(const std::string &ver, int &major, int &minor, int &patch) {
+  // Initialize defaults
+  major = minor = patch = 0;
+  size_t i = 0;
+
+  // Skip any leading non-digit characters (e.g., 'v')
+  while (i < ver.size() && !isdigit(static_cast<unsigned char>(ver[i])))
+    ++i;
+
+  // Helper to parse next integer starting at i
+  auto parseInt = [&](int &out) {
+    out = 0;
+    bool found = false;
+    while (i < ver.size() && isdigit(static_cast<unsigned char>(ver[i]))) {
+      found = true;
+      out = out * 10 + (ver[i] - '0');
+      ++i;
+    }
+    return found;
+  };
+
+  // Parse major
+  parseInt(major);
+  // Skip non-digit separators
+  while (i < ver.size() && !isdigit(static_cast<unsigned char>(ver[i])))
+    ++i;
+  // Parse minor
+  parseInt(minor);
+  // Skip non-digit separators
+  while (i < ver.size() && !isdigit(static_cast<unsigned char>(ver[i])))
+    ++i;
+  // Parse patch
+  parseInt(patch);
+}
+
 bool OtaUpdater::isUpdateNewer() const {
-  if (!updateAvailable || latestVersion.empty() || latestVersion == CROSSPOINT_VERSION) {
+  if (latestVersion.empty()) {
     return false;
   }
 
-  int currentMajor, currentMinor, currentPatch;
-  int latestMajor, latestMinor, latestPatch;
+  // If versions are identical string-wise, no update
+  if (latestVersion == CROSSPOINT_VERSION) {
+    return false;
+  }
 
-  const auto currentVersion = CROSSPOINT_VERSION;
+  int currentMajor = 0, currentMinor = 0, currentPatch = 0;
+  int latestMajor = 0, latestMinor = 0, latestPatch = 0;
 
-  // semantic version check (only match on 3 segments)
-  sscanf(latestVersion.c_str(), "%d.%d.%d", &latestMajor, &latestMinor, &latestPatch);
-  sscanf(currentVersion, "%d.%d.%d", &currentMajor, &currentMinor, &currentPatch);
+  parseSemver(latestVersion, latestMajor, latestMinor, latestPatch);
+  parseSemver(std::string(CROSSPOINT_VERSION), currentMajor, currentMinor, currentPatch);
 
-  /*
-   * Compare major versions.
-   * If they differ, return true if latest major version greater than current major version
-   * otherwise return false.
-   */
+  Serial.printf("[%lu] [OTA] Comparing parsed: latest=%d.%d.%d current=%d.%d.%d\n", millis(), latestMajor,
+                latestMinor, latestPatch, currentMajor, currentMinor, currentPatch);
+
+  // If latest parsed to all zeros and equals current parsed to all zeros, fall back to string compare
+  if (latestMajor == 0 && latestMinor == 0 && latestPatch == 0 && currentMajor == 0 && currentMinor == 0 &&
+      currentPatch == 0) {
+    // basic string comparison (lexicographic) as last resort
+    return latestVersion > std::string(CROSSPOINT_VERSION);
+  }
+
   if (latestMajor != currentMajor)
     return latestMajor > currentMajor;
-
-  /*
-   * Compare minor versions.
-   * If they differ, return true if latest minor version greater than current minor version
-   * otherwise return false.
-   */
   if (latestMinor != currentMinor)
     return latestMinor > currentMinor;
-
-  /*
-   * Check patch versions.
-   */
   return latestPatch > currentPatch;
 }
 

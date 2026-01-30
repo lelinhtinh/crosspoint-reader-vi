@@ -437,7 +437,6 @@ void TxtReaderActivity::renderScreen() {
   // Do not persist on every page render to reduce SD writes; save on exit only
 }
 
-
 void TxtReaderActivity::renderPage() {
   int orientedMarginTop, orientedMarginRight, orientedMarginBottom, orientedMarginLeft;
   renderer.getOrientedViewableTRBL(&orientedMarginTop, &orientedMarginRight, &orientedMarginBottom,

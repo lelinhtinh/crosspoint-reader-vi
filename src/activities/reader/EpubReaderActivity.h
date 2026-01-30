@@ -35,7 +35,6 @@ class EpubReaderActivity final : public ActivityWithSubactivity {
                       int orientedMarginBottom, int orientedMarginLeft);
   void renderStatusBar(int orientedMarginRight, int orientedMarginBottom, int orientedMarginLeft) const;
 
-
 public:
   explicit EpubReaderActivity(GfxRenderer &renderer, MappedInputManager &mappedInput, std::unique_ptr<Epub> epub,
                               const std::function<void()> &onGoBack, const std::function<void()> &onGoHome)

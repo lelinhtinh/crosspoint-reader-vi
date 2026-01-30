@@ -2,8 +2,8 @@
 
 #include <Epub.h>
 #include <SDCardManager.h>
-#include <Xtc.h>
 #include <Txt.h>
+#include <Xtc.h>
 
 #include <cstring>
 #include <string>
@@ -13,11 +13,13 @@ namespace ProgressUtils {
 static bool endsWithLower(const std::string &s, const char *suff) {
   const size_t sl = s.size();
   const size_t nl = strlen(suff);
-  if (sl < nl) return false;
+  if (sl < nl)
+    return false;
   for (size_t i = 0; i < nl; ++i) {
     char a = tolower(s[sl - nl + i]);
     char b = tolower(suff[i]);
-    if (a != b) return false;
+    if (a != b)
+      return false;
   }
   return true;
 }
@@ -78,7 +80,8 @@ bool getBookProgress(const std::string &path, int &currentOut, int &totalOut) {
       return false;
     }
     const uint32_t total = xtc.getPageCount();
-    if (total == 0) return false;
+    if (total == 0)
+      return false;
     totalOut = static_cast<int>(total);
 
     // progress file is 4 bytes (little-endian page)

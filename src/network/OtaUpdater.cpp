@@ -160,9 +160,9 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
   parseSemver(latestVersion, latestMajor, latestMinor, latestPatch);
   parseSemver(std::string(CROSSPOINT_VERSION), currentMajor, currentMinor, currentPatch);
 
-  Serial.printf("[%lu] [OTA] Found release: %s (parsed %d.%d.%d) | Current: %s (parsed %d.%d.%d)\n",
-                millis(), latestVersion.c_str(), latestMajor, latestMinor, latestPatch, CROSSPOINT_VERSION,
-                currentMajor, currentMinor, currentPatch);
+  Serial.printf("[%lu] [OTA] Found release: %s (parsed %d.%d.%d) | Current: %s (parsed %d.%d.%d)\n", millis(),
+                latestVersion.c_str(), latestMajor, latestMinor, latestPatch, CROSSPOINT_VERSION, currentMajor,
+                currentMinor, currentPatch);
 
   // Only mark updateAvailable if the remote version is actually newer
   if (latestMajor == 0 && latestMinor == 0 && latestPatch == 0 && currentMajor == 0 && currentMinor == 0 &&
@@ -187,7 +187,6 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
   return OK;
 }
 
-
 bool OtaUpdater::isUpdateNewer() const {
   if (latestVersion.empty()) {
     return false;
@@ -204,8 +203,8 @@ bool OtaUpdater::isUpdateNewer() const {
   parseSemver(latestVersion, latestMajor, latestMinor, latestPatch);
   parseSemver(std::string(CROSSPOINT_VERSION), currentMajor, currentMinor, currentPatch);
 
-  Serial.printf("[%lu] [OTA] Comparing parsed: latest=%d.%d.%d current=%d.%d.%d\n", millis(), latestMajor,
-                latestMinor, latestPatch, currentMajor, currentMinor, currentPatch);
+  Serial.printf("[%lu] [OTA] Comparing parsed: latest=%d.%d.%d current=%d.%d.%d\n", millis(), latestMajor, latestMinor,
+                latestPatch, currentMajor, currentMinor, currentPatch);
 
   // If latest parsed to all zeros and equals current parsed to all zeros, fall back to string compare
   if (latestMajor == 0 && latestMinor == 0 && latestPatch == 0 && currentMajor == 0 && currentMinor == 0 &&

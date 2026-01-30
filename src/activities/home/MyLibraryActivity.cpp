@@ -9,8 +9,8 @@
 #include "RecentBooksStore.h"
 #include "ScreenComponents.h"
 #include "fontIds.h"
-#include "util/StringUtils.h"
 #include "util/ProgressUtils.h"
+#include "util/StringUtils.h"
 
 namespace {
 // Layout constants

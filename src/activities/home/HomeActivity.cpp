@@ -15,8 +15,8 @@
 #include "MappedInputManager.h"
 #include "ScreenComponents.h"
 #include "fontIds.h"
-#include "util/StringUtils.h"
 #include "util/ProgressUtils.h"
+#include "util/StringUtils.h"
 
 void HomeActivity::taskTrampoline(void *param) {
   auto *self = static_cast<HomeActivity *>(param);
@@ -499,7 +499,6 @@ void HomeActivity::render() {
       renderer.drawCenteredText(UI_10_FONT_ID, afterTextY, trimmedAuthor.c_str(), !bookSelected);
       afterTextY += renderer.getLineHeight(UI_10_FONT_ID);
     }
-
 
     // Footer area: show progress if available, otherwise "Continue Reading"
     const int continueY = bookY + bookHeight - renderer.getLineHeight(UI_10_FONT_ID) * 3 / 2;

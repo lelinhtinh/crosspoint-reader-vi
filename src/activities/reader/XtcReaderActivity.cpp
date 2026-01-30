@@ -63,6 +63,10 @@ void XtcReaderActivity::onExit() {
 
   // Wait until not rendering to delete task
   xSemaphoreTake(renderingMutex, portMAX_DELAY);
+
+  // Persist progress on exit (XTC has no chapters; save last page once)
+  saveProgress();
+
   if (displayTaskHandle) {
     vTaskDelete(displayTaskHandle);
     displayTaskHandle = nullptr;
@@ -182,7 +186,7 @@ void XtcReaderActivity::renderScreen() {
   }
 
   renderPage();
-  saveProgress();
+  // Do not persist on every page render to reduce SD writes; progress will be saved on exit
 }
 
 void XtcReaderActivity::renderPage() {

@@ -10,6 +10,7 @@
 #include "ScreenComponents.h"
 #include "fontIds.h"
 #include "util/StringUtils.h"
+#include "util/ProgressUtils.h"
 
 namespace {
 // Layout constants
@@ -361,6 +362,14 @@ void MyLibraryActivity::renderRecentTab() const {
       auto truncatedAuthor =
           renderer.truncatedText(UI_10_FONT_ID, book.author.c_str(), pageWidth - LEFT_MARGIN - RIGHT_MARGIN);
       renderer.drawText(UI_10_FONT_ID, LEFT_MARGIN, y + 32, truncatedAuthor.c_str(), i != selectorIndex);
+    }
+
+    // Progress: show "current/total" aligned to the right if available
+    int cur = 0, tot = 0;
+    if (ProgressUtils::getBookProgress(book.path, cur, tot) && tot > 0) {
+      std::string prog = std::to_string(cur) + "/" + std::to_string(tot);
+      const int progWidth = renderer.getTextWidth(UI_10_FONT_ID, prog.c_str());
+      renderer.drawText(UI_10_FONT_ID, pageWidth - RIGHT_MARGIN - progWidth, y + 32, prog.c_str(), i != selectorIndex);
     }
   }
 }

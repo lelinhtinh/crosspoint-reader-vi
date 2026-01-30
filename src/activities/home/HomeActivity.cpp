@@ -478,9 +478,8 @@ void HomeActivity::render() {
       titleYStart += renderer.getLineHeight(UI_12_FONT_ID);
     }
 
-    int afterTextY = titleYStart;
-
     if (!lastBookAuthor.empty()) {
+      int afterTextY = titleYStart;
       afterTextY += renderer.getLineHeight(UI_10_FONT_ID) / 2;
       std::string trimmedAuthor = lastBookAuthor;
       // Trim author if too long (UTF-8 safe)

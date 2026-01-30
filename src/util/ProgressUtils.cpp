@@ -108,7 +108,6 @@ bool getBookProgress(const std::string &path, int &currentOut, int &totalOut) {
     // Try to read page index cache to get total pages
     const std::string indexPath = txt.getCachePath() + "/index.bin";
     FsFile idx;
-    int pages = 0;
     if (SdMan.openFileForRead("TXI", indexPath, idx)) {
       // Seek to position of total pages in the index header format used by Txt
       // The format stores total pages as a uint32_t after several headers; to avoid parsing, attempt

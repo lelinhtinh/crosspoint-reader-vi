@@ -16,18 +16,14 @@
 namespace xtc {
 
 XtcParser::XtcParser()
-    : m_isOpen(false),
-      m_defaultWidth(DISPLAY_WIDTH),
-      m_defaultHeight(DISPLAY_HEIGHT),
-      m_bitDepth(1),
-      m_hasChapters(false),
-      m_lastError(XtcError::OK) {
+    : m_isOpen(false), m_defaultWidth(DISPLAY_WIDTH), m_defaultHeight(DISPLAY_HEIGHT), m_bitDepth(1),
+      m_hasChapters(false), m_lastError(XtcError::OK) {
   memset(&m_header, 0, sizeof(m_header));
 }
 
 XtcParser::~XtcParser() { close(); }
 
-XtcError XtcParser::open(const char* filepath) {
+XtcError XtcParser::open(const char *filepath) {
   // Close if already open
   if (m_isOpen) {
     close();
@@ -99,7 +95,7 @@ void XtcParser::close() {
 
 XtcError XtcParser::readHeader() {
   // Read first 56 bytes of header
-  size_t bytesRead = m_file.read(reinterpret_cast<uint8_t*>(&m_header), sizeof(XtcHeader));
+  size_t bytesRead = m_file.read(reinterpret_cast<uint8_t *>(&m_header), sizeof(XtcHeader));
   if (bytesRead != sizeof(XtcHeader)) {
     return XtcError::READ_ERROR;
   }
@@ -182,7 +178,7 @@ XtcError XtcParser::readPageTable() {
   // Read page table entries
   for (uint16_t i = 0; i < m_header.pageCount; i++) {
     PageTableEntry entry;
-    size_t bytesRead = m_file.read(reinterpret_cast<uint8_t*>(&entry), sizeof(PageTableEntry));
+    size_t bytesRead = m_file.read(reinterpret_cast<uint8_t *>(&entry), sizeof(PageTableEntry));
     if (bytesRead != sizeof(PageTableEntry)) {
       Serial.printf("[%lu] [XTC] Failed to read page table entry %u\n", millis(), i);
       return XtcError::READ_ERROR;
@@ -225,7 +221,7 @@ XtcError XtcParser::readChapters() {
   if (!m_file.seek(0x30)) {
     return XtcError::READ_ERROR;
   }
-  if (m_file.read(reinterpret_cast<uint8_t*>(&chapterOffset), sizeof(chapterOffset)) != sizeof(chapterOffset)) {
+  if (m_file.read(reinterpret_cast<uint8_t *>(&chapterOffset), sizeof(chapterOffset)) != sizeof(chapterOffset)) {
     return XtcError::READ_ERROR;
   }
 
@@ -311,7 +307,7 @@ XtcError XtcParser::readChapters() {
   return XtcError::OK;
 }
 
-bool XtcParser::getPageInfo(uint32_t pageIndex, PageInfo& info) const {
+bool XtcParser::getPageInfo(uint32_t pageIndex, PageInfo &info) const {
   if (pageIndex >= m_pageTable.size()) {
     return false;
   }
@@ -319,7 +315,7 @@ bool XtcParser::getPageInfo(uint32_t pageIndex, PageInfo& info) const {
   return true;
 }
 
-size_t XtcParser::loadPage(uint32_t pageIndex, uint8_t* buffer, size_t bufferSize) {
+size_t XtcParser::loadPage(uint32_t pageIndex, uint8_t *buffer, size_t bufferSize) {
   if (!m_isOpen) {
     m_lastError = XtcError::FILE_NOT_FOUND;
     return 0;
@@ -330,7 +326,7 @@ size_t XtcParser::loadPage(uint32_t pageIndex, uint8_t* buffer, size_t bufferSiz
     return 0;
   }
 
-  const PageInfo& page = m_pageTable[pageIndex];
+  const PageInfo &page = m_pageTable[pageIndex];
 
   // Seek to page data
   if (!m_file.seek(page.offset)) {
@@ -341,7 +337,7 @@ size_t XtcParser::loadPage(uint32_t pageIndex, uint8_t* buffer, size_t bufferSiz
 
   // Read page header (XTG for 1-bit, XTH for 2-bit - same structure)
   XtgPageHeader pageHeader;
-  size_t headerRead = m_file.read(reinterpret_cast<uint8_t*>(&pageHeader), sizeof(XtgPageHeader));
+  size_t headerRead = m_file.read(reinterpret_cast<uint8_t *>(&pageHeader), sizeof(XtgPageHeader));
   if (headerRead != sizeof(XtgPageHeader)) {
     Serial.printf("[%lu] [XTC] Failed to read page header for page %u\n", millis(), pageIndex);
     m_lastError = XtcError::READ_ERROR;
@@ -388,7 +384,7 @@ size_t XtcParser::loadPage(uint32_t pageIndex, uint8_t* buffer, size_t bufferSiz
 }
 
 XtcError XtcParser::loadPageStreaming(uint32_t pageIndex,
-                                      std::function<void(const uint8_t* data, size_t size, size_t offset)> callback,
+                                      std::function<void(const uint8_t *data, size_t size, size_t offset)> callback,
                                       size_t chunkSize) {
   if (!m_isOpen) {
     return XtcError::FILE_NOT_FOUND;
@@ -398,7 +394,7 @@ XtcError XtcParser::loadPageStreaming(uint32_t pageIndex,
     return XtcError::PAGE_OUT_OF_RANGE;
   }
 
-  const PageInfo& page = m_pageTable[pageIndex];
+  const PageInfo &page = m_pageTable[pageIndex];
 
   // Seek to page data
   if (!m_file.seek(page.offset)) {
@@ -407,7 +403,7 @@ XtcError XtcParser::loadPageStreaming(uint32_t pageIndex,
 
   // Read and skip page header (XTG for 1-bit, XTH for 2-bit)
   XtgPageHeader pageHeader;
-  size_t headerRead = m_file.read(reinterpret_cast<uint8_t*>(&pageHeader), sizeof(XtgPageHeader));
+  size_t headerRead = m_file.read(reinterpret_cast<uint8_t *>(&pageHeader), sizeof(XtgPageHeader));
   const uint32_t expectedMagic = (m_bitDepth == 2) ? XTH_MAGIC : XTG_MAGIC;
   if (headerRead != sizeof(XtgPageHeader) || pageHeader.magic != expectedMagic) {
     return XtcError::READ_ERROR;
@@ -442,14 +438,14 @@ XtcError XtcParser::loadPageStreaming(uint32_t pageIndex,
   return XtcError::OK;
 }
 
-bool XtcParser::isValidXtcFile(const char* filepath) {
+bool XtcParser::isValidXtcFile(const char *filepath) {
   FsFile file;
   if (!SdMan.openFileForRead("XTC", filepath, file)) {
     return false;
   }
 
   uint32_t magic = 0;
-  size_t bytesRead = file.read(reinterpret_cast<uint8_t*>(&magic), sizeof(magic));
+  size_t bytesRead = file.read(reinterpret_cast<uint8_t *>(&magic), sizeof(magic));
   file.close();
 
   if (bytesRead != sizeof(magic)) {
@@ -459,4 +455,4 @@ bool XtcParser::isValidXtcFile(const char* filepath) {
   return (magic == XTC_MAGIC || magic == XTCH_MAGIC);
 }
 
-}  // namespace xtc
+} // namespace xtc

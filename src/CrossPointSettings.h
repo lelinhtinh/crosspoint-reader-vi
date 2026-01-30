@@ -3,17 +3,17 @@
 #include <iosfwd>
 
 class CrossPointSettings {
- private:
+private:
   // Private constructor for singleton
   CrossPointSettings() = default;
 
   // Static instance
   static CrossPointSettings instance;
 
- public:
+public:
   // Delete copy constructor and assignment
-  CrossPointSettings(const CrossPointSettings&) = delete;
-  CrossPointSettings& operator=(const CrossPointSettings&) = delete;
+  CrossPointSettings(const CrossPointSettings &) = delete;
+  CrossPointSettings &operator=(const CrossPointSettings &) = delete;
 
   enum SLEEP_SCREEN_MODE { DARK = 0, LIGHT = 1, CUSTOM = 2, COVER = 3, BLANK = 4, SLEEP_SCREEN_MODE_COUNT };
   enum SLEEP_SCREEN_COVER_MODE { FIT = 0, CROP = 1, SLEEP_SCREEN_COVER_MODE_COUNT };
@@ -35,10 +35,10 @@ class CrossPointSettings {
   };
 
   enum ORIENTATION {
-    PORTRAIT = 0,       // 480x800 logical coordinates (current default)
-    LANDSCAPE_CW = 1,   // 800x480 logical coordinates, rotated 180° (swap top/bottom)
-    INVERTED = 2,       // 480x800 logical coordinates, inverted
-    LANDSCAPE_CCW = 3,  // 800x480 logical coordinates, native panel orientation
+    PORTRAIT = 0,      // 480x800 logical coordinates (current default)
+    LANDSCAPE_CW = 1,  // 800x480 logical coordinates, rotated 180° (swap top/bottom)
+    INVERTED = 2,      // 480x800 logical coordinates, inverted
+    LANDSCAPE_CCW = 3, // 800x480 logical coordinates, native panel orientation
     ORIENTATION_COUNT
   };
 
@@ -143,7 +143,7 @@ class CrossPointSettings {
   ~CrossPointSettings() = default;
 
   // Get singleton instance
-  static CrossPointSettings& getInstance() { return instance; }
+  static CrossPointSettings &getInstance() { return instance; }
 
   uint16_t getPowerButtonDuration() const {
     return (shortPwrBtn == CrossPointSettings::SHORT_PWRBTN::SLEEP) ? 10 : 400;

@@ -26,8 +26,8 @@ class Xtc {
   std::unique_ptr<xtc::XtcParser> parser;
   bool loaded;
 
- public:
-  explicit Xtc(std::string filepath, const std::string& cacheDir) : filepath(std::move(filepath)), loaded(false) {
+public:
+  explicit Xtc(std::string filepath, const std::string &cacheDir) : filepath(std::move(filepath)), loaded(false) {
     // Create cache key based on filepath (same as Epub)
     cachePath = cacheDir + "/xtc_" + std::to_string(std::hash<std::string>{}(this->filepath));
   }
@@ -51,14 +51,14 @@ class Xtc {
   void setupCacheDir() const;
 
   // Path accessors
-  const std::string& getCachePath() const { return cachePath; }
-  const std::string& getPath() const { return filepath; }
+  const std::string &getCachePath() const { return cachePath; }
+  const std::string &getPath() const { return filepath; }
 
   // Metadata
   std::string getTitle() const;
   std::string getAuthor() const;
   bool hasChapters() const;
-  const std::vector<xtc::ChapterInfo>& getChapters() const;
+  const std::vector<xtc::ChapterInfo> &getChapters() const;
 
   // Cover image support (for sleep screen)
   std::string getCoverBmpPath() const;
@@ -71,7 +71,7 @@ class Xtc {
   uint32_t getPageCount() const;
   uint16_t getPageWidth() const;
   uint16_t getPageHeight() const;
-  uint8_t getBitDepth() const;  // 1 = XTC (1-bit), 2 = XTCH (2-bit)
+  uint8_t getBitDepth() const; // 1 = XTC (1-bit), 2 = XTCH (2-bit)
 
   /**
    * Load page bitmap data
@@ -80,7 +80,7 @@ class Xtc {
    * @param bufferSize Buffer size
    * @return Number of bytes read
    */
-  size_t loadPage(uint32_t pageIndex, uint8_t* buffer, size_t bufferSize) const;
+  size_t loadPage(uint32_t pageIndex, uint8_t *buffer, size_t bufferSize) const;
 
   /**
    * Load page with streaming callback
@@ -90,7 +90,7 @@ class Xtc {
    * @return Error code
    */
   xtc::XtcError loadPageStreaming(uint32_t pageIndex,
-                                  std::function<void(const uint8_t* data, size_t size, size_t offset)> callback,
+                                  std::function<void(const uint8_t *data, size_t size, size_t offset)> callback,
                                   size_t chunkSize = 1024) const;
 
   // Progress calculation

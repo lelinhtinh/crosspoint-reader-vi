@@ -31,7 +31,7 @@ void SleepActivity::onEnter() {
   renderDefaultSleepScreen();
 }
 
-void SleepActivity::renderPopup(const char* message) const {
+void SleepActivity::renderPopup(const char *message) const {
   const int textWidth = renderer.getTextWidth(UI_12_FONT_ID, message, EpdFontFamily::BOLD);
   constexpr int margin = 20;
   const int x = (renderer.getScreenWidth() - textWidth - margin * 2) / 2;
@@ -102,7 +102,8 @@ void SleepActivity::renderCustomSleepScreen() const {
       }
     }
   }
-  if (dir) dir.close();
+  if (dir)
+    dir.close();
 
   // Look for sleep.bmp on the root of the sd card to determine if we should
   // render a custom sleep screen instead of the default.
@@ -136,7 +137,7 @@ void SleepActivity::renderDefaultSleepScreen() const {
   renderer.displayBuffer(HalDisplay::HALF_REFRESH);
 }
 
-void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap) const {
+void SleepActivity::renderBitmapSleepScreen(const Bitmap &bitmap) const {
   int x, y;
   const auto pageWidth = renderer.getScreenWidth();
   const auto pageHeight = renderer.getScreenHeight();

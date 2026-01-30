@@ -9,13 +9,13 @@ class MappedInputManager;
 class GfxRenderer;
 
 class Activity {
- protected:
+protected:
   std::string name;
-  GfxRenderer& renderer;
-  MappedInputManager& mappedInput;
+  GfxRenderer &renderer;
+  MappedInputManager &mappedInput;
 
- public:
-  explicit Activity(std::string name, GfxRenderer& renderer, MappedInputManager& mappedInput)
+public:
+  explicit Activity(std::string name, GfxRenderer &renderer, MappedInputManager &mappedInput)
       : name(std::move(name)), renderer(renderer), mappedInput(mappedInput) {}
   virtual ~Activity() = default;
   virtual void onEnter() { Serial.printf("[%lu] [ACT] Entering activity: %s\n", millis(), name.c_str()); }

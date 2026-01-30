@@ -7,7 +7,7 @@
 
 namespace {
 constexpr int SKIP_PAGE_MS = 700;
-}  // namespace
+} // namespace
 
 int XtcReaderChapterSelectionActivity::getPageItems() const {
   constexpr int startY = 60;
@@ -29,7 +29,7 @@ int XtcReaderChapterSelectionActivity::findChapterIndexForPage(uint32_t page) co
     return 0;
   }
 
-  const auto& chapters = xtc->getChapters();
+  const auto &chapters = xtc->getChapters();
   for (size_t i = 0; i < chapters.size(); i++) {
     if (page >= chapters[i].startPage && page <= chapters[i].endPage) {
       return static_cast<int>(i);
@@ -38,8 +38,8 @@ int XtcReaderChapterSelectionActivity::findChapterIndexForPage(uint32_t page) co
   return 0;
 }
 
-void XtcReaderChapterSelectionActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<XtcReaderChapterSelectionActivity*>(param);
+void XtcReaderChapterSelectionActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<XtcReaderChapterSelectionActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -55,10 +55,10 @@ void XtcReaderChapterSelectionActivity::onEnter() {
 
   updateRequired = true;
   xTaskCreate(&XtcReaderChapterSelectionActivity::taskTrampoline, "XtcReaderChapterSelectionActivityTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -84,7 +84,7 @@ void XtcReaderChapterSelectionActivity::loop() {
   const int pageItems = getPageItems();
 
   if (mappedInput.wasReleased(MappedInputManager::Button::Confirm)) {
-    const auto& chapters = xtc->getChapters();
+    const auto &chapters = xtc->getChapters();
     if (!chapters.empty() && selectorIndex >= 0 && selectorIndex < static_cast<int>(chapters.size())) {
       onSelectPage(chapters[selectorIndex].startPage);
     }
@@ -134,7 +134,7 @@ void XtcReaderChapterSelectionActivity::renderScreen() {
   const int pageItems = getPageItems();
   renderer.drawCenteredText(UI_12_FONT_ID, 15, "Select Chapter", true, EpdFontFamily::BOLD);
 
-  const auto& chapters = xtc->getChapters();
+  const auto &chapters = xtc->getChapters();
   if (chapters.empty()) {
     renderer.drawCenteredText(UI_10_FONT_ID, 120, "No chapters");
     renderer.displayBuffer();
@@ -144,8 +144,8 @@ void XtcReaderChapterSelectionActivity::renderScreen() {
   const auto pageStartIndex = selectorIndex / pageItems * pageItems;
   renderer.fillRect(0, 60 + (selectorIndex % pageItems) * 30 - 2, pageWidth - 1, 30);
   for (int i = pageStartIndex; i < static_cast<int>(chapters.size()) && i < pageStartIndex + pageItems; i++) {
-    const auto& chapter = chapters[i];
-    const char* title = chapter.name.empty() ? "Unnamed" : chapter.name.c_str();
+    const auto &chapter = chapters[i];
+    const char *title = chapter.name.empty() ? "Unnamed" : chapter.name.c_str();
     renderer.drawText(UI_10_FONT_ID, 20, 60 + (i % pageItems) * 30, title, i != selectorIndex);
   }
 

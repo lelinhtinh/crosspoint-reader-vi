@@ -2,7 +2,7 @@
 
 #include <vector>
 
-std::string FsHelpers::normalisePath(const std::string& path) {
+std::string FsHelpers::normalisePath(const std::string &path) {
   std::vector<std::string> components;
   std::string component;
 
@@ -28,7 +28,7 @@ std::string FsHelpers::normalisePath(const std::string& path) {
   }
 
   std::string result;
-  for (const auto& c : components) {
+  for (const auto &c : components) {
     if (!result.empty()) {
       result += "/";
     }

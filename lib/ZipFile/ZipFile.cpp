@@ -6,9 +6,9 @@
 
 #include <algorithm>
 
-bool inflateOneShot(const uint8_t* inputBuf, const size_t deflatedSize, uint8_t* outputBuf, const size_t inflatedSize) {
+bool inflateOneShot(const uint8_t *inputBuf, const size_t deflatedSize, uint8_t *outputBuf, const size_t inflatedSize) {
   // Setup inflator
-  const auto inflator = static_cast<tinfl_decompressor*>(malloc(sizeof(tinfl_decompressor)));
+  const auto inflator = static_cast<tinfl_decompressor *>(malloc(sizeof(tinfl_decompressor)));
   if (!inflator) {
     Serial.printf("[%lu] [ZIP] Failed to allocate memory for inflator\n", millis());
     return false;
@@ -52,7 +52,8 @@ bool ZipFile::loadAllFileStatSlims() {
 
   while (file.available()) {
     file.read(&sig, 4);
-    if (sig != 0x02014b50) break;  // End of list
+    if (sig != 0x02014b50)
+      break; // End of list
 
     FileStatSlim fileStat = {};
 
@@ -86,7 +87,7 @@ bool ZipFile::loadAllFileStatSlims() {
   return true;
 }
 
-bool ZipFile::loadFileStatSlim(const char* filename, FileStatSlim* fileStat) {
+bool ZipFile::loadFileStatSlim(const char *filename, FileStatSlim *fileStat) {
   if (!fileStatSlimCache.empty()) {
     const auto it = fileStatSlimCache.find(filename);
     if (it != fileStatSlimCache.end()) {
@@ -177,7 +178,7 @@ bool ZipFile::loadFileStatSlim(const char* filename, FileStatSlim* fileStat) {
   return found;
 }
 
-long ZipFile::getDataOffset(const FileStatSlim& fileStat) {
+long ZipFile::getDataOffset(const FileStatSlim &fileStat) {
   const bool wasOpen = isOpen();
   if (!wasOpen && !open()) {
     return -1;
@@ -226,13 +227,13 @@ bool ZipFile::loadZipDetails() {
     if (!wasOpen) {
       close();
     }
-    return false;  // Minimum EOCD size is 22 bytes
+    return false; // Minimum EOCD size is 22 bytes
   }
 
   // We scan the last 1KB (or the whole file if smaller) for the EOCD signature
   // 0x06054b50 is stored as 0x50, 0x4b, 0x05, 0x06 in little-endian
   const int scanRange = fileSize > 1024 ? 1024 : fileSize;
-  const auto buffer = static_cast<uint8_t*>(malloc(scanRange));
+  const auto buffer = static_cast<uint8_t *>(malloc(scanRange));
   if (!buffer) {
     Serial.printf("[%lu] [ZIP] Failed to allocate memory for EOCD scan buffer\n", millis());
     if (!wasOpen) {
@@ -248,7 +249,7 @@ bool ZipFile::loadZipDetails() {
   int foundOffset = -1;
   for (int i = scanRange - 22; i >= 0; i--) {
     constexpr uint32_t signature = 0x06054b50;
-    if (*reinterpret_cast<uint32_t*>(&buffer[i]) == signature) {
+    if (*reinterpret_cast<uint32_t *>(&buffer[i]) == signature) {
       foundOffset = i;
       break;
     }
@@ -267,8 +268,8 @@ bool ZipFile::loadZipDetails() {
   // Relative positions within EOCD:
   // Offset 10: Total number of entries (2 bytes)
   // Offset 16: Offset of start of central directory with respect to the starting disk number (4 bytes)
-  zipDetails.totalEntries = *reinterpret_cast<uint16_t*>(&buffer[foundOffset + 10]);
-  zipDetails.centralDirOffset = *reinterpret_cast<uint32_t*>(&buffer[foundOffset + 16]);
+  zipDetails.totalEntries = *reinterpret_cast<uint16_t *>(&buffer[foundOffset + 10]);
+  zipDetails.centralDirOffset = *reinterpret_cast<uint32_t *>(&buffer[foundOffset + 16]);
   zipDetails.isSet = true;
 
   free(buffer);
@@ -294,7 +295,7 @@ bool ZipFile::close() {
   return true;
 }
 
-bool ZipFile::getInflatedFileSize(const char* filename, size_t* size) {
+bool ZipFile::getInflatedFileSize(const char *filename, size_t *size) {
   FileStatSlim fileStat = {};
   if (!loadFileStatSlim(filename, &fileStat)) {
     return false;
@@ -304,7 +305,7 @@ bool ZipFile::getInflatedFileSize(const char* filename, size_t* size) {
   return true;
 }
 
-int ZipFile::fillUncompressedSizes(std::vector<SizeTarget>& targets, std::vector<uint32_t>& sizes) {
+int ZipFile::fillUncompressedSizes(std::vector<SizeTarget> &targets, std::vector<uint32_t> &sizes) {
   if (targets.empty()) {
     return 0;
   }
@@ -329,7 +330,8 @@ int ZipFile::fillUncompressedSizes(std::vector<SizeTarget>& targets, std::vector
 
   while (file.available()) {
     file.read(&sig, 4);
-    if (sig != 0x02014b50) break;
+    if (sig != 0x02014b50)
+      break;
 
     file.seekCur(6);
     uint16_t method;
@@ -353,7 +355,7 @@ int ZipFile::fillUncompressedSizes(std::vector<SizeTarget>& targets, std::vector
       uint64_t hash = fnvHash64(itemName, nameLen);
       SizeTarget key = {hash, nameLen, 0};
 
-      auto it = std::lower_bound(targets.begin(), targets.end(), key, [](const SizeTarget& a, const SizeTarget& b) {
+      auto it = std::lower_bound(targets.begin(), targets.end(), key, [](const SizeTarget &a, const SizeTarget &b) {
         return a.hash < b.hash || (a.hash == b.hash && a.len < b.len);
       });
 
@@ -378,7 +380,7 @@ int ZipFile::fillUncompressedSizes(std::vector<SizeTarget>& targets, std::vector
   return matched;
 }
 
-uint8_t* ZipFile::readFileToMemory(const char* filename, size_t* size, const bool trailingNullByte) {
+uint8_t *ZipFile::readFileToMemory(const char *filename, size_t *size, const bool trailingNullByte) {
   const bool wasOpen = isOpen();
   if (!wasOpen && !open()) {
     return nullptr;
@@ -405,7 +407,7 @@ uint8_t* ZipFile::readFileToMemory(const char* filename, size_t* size, const boo
   const auto deflatedDataSize = fileStat.compressedSize;
   const auto inflatedDataSize = fileStat.uncompressedSize;
   const auto dataSize = trailingNullByte ? inflatedDataSize + 1 : inflatedDataSize;
-  const auto data = static_cast<uint8_t*>(malloc(dataSize));
+  const auto data = static_cast<uint8_t *>(malloc(dataSize));
   if (data == nullptr) {
     Serial.printf("[%lu] [ZIP] Failed to allocate memory for output buffer (%zu bytes)\n", millis(), dataSize);
     if (!wasOpen) {
@@ -430,7 +432,7 @@ uint8_t* ZipFile::readFileToMemory(const char* filename, size_t* size, const boo
     // Continue out of block with data set
   } else if (fileStat.method == MZ_DEFLATED) {
     // Read out deflated content from file
-    const auto deflatedData = static_cast<uint8_t*>(malloc(deflatedDataSize));
+    const auto deflatedData = static_cast<uint8_t *>(malloc(deflatedDataSize));
     if (deflatedData == nullptr) {
       Serial.printf("[%lu] [ZIP] Failed to allocate memory for decompression buffer\n", millis());
       if (!wasOpen) {
@@ -469,12 +471,14 @@ uint8_t* ZipFile::readFileToMemory(const char* filename, size_t* size, const boo
     return nullptr;
   }
 
-  if (trailingNullByte) data[inflatedDataSize] = '\0';
-  if (size) *size = inflatedDataSize;
+  if (trailingNullByte)
+    data[inflatedDataSize] = '\0';
+  if (size)
+    *size = inflatedDataSize;
   return data;
 }
 
-bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t chunkSize) {
+bool ZipFile::readFileToStream(const char *filename, Print &out, const size_t chunkSize) {
   const bool wasOpen = isOpen();
   if (!wasOpen && !open()) {
     return false;
@@ -496,7 +500,7 @@ bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t ch
 
   if (fileStat.method == MZ_NO_COMPRESSION) {
     // no deflation, just read content
-    const auto buffer = static_cast<uint8_t*>(malloc(chunkSize));
+    const auto buffer = static_cast<uint8_t *>(malloc(chunkSize));
     if (!buffer) {
       Serial.printf("[%lu] [ZIP] Failed to allocate memory for buffer\n", millis());
       if (!wasOpen) {
@@ -530,7 +534,7 @@ bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t ch
 
   if (fileStat.method == MZ_DEFLATED) {
     // Setup inflator
-    const auto inflator = static_cast<tinfl_decompressor*>(malloc(sizeof(tinfl_decompressor)));
+    const auto inflator = static_cast<tinfl_decompressor *>(malloc(sizeof(tinfl_decompressor)));
     if (!inflator) {
       Serial.printf("[%lu] [ZIP] Failed to allocate memory for inflator\n", millis());
       if (!wasOpen) {
@@ -542,7 +546,7 @@ bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t ch
     tinfl_init(inflator);
 
     // Setup file read buffer
-    const auto fileReadBuffer = static_cast<uint8_t*>(malloc(chunkSize));
+    const auto fileReadBuffer = static_cast<uint8_t *>(malloc(chunkSize));
     if (!fileReadBuffer) {
       Serial.printf("[%lu] [ZIP] Failed to allocate memory for zip file read buffer\n", millis());
       free(inflator);
@@ -552,7 +556,7 @@ bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t ch
       return false;
     }
 
-    const auto outputBuffer = static_cast<uint8_t*>(malloc(TINFL_LZ_DICT_SIZE));
+    const auto outputBuffer = static_cast<uint8_t *>(malloc(TINFL_LZ_DICT_SIZE));
     if (!outputBuffer) {
       Serial.printf("[%lu] [ZIP] Failed to allocate memory for dictionary\n", millis());
       free(inflator);
@@ -568,14 +572,14 @@ bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t ch
     size_t processedOutputBytes = 0;
     size_t fileReadBufferFilledBytes = 0;
     size_t fileReadBufferCursor = 0;
-    size_t outputCursor = 0;  // Current offset in the circular dictionary
+    size_t outputCursor = 0; // Current offset in the circular dictionary
 
     while (true) {
       // Load more compressed bytes when needed
       if (fileReadBufferCursor >= fileReadBufferFilledBytes) {
         if (fileRemainingBytes == 0) {
           // Should not be hit, but a safe protection
-          break;  // EOF
+          break; // EOF
         }
 
         fileReadBufferFilledBytes =
@@ -585,7 +589,7 @@ bool ZipFile::readFileToStream(const char* filename, Print& out, const size_t ch
 
         if (fileReadBufferFilledBytes == 0) {
           // Bad read
-          break;  // EOF
+          break; // EOF
         }
       }
 

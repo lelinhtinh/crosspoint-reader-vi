@@ -24,7 +24,7 @@ OpdsParser::~OpdsParser() {
 
 size_t OpdsParser::write(uint8_t c) { return write(&c, 1); }
 
-size_t OpdsParser::write(const uint8_t* xmlData, const size_t length) {
+size_t OpdsParser::write(const uint8_t *xmlData, const size_t length) {
   if (errorOccured) {
     return length;
   }
@@ -34,12 +34,12 @@ size_t OpdsParser::write(const uint8_t* xmlData, const size_t length) {
   XML_SetCharacterDataHandler(parser, characterData);
 
   // Parse in chunks to avoid large buffer allocations
-  const char* currentPos = reinterpret_cast<const char*>(xmlData);
+  const char *currentPos = reinterpret_cast<const char *>(xmlData);
   size_t remaining = length;
   constexpr size_t chunkSize = 1024;
 
   while (remaining > 0) {
-    void* const buf = XML_GetBuffer(parser, chunkSize);
+    void *const buf = XML_GetBuffer(parser, chunkSize);
     if (!buf) {
       errorOccured = true;
       Serial.printf("[%lu] [OPDS] Couldn't allocate memory for buffer\n", millis());
@@ -89,7 +89,7 @@ void OpdsParser::clear() {
 
 std::vector<OpdsEntry> OpdsParser::getBooks() const {
   std::vector<OpdsEntry> books;
-  for (const auto& entry : entries) {
+  for (const auto &entry : entries) {
     if (entry.type == OpdsEntryType::BOOK) {
       books.push_back(entry);
     }
@@ -97,7 +97,7 @@ std::vector<OpdsEntry> OpdsParser::getBooks() const {
   return books;
 }
 
-const char* OpdsParser::findAttribute(const XML_Char** atts, const char* name) {
+const char *OpdsParser::findAttribute(const XML_Char **atts, const char *name) {
   for (int i = 0; atts[i]; i += 2) {
     if (strcmp(atts[i], name) == 0) {
       return atts[i + 1];
@@ -106,8 +106,8 @@ const char* OpdsParser::findAttribute(const XML_Char** atts, const char* name) {
   return nullptr;
 }
 
-void XMLCALL OpdsParser::startElement(void* userData, const XML_Char* name, const XML_Char** atts) {
-  auto* self = static_cast<OpdsParser*>(userData);
+void XMLCALL OpdsParser::startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  auto *self = static_cast<OpdsParser *>(userData);
 
   // Check for entry element (with or without namespace prefix)
   if (strcmp(name, "entry") == 0 || strstr(name, ":entry") != nullptr) {
@@ -116,7 +116,8 @@ void XMLCALL OpdsParser::startElement(void* userData, const XML_Char* name, cons
     return;
   }
 
-  if (!self->inEntry) return;
+  if (!self->inEntry)
+    return;
 
   // Check for title element
   if (strcmp(name, "title") == 0 || strstr(name, ":title") != nullptr) {
@@ -147,9 +148,9 @@ void XMLCALL OpdsParser::startElement(void* userData, const XML_Char* name, cons
 
   // Check for link element
   if (strcmp(name, "link") == 0 || strstr(name, ":link") != nullptr) {
-    const char* rel = findAttribute(atts, "rel");
-    const char* type = findAttribute(atts, "type");
-    const char* href = findAttribute(atts, "href");
+    const char *rel = findAttribute(atts, "rel");
+    const char *type = findAttribute(atts, "type");
+    const char *href = findAttribute(atts, "href");
 
     if (href) {
       // Check for acquisition link with epub type (this is a downloadable book)
@@ -170,8 +171,8 @@ void XMLCALL OpdsParser::startElement(void* userData, const XML_Char* name, cons
   }
 }
 
-void XMLCALL OpdsParser::endElement(void* userData, const XML_Char* name) {
-  auto* self = static_cast<OpdsParser*>(userData);
+void XMLCALL OpdsParser::endElement(void *userData, const XML_Char *name) {
+  auto *self = static_cast<OpdsParser *>(userData);
 
   // Check for entry end
   if (strcmp(name, "entry") == 0 || strstr(name, ":entry") != nullptr) {
@@ -184,7 +185,8 @@ void XMLCALL OpdsParser::endElement(void* userData, const XML_Char* name) {
     return;
   }
 
-  if (!self->inEntry) return;
+  if (!self->inEntry)
+    return;
 
   // Check for title end
   if (strcmp(name, "title") == 0 || strstr(name, ":title") != nullptr) {
@@ -220,8 +222,8 @@ void XMLCALL OpdsParser::endElement(void* userData, const XML_Char* name) {
   }
 }
 
-void XMLCALL OpdsParser::characterData(void* userData, const XML_Char* s, const int len) {
-  auto* self = static_cast<OpdsParser*>(userData);
+void XMLCALL OpdsParser::characterData(void *userData, const XML_Char *s, const int len) {
+  auto *self = static_cast<OpdsParser *>(userData);
 
   // Only accumulate text when in a text element
   if (self->inTitle || self->inAuthorName || self->inId) {

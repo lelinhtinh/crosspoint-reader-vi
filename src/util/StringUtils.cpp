@@ -4,7 +4,7 @@
 
 namespace StringUtils {
 
-std::string sanitizeFilename(const std::string& name, size_t maxLength) {
+std::string sanitizeFilename(const std::string &name, size_t maxLength) {
   std::string result;
   result.reserve(name.size());
 
@@ -22,7 +22,7 @@ std::string sanitizeFilename(const std::string& name, size_t maxLength) {
   // Trim leading/trailing spaces and dots
   size_t start = result.find_first_not_of(" .");
   if (start == std::string::npos) {
-    return "book";  // Fallback if name is all invalid characters
+    return "book"; // Fallback if name is all invalid characters
   }
   size_t end = result.find_last_not_of(" .");
   result = result.substr(start, end - start + 1);
@@ -35,7 +35,7 @@ std::string sanitizeFilename(const std::string& name, size_t maxLength) {
   return result.empty() ? "book" : result;
 }
 
-bool checkFileExtension(const std::string& fileName, const char* extension) {
+bool checkFileExtension(const std::string &fileName, const char *extension) {
   if (fileName.length() < strlen(extension)) {
     return false;
   }
@@ -49,7 +49,7 @@ bool checkFileExtension(const std::string& fileName, const char* extension) {
   return true;
 }
 
-bool checkFileExtension(const String& fileName, const char* extension) {
+bool checkFileExtension(const String &fileName, const char *extension) {
   if (fileName.length() < strlen(extension)) {
     return false;
   }
@@ -61,8 +61,9 @@ bool checkFileExtension(const String& fileName, const char* extension) {
   return localFile.endsWith(localExtension);
 }
 
-size_t utf8RemoveLastChar(std::string& str) {
-  if (str.empty()) return 0;
+size_t utf8RemoveLastChar(std::string &str) {
+  if (str.empty())
+    return 0;
   size_t pos = str.size() - 1;
   // Walk back to find the start of the last UTF-8 character
   // UTF-8 continuation bytes start with 10xxxxxx (0x80-0xBF)
@@ -74,10 +75,10 @@ size_t utf8RemoveLastChar(std::string& str) {
 }
 
 // Truncate string by removing N UTF-8 characters from the end
-void utf8TruncateChars(std::string& str, const size_t numChars) {
+void utf8TruncateChars(std::string &str, const size_t numChars) {
   for (size_t i = 0; i < numChars && !str.empty(); ++i) {
     utf8RemoveLastChar(str);
   }
 }
 
-}  // namespace StringUtils
+} // namespace StringUtils

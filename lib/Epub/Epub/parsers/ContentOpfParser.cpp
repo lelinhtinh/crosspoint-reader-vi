@@ -9,7 +9,7 @@
 namespace {
 constexpr char MEDIA_TYPE_NCX[] = "application/x-dtbncx+xml";
 constexpr char itemCacheFile[] = "/.items.bin";
-}  // namespace
+} // namespace
 
 bool ContentOpfParser::setup() {
   parser = XML_ParserCreate(nullptr);
@@ -26,8 +26,8 @@ bool ContentOpfParser::setup() {
 
 ContentOpfParser::~ContentOpfParser() {
   if (parser) {
-    XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-    XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+    XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+    XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
     XML_SetCharacterDataHandler(parser, nullptr);
     XML_ParserFree(parser);
     parser = nullptr;
@@ -45,19 +45,20 @@ ContentOpfParser::~ContentOpfParser() {
 
 size_t ContentOpfParser::write(const uint8_t data) { return write(&data, 1); }
 
-size_t ContentOpfParser::write(const uint8_t* buffer, const size_t size) {
-  if (!parser) return 0;
+size_t ContentOpfParser::write(const uint8_t *buffer, const size_t size) {
+  if (!parser)
+    return 0;
 
-  const uint8_t* currentBufferPos = buffer;
+  const uint8_t *currentBufferPos = buffer;
   auto remainingInBuffer = size;
 
   while (remainingInBuffer > 0) {
-    void* const buf = XML_GetBuffer(parser, 1024);
+    void *const buf = XML_GetBuffer(parser, 1024);
 
     if (!buf) {
       Serial.printf("[%lu] [COF] Couldn't allocate memory for buffer\n", millis());
-      XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-      XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+      XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+      XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
       XML_SetCharacterDataHandler(parser, nullptr);
       XML_ParserFree(parser);
       parser = nullptr;
@@ -70,8 +71,8 @@ size_t ContentOpfParser::write(const uint8_t* buffer, const size_t size) {
     if (XML_ParseBuffer(parser, static_cast<int>(toRead), remainingSize == toRead) == XML_STATUS_ERROR) {
       Serial.printf("[%lu] [COF] Parse error at line %lu: %s\n", millis(), XML_GetCurrentLineNumber(parser),
                     XML_ErrorString(XML_GetErrorCode(parser)));
-      XML_StopParser(parser, XML_FALSE);                // Stop any pending processing
-      XML_SetElementHandler(parser, nullptr, nullptr);  // Clear callbacks
+      XML_StopParser(parser, XML_FALSE);               // Stop any pending processing
+      XML_SetElementHandler(parser, nullptr, nullptr); // Clear callbacks
       XML_SetCharacterDataHandler(parser, nullptr);
       XML_ParserFree(parser);
       parser = nullptr;
@@ -86,8 +87,8 @@ size_t ContentOpfParser::write(const uint8_t* buffer, const size_t size) {
   return size;
 }
 
-void XMLCALL ContentOpfParser::startElement(void* userData, const XML_Char* name, const XML_Char** atts) {
-  auto* self = static_cast<ContentOpfParser*>(userData);
+void XMLCALL ContentOpfParser::startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  auto *self = static_cast<ContentOpfParser *>(userData);
   (void)atts;
 
   if (self->state == START && (strcmp(name, "package") == 0 || strcmp(name, "opf:package") == 0)) {
@@ -135,7 +136,7 @@ void XMLCALL ContentOpfParser::startElement(void* userData, const XML_Char* name
 
     // Sort item index for binary search if we have enough items
     if (self->itemIndex.size() >= LARGE_SPINE_THRESHOLD) {
-      std::sort(self->itemIndex.begin(), self->itemIndex.end(), [](const ItemIndexEntry& a, const ItemIndexEntry& b) {
+      std::sort(self->itemIndex.begin(), self->itemIndex.end(), [](const ItemIndexEntry &a, const ItemIndexEntry &b) {
         return a.idHash < b.idHash || (a.idHash == b.idHash && a.idLen < b.idLen);
       });
       self->useItemIndex = true;
@@ -246,7 +247,7 @@ void XMLCALL ContentOpfParser::startElement(void* userData, const XML_Char* name
 
             auto it = std::lower_bound(self->itemIndex.begin(), self->itemIndex.end(),
                                        ItemIndexEntry{targetHash, targetLen, 0},
-                                       [](const ItemIndexEntry& a, const ItemIndexEntry& b) {
+                                       [](const ItemIndexEntry &a, const ItemIndexEntry &b) {
                                          return a.idHash < b.idHash || (a.idHash == b.idHash && a.idLen < b.idLen);
                                        });
 
@@ -311,8 +312,8 @@ void XMLCALL ContentOpfParser::startElement(void* userData, const XML_Char* name
   }
 }
 
-void XMLCALL ContentOpfParser::characterData(void* userData, const XML_Char* s, const int len) {
-  auto* self = static_cast<ContentOpfParser*>(userData);
+void XMLCALL ContentOpfParser::characterData(void *userData, const XML_Char *s, const int len) {
+  auto *self = static_cast<ContentOpfParser *>(userData);
 
   if (self->state == IN_BOOK_TITLE) {
     self->title.append(s, len);
@@ -330,8 +331,8 @@ void XMLCALL ContentOpfParser::characterData(void* userData, const XML_Char* s, 
   }
 }
 
-void XMLCALL ContentOpfParser::endElement(void* userData, const XML_Char* name) {
-  auto* self = static_cast<ContentOpfParser*>(userData);
+void XMLCALL ContentOpfParser::endElement(void *userData, const XML_Char *name) {
+  auto *self = static_cast<ContentOpfParser *>(userData);
   (void)name;
 
   if (self->state == IN_SPINE && (strcmp(name, "spine") == 0 || strcmp(name, "opf:spine") == 0)) {

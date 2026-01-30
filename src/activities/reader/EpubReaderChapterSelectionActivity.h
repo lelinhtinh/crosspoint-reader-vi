@@ -38,27 +38,21 @@ class EpubReaderChapterSelectionActivity final : public ActivityWithSubactivity 
   // Convert item index to TOC index (accounting for top sync option offset)
   int tocIndexFromItemIndex(int itemIndex) const;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void renderScreen();
   void launchSyncActivity();
 
- public:
-  explicit EpubReaderChapterSelectionActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                              const std::shared_ptr<Epub>& epub, const std::string& epubPath,
+public:
+  explicit EpubReaderChapterSelectionActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                              const std::shared_ptr<Epub> &epub, const std::string &epubPath,
                                               const int currentSpineIndex, const int currentPage,
-                                              const int totalPagesInSpine, const std::function<void()>& onGoBack,
-                                              const std::function<void(int newSpineIndex)>& onSelectSpineIndex,
-                                              const std::function<void(int newSpineIndex, int newPage)>& onSyncPosition)
-      : ActivityWithSubactivity("EpubReaderChapterSelection", renderer, mappedInput),
-        epub(epub),
-        epubPath(epubPath),
-        currentSpineIndex(currentSpineIndex),
-        currentPage(currentPage),
-        totalPagesInSpine(totalPagesInSpine),
-        onGoBack(onGoBack),
-        onSelectSpineIndex(onSelectSpineIndex),
-        onSyncPosition(onSyncPosition) {}
+                                              const int totalPagesInSpine, const std::function<void()> &onGoBack,
+                                              const std::function<void(int newSpineIndex)> &onSelectSpineIndex,
+                                              const std::function<void(int newSpineIndex, int newPage)> &onSyncPosition)
+      : ActivityWithSubactivity("EpubReaderChapterSelection", renderer, mappedInput), epub(epub), epubPath(epubPath),
+        currentSpineIndex(currentSpineIndex), currentPage(currentPage), totalPagesInSpine(totalPagesInSpine),
+        onGoBack(onGoBack), onSelectSpineIndex(onSelectSpineIndex), onSyncPosition(onSyncPosition) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;

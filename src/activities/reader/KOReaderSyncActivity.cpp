@@ -24,7 +24,7 @@ void syncTimeWithNTP() {
 
   // Wait for time to sync (with timeout)
   int retry = 0;
-  const int maxRetries = 50;  // 5 seconds max
+  const int maxRetries = 50; // 5 seconds max
   while (sntp_get_sync_status() != SNTP_SYNC_STATUS_COMPLETED && retry < maxRetries) {
     vTaskDelay(100 / portTICK_PERIOD_MS);
     retry++;
@@ -36,10 +36,10 @@ void syncTimeWithNTP() {
     Serial.printf("[%lu] [KOSync] NTP sync timeout, using fallback\n", millis());
   }
 }
-}  // namespace
+} // namespace
 
-void KOReaderSyncActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<KOReaderSyncActivity*>(param);
+void KOReaderSyncActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<KOReaderSyncActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -128,7 +128,7 @@ void KOReaderSyncActivity::performSync() {
 
   xSemaphoreTake(renderingMutex, portMAX_DELAY);
   state = SHOWING_RESULT;
-  selectedOption = 0;  // Default to "Apply"
+  selectedOption = 0; // Default to "Apply"
   xSemaphoreGive(renderingMutex);
   updateRequired = true;
 }
@@ -173,10 +173,10 @@ void KOReaderSyncActivity::onEnter() {
   renderingMutex = xSemaphoreCreateMutex();
 
   xTaskCreate(&KOReaderSyncActivity::taskTrampoline, "KOSyncTask",
-              4096,               // Stack size (larger for network operations)
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size (larger for network operations)
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 
   // Check for credentials first
@@ -199,8 +199,8 @@ void KOReaderSyncActivity::onEnter() {
 
     // Perform sync directly (will be handled in loop)
     xTaskCreate(
-        [](void* param) {
-          auto* self = static_cast<KOReaderSyncActivity*>(param);
+        [](void *param) {
+          auto *self = static_cast<KOReaderSyncActivity *>(param);
           // Sync time first
           syncTimeWithNTP();
           xSemaphoreTake(self->renderingMutex, portMAX_DELAY);
@@ -391,7 +391,7 @@ void KOReaderSyncActivity::loop() {
     // Navigate options
     if (mappedInput.wasPressed(MappedInputManager::Button::Up) ||
         mappedInput.wasPressed(MappedInputManager::Button::Left)) {
-      selectedOption = (selectedOption + 2) % 3;  // Wrap around
+      selectedOption = (selectedOption + 2) % 3; // Wrap around
       updateRequired = true;
     } else if (mappedInput.wasPressed(MappedInputManager::Button::Down) ||
                mappedInput.wasPressed(MappedInputManager::Button::Right)) {

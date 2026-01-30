@@ -10,34 +10,37 @@
 #include "ScreenComponents.h"
 #include "fontIds.h"
 #include "util/StringUtils.h"
+#include "util/ProgressUtils.h"
 
 namespace {
 // Layout constants
 constexpr int TAB_BAR_Y = 15;
 constexpr int CONTENT_START_Y = 60;
 constexpr int LINE_HEIGHT = 30;
-constexpr int RECENTS_LINE_HEIGHT = 65;  // Increased for two-line items
+constexpr int RECENTS_LINE_HEIGHT = 65; // Increased for two-line items
 constexpr int LEFT_MARGIN = 20;
-constexpr int RIGHT_MARGIN = 40;  // Extra space for scroll indicator
+constexpr int RIGHT_MARGIN = 40; // Extra space for scroll indicator
 
 // Timing thresholds
 constexpr int SKIP_PAGE_MS = 700;
 constexpr unsigned long GO_HOME_MS = 1000;
 
-void sortFileList(std::vector<std::string>& strs) {
-  std::sort(begin(strs), end(strs), [](const std::string& str1, const std::string& str2) {
-    if (str1.back() == '/' && str2.back() != '/') return true;
-    if (str1.back() != '/' && str2.back() == '/') return false;
+void sortFileList(std::vector<std::string> &strs) {
+  std::sort(begin(strs), end(strs), [](const std::string &str1, const std::string &str2) {
+    if (str1.back() == '/' && str2.back() != '/')
+      return true;
+    if (str1.back() != '/' && str2.back() == '/')
+      return false;
     return lexicographical_compare(
         begin(str1), end(str1), begin(str2), end(str2),
-        [](const char& char1, const char& char2) { return tolower(char1) < tolower(char2); });
+        [](const char &char1, const char &char2) { return tolower(char1) < tolower(char2); });
   });
 }
-}  // namespace
+} // namespace
 
 int MyLibraryActivity::getPageItems() const {
   const int screenHeight = renderer.getScreenHeight();
-  const int bottomBarHeight = 60;  // Space for button hints
+  const int bottomBarHeight = 60; // Space for button hints
   const int availableHeight = screenHeight - CONTENT_START_Y - bottomBarHeight;
   int items = availableHeight / LINE_HEIGHT;
   if (items < 1) {
@@ -56,7 +59,8 @@ int MyLibraryActivity::getCurrentItemCount() const {
 int MyLibraryActivity::getTotalPages() const {
   const int itemCount = getCurrentItemCount();
   const int pageItems = getPageItems();
-  if (itemCount == 0) return 1;
+  if (itemCount == 0)
+    return 1;
   return (itemCount + pageItems - 1) / pageItems;
 }
 
@@ -67,10 +71,10 @@ int MyLibraryActivity::getCurrentPage() const {
 
 void MyLibraryActivity::loadRecentBooks() {
   recentBooks.clear();
-  const auto& books = RECENT_BOOKS.getBooks();
+  const auto &books = RECENT_BOOKS.getBooks();
   recentBooks.reserve(books.size());
 
-  for (const auto& book : books) {
+  for (const auto &book : books) {
     // Skip if file no longer exists
     if (!SdMan.exists(book.path.c_str())) {
       continue;
@@ -84,7 +88,8 @@ void MyLibraryActivity::loadFiles() {
 
   auto root = SdMan.open(basepath.c_str());
   if (!root || !root.isDirectory()) {
-    if (root) root.close();
+    if (root)
+      root.close();
     return;
   }
 
@@ -114,15 +119,16 @@ void MyLibraryActivity::loadFiles() {
   sortFileList(files);
 }
 
-size_t MyLibraryActivity::findEntry(const std::string& name) const {
+size_t MyLibraryActivity::findEntry(const std::string &name) const {
   for (size_t i = 0; i < files.size(); i++) {
-    if (files[i] == name) return i;
+    if (files[i] == name)
+      return i;
   }
   return 0;
 }
 
-void MyLibraryActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<MyLibraryActivity*>(param);
+void MyLibraryActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<MyLibraryActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -139,10 +145,10 @@ void MyLibraryActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&MyLibraryActivity::taskTrampoline, "MyLibraryActivityTask",
-              4096,               // Stack size (increased for epub metadata loading)
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size (increased for epub metadata loading)
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -194,7 +200,8 @@ void MyLibraryActivity::loop() {
     } else {
       // Files tab
       if (!files.empty() && selectorIndex < static_cast<int>(files.size())) {
-        if (basepath.back() != '/') basepath += "/";
+        if (basepath.back() != '/')
+          basepath += "/";
         if (files[selectorIndex].back() == '/') {
           // Enter directory
           basepath += files[selectorIndex].substr(0, files[selectorIndex].length() - 1);
@@ -217,7 +224,8 @@ void MyLibraryActivity::loop() {
         // Go up one directory, remembering the directory we came from
         const std::string oldPath = basepath;
         basepath.replace(basepath.find_last_of('/'), std::string::npos, "");
-        if (basepath.empty()) basepath = "/";
+        if (basepath.empty())
+          basepath = "/";
         loadFiles();
 
         // Select the directory we just came from
@@ -297,7 +305,7 @@ void MyLibraryActivity::render() const {
 
   // Draw scroll indicator
   const int screenHeight = renderer.getScreenHeight();
-  const int contentHeight = screenHeight - CONTENT_START_Y - 60;  // 60 for bottom bar
+  const int contentHeight = screenHeight - CONTENT_START_Y - 60; // 60 for bottom bar
   ScreenComponents::drawScrollIndicator(renderer, getCurrentPage(), getTotalPages(), CONTENT_START_Y, contentHeight);
 
   // Draw side button hints (up/down navigation on right side)
@@ -329,7 +337,7 @@ void MyLibraryActivity::renderRecentTab() const {
 
   // Draw items
   for (int i = pageStartIndex; i < bookCount && i < pageStartIndex + pageItems; i++) {
-    const auto& book = recentBooks[i];
+    const auto &book = recentBooks[i];
     const int y = CONTENT_START_Y + (i % pageItems) * RECENTS_LINE_HEIGHT;
 
     // Line 1: Title
@@ -354,6 +362,14 @@ void MyLibraryActivity::renderRecentTab() const {
       auto truncatedAuthor =
           renderer.truncatedText(UI_10_FONT_ID, book.author.c_str(), pageWidth - LEFT_MARGIN - RIGHT_MARGIN);
       renderer.drawText(UI_10_FONT_ID, LEFT_MARGIN, y + 32, truncatedAuthor.c_str(), i != selectorIndex);
+    }
+
+    // Progress: show "current/total" aligned to the right if available
+    int cur = 0, tot = 0;
+    if (ProgressUtils::getBookProgress(book.path, cur, tot) && tot > 0) {
+      std::string prog = std::to_string(cur) + "/" + std::to_string(tot);
+      const int progWidth = renderer.getTextWidth(UI_10_FONT_ID, prog.c_str());
+      renderer.drawText(UI_10_FONT_ID, pageWidth - RIGHT_MARGIN - progWidth, y + 32, prog.c_str(), i != selectorIndex);
     }
   }
 }

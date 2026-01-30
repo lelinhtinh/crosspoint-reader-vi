@@ -16,13 +16,13 @@
 namespace {
 // Folders/files to hide from the web interface file browser
 // Note: Items starting with "." are automatically hidden
-const char* HIDDEN_ITEMS[] = {"System Volume Information", "XTCache"};
+const char *HIDDEN_ITEMS[] = {"System Volume Information", "XTCache"};
 constexpr size_t HIDDEN_ITEMS_COUNT = sizeof(HIDDEN_ITEMS) / sizeof(HIDDEN_ITEMS[0]);
 constexpr uint16_t UDP_PORTS[] = {54982, 48123, 39001, 44044, 59678};
 constexpr uint16_t LOCAL_UDP_PORT = 8134;
 
 // Static pointer for WebSocket callback (WebSocketsServer requires C-style callback)
-CrossPointWebServer* wsInstance = nullptr;
+CrossPointWebServer *wsInstance = nullptr;
 
 // WebSocket upload state
 FsFile wsUploadFile;
@@ -37,14 +37,14 @@ size_t wsLastCompleteSize = 0;
 unsigned long wsLastCompleteAt = 0;
 
 // Helper function to clear epub cache after upload
-void clearEpubCacheIfNeeded(const String& filePath) {
+void clearEpubCacheIfNeeded(const String &filePath) {
   // Only clear cache for .epub files
   if (StringUtils::checkFileExtension(filePath, ".epub")) {
     Epub(filePath.c_str(), "/.crosspoint").clearCache();
     Serial.printf("[%lu] [WEB] Cleared epub cache for: %s\n", millis(), filePath.c_str());
   }
 }
-}  // namespace
+} // namespace
 
 // File listing page template - now using generated headers:
 // - HomePageHtml (from html/HomePage.html)
@@ -63,7 +63,7 @@ void CrossPointWebServer::begin() {
   // Check if we have a valid network connection (either STA connected or AP mode)
   const wifi_mode_t wifiMode = WiFi.getMode();
   const bool isStaConnected = (wifiMode & WIFI_MODE_STA) && (WiFi.status() == WL_CONNECTED);
-  const bool isInApMode = (wifiMode & WIFI_MODE_AP) && (WiFi.softAPgetStationNum() >= 0);  // AP is running
+  const bool isInApMode = (wifiMode & WIFI_MODE_AP) && (WiFi.softAPgetStationNum() >= 0); // AP is running
 
   if (!isStaConnected && !isInApMode) {
     Serial.printf("[%lu] [WEB] Cannot start webserver - no valid network (mode=%d, status=%d)\n", millis(), wifiMode,
@@ -120,7 +120,7 @@ void CrossPointWebServer::begin() {
   // Start WebSocket server for fast binary uploads
   Serial.printf("[%lu] [WEB] Starting WebSocket server on port %d...\n", millis(), wsPort);
   wsServer.reset(new WebSocketsServer(wsPort));
-  wsInstance = const_cast<CrossPointWebServer*>(this);
+  wsInstance = const_cast<CrossPointWebServer *>(this);
   wsServer->begin();
   wsServer->onEvent(wsEventCallback);
   Serial.printf("[%lu] [WEB] WebSocket server started\n", millis());
@@ -147,7 +147,7 @@ void CrossPointWebServer::stop() {
   }
 
   Serial.printf("[%lu] [WEB] STOP INITIATED - setting running=false first\n", millis());
-  running = false;  // Set this FIRST to prevent handleClient from using server
+  running = false; // Set this FIRST to prevent handleClient from using server
 
   Serial.printf("[%lu] [WEB] [MEM] Free heap before stop: %d bytes\n", millis(), ESP.getFreeHeap());
 
@@ -231,7 +231,7 @@ void CrossPointWebServer::handleClient() {
           }
           String message = "crosspoint (on " + hostname + ");" + String(wsPort);
           udp.beginPacket(udp.remoteIP(), udp.remotePort());
-          udp.write(reinterpret_cast<const uint8_t*>(message.c_str()), message.length());
+          udp.write(reinterpret_cast<const uint8_t *>(message.c_str()), message.length());
           udp.endPacket();
         }
       }
@@ -279,7 +279,7 @@ void CrossPointWebServer::handleStatus() const {
   server->send(200, "application/json", json);
 }
 
-void CrossPointWebServer::scanFiles(const char* path, const std::function<void(FileInfo)>& callback) const {
+void CrossPointWebServer::scanFiles(const char *path, const std::function<void(FileInfo)> &callback) const {
   FsFile root = SdMan.open(path);
   if (!root) {
     Serial.printf("[%lu] [WEB] Failed to open directory: %s\n", millis(), path);
@@ -330,14 +330,14 @@ void CrossPointWebServer::scanFiles(const char* path, const std::function<void(F
     }
 
     file.close();
-    yield();               // Yield to allow WiFi and other tasks to process during long scans
-    esp_task_wdt_reset();  // Reset watchdog to prevent timeout on large directories
+    yield();              // Yield to allow WiFi and other tasks to process during long scans
+    esp_task_wdt_reset(); // Reset watchdog to prevent timeout on large directories
     file = root.openNextFile();
   }
   root.close();
 }
 
-bool CrossPointWebServer::isEpubFile(const String& filename) const {
+bool CrossPointWebServer::isEpubFile(const String &filename) const {
   String lower = filename;
   lower.toLowerCase();
   return lower.endsWith(".epub");
@@ -368,7 +368,7 @@ void CrossPointWebServer::handleFileListData() const {
   bool seenFirst = false;
   JsonDocument doc;
 
-  scanFiles(currentPath.c_str(), [this, &output, &doc, seenFirst](const FileInfo& info) mutable {
+  scanFiles(currentPath.c_str(), [this, &output, &doc, seenFirst](const FileInfo &info) mutable {
     doc.clear();
     doc["name"] = info.name;
     doc["size"] = info.size;
@@ -469,7 +469,7 @@ static String uploadError = "";
 // Upload write buffer - batches small writes into larger SD card operations
 // 4KB is a good balance: large enough to reduce syscall overhead, small enough
 // to keep individual write times short and avoid watchdog issues
-constexpr size_t UPLOAD_BUFFER_SIZE = 4096;  // 4KB buffer
+constexpr size_t UPLOAD_BUFFER_SIZE = 4096; // 4KB buffer
 static uint8_t uploadBuffer[UPLOAD_BUFFER_SIZE];
 static size_t uploadBufferPos = 0;
 
@@ -480,12 +480,12 @@ static size_t writeCount = 0;
 
 static bool flushUploadBuffer() {
   if (uploadBufferPos > 0 && uploadFile) {
-    esp_task_wdt_reset();  // Reset watchdog before potentially slow SD write
+    esp_task_wdt_reset(); // Reset watchdog before potentially slow SD write
     const unsigned long writeStart = millis();
     const size_t written = uploadFile.write(uploadBuffer, uploadBufferPos);
     totalWriteTime += millis() - writeStart;
     writeCount++;
-    esp_task_wdt_reset();  // Reset watchdog after SD write
+    esp_task_wdt_reset(); // Reset watchdog after SD write
 
     if (written != uploadBufferPos) {
       Serial.printf("[%lu] [WEB] [UPLOAD] Buffer flush failed: expected %d, wrote %d\n", millis(), uploadBufferPos,
@@ -510,7 +510,7 @@ void CrossPointWebServer::handleUpload() const {
     return;
   }
 
-  const HTTPUpload& upload = server->upload();
+  const HTTPUpload &upload = server->upload();
 
   if (upload.status == UPLOAD_FILE_START) {
     // Reset watchdog - this is the critical 1% crash point
@@ -548,7 +548,8 @@ void CrossPointWebServer::handleUpload() const {
 
     // Create file path
     String filePath = uploadPath;
-    if (!filePath.endsWith("/")) filePath += "/";
+    if (!filePath.endsWith("/"))
+      filePath += "/";
     filePath += uploadFileName;
 
     // Check if file already exists - SD operations can be slow
@@ -573,7 +574,7 @@ void CrossPointWebServer::handleUpload() const {
     if (uploadFile && uploadError.isEmpty()) {
       // Buffer incoming data and flush when buffer is full
       // This reduces SD card write operations and improves throughput
-      const uint8_t* data = upload.buf;
+      const uint8_t *data = upload.buf;
       size_t remaining = upload.currentSize;
 
       while (remaining > 0) {
@@ -626,18 +627,20 @@ void CrossPointWebServer::handleUpload() const {
 
         // Clear epub cache to prevent stale metadata issues when overwriting files
         String filePath = uploadPath;
-        if (!filePath.endsWith("/")) filePath += "/";
+        if (!filePath.endsWith("/"))
+          filePath += "/";
         filePath += uploadFileName;
         clearEpubCacheIfNeeded(filePath);
       }
     }
   } else if (upload.status == UPLOAD_FILE_ABORTED) {
-    uploadBufferPos = 0;  // Discard buffered data
+    uploadBufferPos = 0; // Discard buffered data
     if (uploadFile) {
       uploadFile.close();
       // Try to delete the incomplete file
       String filePath = uploadPath;
-      if (!filePath.endsWith("/")) filePath += "/";
+      if (!filePath.endsWith("/"))
+        filePath += "/";
       filePath += uploadFileName;
       SdMan.remove(filePath.c_str());
     }
@@ -684,7 +687,8 @@ void CrossPointWebServer::handleCreateFolder() const {
 
   // Build full folder path
   String folderPath = parentPath;
-  if (!folderPath.endsWith("/")) folderPath += "/";
+  if (!folderPath.endsWith("/"))
+    folderPath += "/";
   folderPath += folderName;
 
   Serial.printf("[%lu] [WEB] Creating folder: %s\n", millis(), folderPath.c_str());
@@ -788,7 +792,7 @@ void CrossPointWebServer::handleDelete() const {
 }
 
 // WebSocket callback trampoline
-void CrossPointWebServer::wsEventCallback(uint8_t num, WStype_t type, uint8_t* payload, size_t length) {
+void CrossPointWebServer::wsEventCallback(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   if (wsInstance) {
     wsInstance->onWebSocketEvent(num, type, payload, length);
   }
@@ -800,139 +804,143 @@ void CrossPointWebServer::wsEventCallback(uint8_t num, WStype_t type, uint8_t* p
 //   2. Client sends BINARY messages with file data chunks
 //   3. Server sends TEXT "PROGRESS:<received>:<total>" after each chunk
 //   4. Server sends TEXT "DONE" or "ERROR:<message>" when complete
-void CrossPointWebServer::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length) {
+void CrossPointWebServer::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.printf("[%lu] [WS] Client %u disconnected\n", millis(), num);
-      // Clean up any in-progress upload
-      if (wsUploadInProgress && wsUploadFile) {
-        wsUploadFile.close();
-        // Delete incomplete file
-        String filePath = wsUploadPath;
-        if (!filePath.endsWith("/")) filePath += "/";
-        filePath += wsUploadFileName;
-        SdMan.remove(filePath.c_str());
-        Serial.printf("[%lu] [WS] Deleted incomplete upload: %s\n", millis(), filePath.c_str());
-      }
-      wsUploadInProgress = false;
-      break;
-
-    case WStype_CONNECTED: {
-      Serial.printf("[%lu] [WS] Client %u connected\n", millis(), num);
-      break;
+  case WStype_DISCONNECTED:
+    Serial.printf("[%lu] [WS] Client %u disconnected\n", millis(), num);
+    // Clean up any in-progress upload
+    if (wsUploadInProgress && wsUploadFile) {
+      wsUploadFile.close();
+      // Delete incomplete file
+      String filePath = wsUploadPath;
+      if (!filePath.endsWith("/"))
+        filePath += "/";
+      filePath += wsUploadFileName;
+      SdMan.remove(filePath.c_str());
+      Serial.printf("[%lu] [WS] Deleted incomplete upload: %s\n", millis(), filePath.c_str());
     }
+    wsUploadInProgress = false;
+    break;
 
-    case WStype_TEXT: {
-      // Parse control messages
-      String msg = String((char*)payload);
-      Serial.printf("[%lu] [WS] Text from client %u: %s\n", millis(), num, msg.c_str());
+  case WStype_CONNECTED: {
+    Serial.printf("[%lu] [WS] Client %u connected\n", millis(), num);
+    break;
+  }
 
-      if (msg.startsWith("START:")) {
-        // Parse: START:<filename>:<size>:<path>
-        int firstColon = msg.indexOf(':', 6);
-        int secondColon = msg.indexOf(':', firstColon + 1);
+  case WStype_TEXT: {
+    // Parse control messages
+    String msg = String((char *)payload);
+    Serial.printf("[%lu] [WS] Text from client %u: %s\n", millis(), num, msg.c_str());
 
-        if (firstColon > 0 && secondColon > 0) {
-          wsUploadFileName = msg.substring(6, firstColon);
-          wsUploadSize = msg.substring(firstColon + 1, secondColon).toInt();
-          wsUploadPath = msg.substring(secondColon + 1);
-          wsUploadReceived = 0;
-          wsUploadStartTime = millis();
+    if (msg.startsWith("START:")) {
+      // Parse: START:<filename>:<size>:<path>
+      int firstColon = msg.indexOf(':', 6);
+      int secondColon = msg.indexOf(':', firstColon + 1);
 
-          // Ensure path is valid
-          if (!wsUploadPath.startsWith("/")) wsUploadPath = "/" + wsUploadPath;
-          if (wsUploadPath.length() > 1 && wsUploadPath.endsWith("/")) {
-            wsUploadPath = wsUploadPath.substring(0, wsUploadPath.length() - 1);
-          }
+      if (firstColon > 0 && secondColon > 0) {
+        wsUploadFileName = msg.substring(6, firstColon);
+        wsUploadSize = msg.substring(firstColon + 1, secondColon).toInt();
+        wsUploadPath = msg.substring(secondColon + 1);
+        wsUploadReceived = 0;
+        wsUploadStartTime = millis();
 
-          // Build file path
-          String filePath = wsUploadPath;
-          if (!filePath.endsWith("/")) filePath += "/";
-          filePath += wsUploadFileName;
-
-          Serial.printf("[%lu] [WS] Starting upload: %s (%d bytes) to %s\n", millis(), wsUploadFileName.c_str(),
-                        wsUploadSize, filePath.c_str());
-
-          // Check if file exists and remove it
-          esp_task_wdt_reset();
-          if (SdMan.exists(filePath.c_str())) {
-            SdMan.remove(filePath.c_str());
-          }
-
-          // Open file for writing
-          esp_task_wdt_reset();
-          if (!SdMan.openFileForWrite("WS", filePath, wsUploadFile)) {
-            wsServer->sendTXT(num, "ERROR:Failed to create file");
-            wsUploadInProgress = false;
-            return;
-          }
-          esp_task_wdt_reset();
-
-          wsUploadInProgress = true;
-          wsServer->sendTXT(num, "READY");
-        } else {
-          wsServer->sendTXT(num, "ERROR:Invalid START format");
+        // Ensure path is valid
+        if (!wsUploadPath.startsWith("/"))
+          wsUploadPath = "/" + wsUploadPath;
+        if (wsUploadPath.length() > 1 && wsUploadPath.endsWith("/")) {
+          wsUploadPath = wsUploadPath.substring(0, wsUploadPath.length() - 1);
         }
-      }
-      break;
-    }
 
-    case WStype_BIN: {
-      if (!wsUploadInProgress || !wsUploadFile) {
-        wsServer->sendTXT(num, "ERROR:No upload in progress");
-        return;
-      }
-
-      // Write binary data directly to file
-      esp_task_wdt_reset();
-      size_t written = wsUploadFile.write(payload, length);
-      esp_task_wdt_reset();
-
-      if (written != length) {
-        wsUploadFile.close();
-        wsUploadInProgress = false;
-        wsServer->sendTXT(num, "ERROR:Write failed - disk full?");
-        return;
-      }
-
-      wsUploadReceived += written;
-
-      // Send progress update (every 64KB or at end)
-      static size_t lastProgressSent = 0;
-      if (wsUploadReceived - lastProgressSent >= 65536 || wsUploadReceived >= wsUploadSize) {
-        String progress = "PROGRESS:" + String(wsUploadReceived) + ":" + String(wsUploadSize);
-        wsServer->sendTXT(num, progress);
-        lastProgressSent = wsUploadReceived;
-      }
-
-      // Check if upload complete
-      if (wsUploadReceived >= wsUploadSize) {
-        wsUploadFile.close();
-        wsUploadInProgress = false;
-
-        wsLastCompleteName = wsUploadFileName;
-        wsLastCompleteSize = wsUploadSize;
-        wsLastCompleteAt = millis();
-
-        unsigned long elapsed = millis() - wsUploadStartTime;
-        float kbps = (elapsed > 0) ? (wsUploadSize / 1024.0) / (elapsed / 1000.0) : 0;
-
-        Serial.printf("[%lu] [WS] Upload complete: %s (%d bytes in %lu ms, %.1f KB/s)\n", millis(),
-                      wsUploadFileName.c_str(), wsUploadSize, elapsed, kbps);
-
-        // Clear epub cache to prevent stale metadata issues when overwriting files
+        // Build file path
         String filePath = wsUploadPath;
-        if (!filePath.endsWith("/")) filePath += "/";
+        if (!filePath.endsWith("/"))
+          filePath += "/";
         filePath += wsUploadFileName;
-        clearEpubCacheIfNeeded(filePath);
 
-        wsServer->sendTXT(num, "DONE");
-        lastProgressSent = 0;
+        Serial.printf("[%lu] [WS] Starting upload: %s (%d bytes) to %s\n", millis(), wsUploadFileName.c_str(),
+                      wsUploadSize, filePath.c_str());
+
+        // Check if file exists and remove it
+        esp_task_wdt_reset();
+        if (SdMan.exists(filePath.c_str())) {
+          SdMan.remove(filePath.c_str());
+        }
+
+        // Open file for writing
+        esp_task_wdt_reset();
+        if (!SdMan.openFileForWrite("WS", filePath, wsUploadFile)) {
+          wsServer->sendTXT(num, "ERROR:Failed to create file");
+          wsUploadInProgress = false;
+          return;
+        }
+        esp_task_wdt_reset();
+
+        wsUploadInProgress = true;
+        wsServer->sendTXT(num, "READY");
+      } else {
+        wsServer->sendTXT(num, "ERROR:Invalid START format");
       }
-      break;
+    }
+    break;
+  }
+
+  case WStype_BIN: {
+    if (!wsUploadInProgress || !wsUploadFile) {
+      wsServer->sendTXT(num, "ERROR:No upload in progress");
+      return;
     }
 
-    default:
-      break;
+    // Write binary data directly to file
+    esp_task_wdt_reset();
+    size_t written = wsUploadFile.write(payload, length);
+    esp_task_wdt_reset();
+
+    if (written != length) {
+      wsUploadFile.close();
+      wsUploadInProgress = false;
+      wsServer->sendTXT(num, "ERROR:Write failed - disk full?");
+      return;
+    }
+
+    wsUploadReceived += written;
+
+    // Send progress update (every 64KB or at end)
+    static size_t lastProgressSent = 0;
+    if (wsUploadReceived - lastProgressSent >= 65536 || wsUploadReceived >= wsUploadSize) {
+      String progress = "PROGRESS:" + String(wsUploadReceived) + ":" + String(wsUploadSize);
+      wsServer->sendTXT(num, progress);
+      lastProgressSent = wsUploadReceived;
+    }
+
+    // Check if upload complete
+    if (wsUploadReceived >= wsUploadSize) {
+      wsUploadFile.close();
+      wsUploadInProgress = false;
+
+      wsLastCompleteName = wsUploadFileName;
+      wsLastCompleteSize = wsUploadSize;
+      wsLastCompleteAt = millis();
+
+      unsigned long elapsed = millis() - wsUploadStartTime;
+      float kbps = (elapsed > 0) ? (wsUploadSize / 1024.0) / (elapsed / 1000.0) : 0;
+
+      Serial.printf("[%lu] [WS] Upload complete: %s (%d bytes in %lu ms, %.1f KB/s)\n", millis(),
+                    wsUploadFileName.c_str(), wsUploadSize, elapsed, kbps);
+
+      // Clear epub cache to prevent stale metadata issues when overwriting files
+      String filePath = wsUploadPath;
+      if (!filePath.endsWith("/"))
+        filePath += "/";
+      filePath += wsUploadFileName;
+      clearEpubCacheIfNeeded(filePath);
+
+      wsServer->sendTXT(num, "DONE");
+      lastProgressSent = 0;
+    }
+    break;
+  }
+
+  default:
+    break;
   }
 }

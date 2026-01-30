@@ -12,12 +12,12 @@ class Txt {
   bool loaded = false;
   size_t fileSize = 0;
 
- public:
+public:
   explicit Txt(std::string path, std::string cacheBasePath);
 
   bool load();
-  [[nodiscard]] const std::string& getPath() const { return filepath; }
-  [[nodiscard]] const std::string& getCachePath() const { return cachePath; }
+  [[nodiscard]] const std::string &getPath() const { return filepath; }
+  [[nodiscard]] const std::string &getCachePath() const { return cachePath; }
   [[nodiscard]] std::string getTitle() const;
   [[nodiscard]] size_t getFileSize() const { return fileSize; }
 
@@ -29,5 +29,5 @@ class Txt {
   [[nodiscard]] std::string findCoverImage() const;
 
   // Read content from file
-  [[nodiscard]] bool readContent(uint8_t* buffer, size_t offset, size_t length) const;
+  [[nodiscard]] bool readContent(uint8_t *buffer, size_t offset, size_t length) const;
 };

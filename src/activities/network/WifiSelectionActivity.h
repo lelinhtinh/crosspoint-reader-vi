@@ -16,19 +16,19 @@ struct WifiNetworkInfo {
   std::string ssid;
   int32_t rssi;
   bool isEncrypted;
-  bool hasSavedPassword;  // Whether we have saved credentials for this network
+  bool hasSavedPassword; // Whether we have saved credentials for this network
 };
 
 // WiFi selection states
 enum class WifiSelectionState {
-  SCANNING,           // Scanning for networks
-  NETWORK_LIST,       // Displaying available networks
-  PASSWORD_ENTRY,     // Entering password for selected network
-  CONNECTING,         // Attempting to connect
-  CONNECTED,          // Successfully connected
-  SAVE_PROMPT,        // Asking user if they want to save the password
-  CONNECTION_FAILED,  // Connection failed
-  FORGET_PROMPT       // Asking user if they want to forget the network
+  SCANNING,          // Scanning for networks
+  NETWORK_LIST,      // Displaying available networks
+  PASSWORD_ENTRY,    // Entering password for selected network
+  CONNECTING,        // Attempting to connect
+  CONNECTED,         // Successfully connected
+  SAVE_PROMPT,       // Asking user if they want to save the password
+  CONNECTION_FAILED, // Connection failed
+  FORGET_PROMPT      // Asking user if they want to forget the network
 };
 
 /**
@@ -76,7 +76,7 @@ class WifiSelectionActivity final : public ActivityWithSubactivity {
   static constexpr unsigned long CONNECTION_TIMEOUT_MS = 15000;
   unsigned long connectionStartTime = 0;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void render() const;
   void renderNetworkList() const;
@@ -94,14 +94,14 @@ class WifiSelectionActivity final : public ActivityWithSubactivity {
   void checkConnectionStatus();
   std::string getSignalStrengthIndicator(int32_t rssi) const;
 
- public:
-  explicit WifiSelectionActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                 const std::function<void(bool connected)>& onComplete)
+public:
+  explicit WifiSelectionActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
+                                 const std::function<void(bool connected)> &onComplete)
       : ActivityWithSubactivity("WifiSelection", renderer, mappedInput), onComplete(onComplete) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;
 
   // Get the IP address after successful connection
-  const std::string& getConnectedIP() const { return connectedIP; }
+  const std::string &getConnectedIP() const { return connectedIP; }
 };

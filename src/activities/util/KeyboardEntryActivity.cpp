@@ -4,17 +4,17 @@
 #include "fontIds.h"
 
 // Keyboard layouts - lowercase
-const char* const KeyboardEntryActivity::keyboard[NUM_ROWS] = {
+const char *const KeyboardEntryActivity::keyboard[NUM_ROWS] = {
     "`1234567890-=", "qwertyuiop[]\\", "asdfghjkl;'", "zxcvbnm,./",
-    "^  _____<OK"  // ^ = shift, _ = space, < = backspace, OK = done
+    "^  _____<OK" // ^ = shift, _ = space, < = backspace, OK = done
 };
 
 // Keyboard layouts - uppercase/symbols
-const char* const KeyboardEntryActivity::keyboardShift[NUM_ROWS] = {"~!@#$%^&*()_+", "QWERTYUIOP{}|", "ASDFGHJKL:\"",
+const char *const KeyboardEntryActivity::keyboardShift[NUM_ROWS] = {"~!@#$%^&*()_+", "QWERTYUIOP{}|", "ASDFGHJKL:\"",
                                                                     "ZXCVBNM<>?", "SPECIAL ROW"};
 
-void KeyboardEntryActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<KeyboardEntryActivity*>(param);
+void KeyboardEntryActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<KeyboardEntryActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -39,10 +39,10 @@ void KeyboardEntryActivity::onEnter() {
   updateRequired = true;
 
   xTaskCreate(&KeyboardEntryActivity::taskTrampoline, "KeyboardEntryActivity",
-              2048,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              2048,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 }
 
@@ -60,30 +60,33 @@ void KeyboardEntryActivity::onExit() {
 }
 
 int KeyboardEntryActivity::getRowLength(const int row) const {
-  if (row < 0 || row >= NUM_ROWS) return 0;
+  if (row < 0 || row >= NUM_ROWS)
+    return 0;
 
   // Return actual length of each row based on keyboard layout
   switch (row) {
-    case 0:
-      return 13;  // `1234567890-=
-    case 1:
-      return 13;  // qwertyuiop[]backslash
-    case 2:
-      return 11;  // asdfghjkl;'
-    case 3:
-      return 10;  // zxcvbnm,./
-    case 4:
-      return 10;  // shift (2 wide), space (5 wide), backspace (2 wide), OK
-    default:
-      return 0;
+  case 0:
+    return 13; // `1234567890-=
+  case 1:
+    return 13; // qwertyuiop[]backslash
+  case 2:
+    return 11; // asdfghjkl;'
+  case 3:
+    return 10; // zxcvbnm,./
+  case 4:
+    return 10; // shift (2 wide), space (5 wide), backspace (2 wide), OK
+  default:
+    return 0;
   }
 }
 
 char KeyboardEntryActivity::getSelectedChar() const {
-  const char* const* layout = shiftActive ? keyboardShift : keyboard;
+  const char *const *layout = shiftActive ? keyboardShift : keyboard;
 
-  if (selectedRow < 0 || selectedRow >= NUM_ROWS) return '\0';
-  if (selectedCol < 0 || selectedCol >= getRowLength(selectedRow)) return '\0';
+  if (selectedRow < 0 || selectedRow >= NUM_ROWS)
+    return '\0';
+  if (selectedCol < 0 || selectedCol >= getRowLength(selectedRow))
+    return '\0';
 
   return layout[selectedRow][selectedCol];
 }
@@ -144,12 +147,14 @@ void KeyboardEntryActivity::loop() {
       selectedRow--;
       // Clamp column to valid range for new row
       const int maxCol = getRowLength(selectedRow) - 1;
-      if (selectedCol > maxCol) selectedCol = maxCol;
+      if (selectedCol > maxCol)
+        selectedCol = maxCol;
     } else {
       // Wrap to bottom row
       selectedRow = NUM_ROWS - 1;
       const int maxCol = getRowLength(selectedRow) - 1;
-      if (selectedCol > maxCol) selectedCol = maxCol;
+      if (selectedCol > maxCol)
+        selectedCol = maxCol;
     }
     updateRequired = true;
   }
@@ -158,12 +163,14 @@ void KeyboardEntryActivity::loop() {
     if (selectedRow < NUM_ROWS - 1) {
       selectedRow++;
       const int maxCol = getRowLength(selectedRow) - 1;
-      if (selectedCol > maxCol) selectedCol = maxCol;
+      if (selectedCol > maxCol)
+        selectedCol = maxCol;
     } else {
       // Wrap to top row
       selectedRow = 0;
       const int maxCol = getRowLength(selectedRow) - 1;
-      if (selectedCol > maxCol) selectedCol = maxCol;
+      if (selectedCol > maxCol)
+        selectedCol = maxCol;
     }
     updateRequired = true;
   }
@@ -297,7 +304,7 @@ void KeyboardEntryActivity::render() const {
   constexpr int keyHeight = 18;
   constexpr int keySpacing = 3;
 
-  const char* const* layout = shiftActive ? keyboardShift : keyboard;
+  const char *const *layout = shiftActive ? keyboardShift : keyboard;
 
   // Calculate left margin to center the longest row (13 keys)
   constexpr int maxRowWidth = KEYS_PER_ROW * (keyWidth + keySpacing);
@@ -362,7 +369,7 @@ void KeyboardEntryActivity::render() const {
   renderer.displayBuffer();
 }
 
-void KeyboardEntryActivity::renderItemWithSelector(const int x, const int y, const char* item,
+void KeyboardEntryActivity::renderItemWithSelector(const int x, const int y, const char *item,
                                                    const bool isSelected) const {
   if (isSelected) {
     const int itemWidth = renderer.getTextWidth(UI_10_FONT_ID, item);

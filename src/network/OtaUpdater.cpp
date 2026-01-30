@@ -10,7 +10,7 @@ namespace {
 constexpr char latestReleaseUrl[] = "https://api.github.com/repos/lelinhtinh/crosspoint-reader-vi/releases/latest";
 
 /* This is buffer and size holder to keep upcoming data from latestReleaseUrl */
-char* local_buf;
+char *local_buf;
 int output_len;
 
 /*
@@ -19,16 +19,17 @@ int output_len;
  * To manage this obstacle, don't include anything, just extern and it will point correct one.
  */
 extern "C" {
-extern esp_err_t esp_crt_bundle_attach(void* conf);
+extern esp_err_t esp_crt_bundle_attach(void *conf);
 }
 
 esp_err_t http_client_set_header_cb(esp_http_client_handle_t http_client) {
   return esp_http_client_set_header(http_client, "User-Agent", "CrossPoint-ESP32-" CROSSPOINT_VERSION);
 }
 
-esp_err_t event_handler(esp_http_client_event_t* event) {
+esp_err_t event_handler(esp_http_client_event_t *event) {
   /* We do interested in only HTTP_EVENT_ON_DATA event only */
-  if (event->event_id != HTTP_EVENT_ON_DATA) return ESP_OK;
+  if (event->event_id != HTTP_EVENT_ON_DATA)
+    return ESP_OK;
 
   if (!esp_http_client_is_chunked_response(event->client)) {
     int content_len = esp_http_client_get_content_length(event->client);
@@ -36,7 +37,7 @@ esp_err_t event_handler(esp_http_client_event_t* event) {
 
     if (local_buf == NULL) {
       /* local_buf life span is tracked by caller checkForUpdate */
-      local_buf = static_cast<char*>(calloc(content_len + 1, sizeof(char)));
+      local_buf = static_cast<char *>(calloc(content_len + 1, sizeof(char)));
       output_len = 0;
       if (local_buf == NULL) {
         Serial.printf("[%lu] [OTA] HTTP Client Out of Memory Failed, Allocation %d\n", millis(), content_len);
@@ -59,6 +60,8 @@ esp_err_t event_handler(esp_http_client_event_t* event) {
 } /* event_handler */
 } /* namespace */
 
+#include "network/semver.h"
+
 OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
   JsonDocument filter;
   esp_err_t esp_err;
@@ -77,7 +80,7 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
 
   /* To track life time of local_buf, dtor will be called on exit from that function */
   struct localBufCleaner {
-    char** bufPtr;
+    char **bufPtr;
     ~localBufCleaner() {
       if (*bufPtr) {
         free(*bufPtr);
@@ -135,60 +138,90 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
 
   latestVersion = doc["tag_name"].as<std::string>();
 
+  bool foundFirmware = false;
   for (int i = 0; i < doc["assets"].size(); i++) {
     if (doc["assets"][i]["name"] == "firmware.bin") {
       otaUrl = doc["assets"][i]["browser_download_url"].as<std::string>();
       otaSize = doc["assets"][i]["size"].as<size_t>();
       totalSize = otaSize;
-      updateAvailable = true;
+      foundFirmware = true;
       break;
     }
   }
 
-  if (!updateAvailable) {
+  if (!foundFirmware) {
     Serial.printf("[%lu] [OTA] No firmware.bin asset found\n", millis());
     return NO_UPDATE;
   }
 
-  Serial.printf("[%lu] [OTA] Found update: %s\n", millis(), latestVersion.c_str());
+  // Parse semver for debug and to determine if it's actually newer
+  int latestMajor = 0, latestMinor = 0, latestPatch = 0;
+  int currentMajor = 0, currentMinor = 0, currentPatch = 0;
+  parseSemver(latestVersion, latestMajor, latestMinor, latestPatch);
+  parseSemver(std::string(CROSSPOINT_VERSION), currentMajor, currentMinor, currentPatch);
+
+  Serial.printf("[%lu] [OTA] Found release: %s (parsed %d.%d.%d) | Current: %s (parsed %d.%d.%d)\n",
+                millis(), latestVersion.c_str(), latestMajor, latestMinor, latestPatch, CROSSPOINT_VERSION,
+                currentMajor, currentMinor, currentPatch);
+
+  // Only mark updateAvailable if the remote version is actually newer
+  if (latestMajor == 0 && latestMinor == 0 && latestPatch == 0 && currentMajor == 0 && currentMinor == 0 &&
+      currentPatch == 0) {
+    // fallback to string comparison
+    updateAvailable = latestVersion > std::string(CROSSPOINT_VERSION);
+  } else {
+    if (latestMajor != currentMajor)
+      updateAvailable = latestMajor > currentMajor;
+    else if (latestMinor != currentMinor)
+      updateAvailable = latestMinor > currentMinor;
+    else
+      updateAvailable = latestPatch > currentPatch;
+  }
+
+  if (!updateAvailable) {
+    Serial.printf("[%lu] [OTA] Latest release is not newer; skipping update\n", millis());
+    return NO_UPDATE;
+  }
+
+  Serial.printf("[%lu] [OTA] Update available: %s (size %zu)\n", millis(), latestVersion.c_str(), otaSize);
   return OK;
 }
 
+
 bool OtaUpdater::isUpdateNewer() const {
-  if (!updateAvailable || latestVersion.empty() || latestVersion == CROSSPOINT_VERSION) {
+  if (latestVersion.empty()) {
     return false;
   }
 
-  int currentMajor, currentMinor, currentPatch;
-  int latestMajor, latestMinor, latestPatch;
+  // If versions are identical string-wise, no update
+  if (latestVersion == CROSSPOINT_VERSION) {
+    return false;
+  }
 
-  const auto currentVersion = CROSSPOINT_VERSION;
+  int currentMajor = 0, currentMinor = 0, currentPatch = 0;
+  int latestMajor = 0, latestMinor = 0, latestPatch = 0;
 
-  // semantic version check (only match on 3 segments)
-  sscanf(latestVersion.c_str(), "%d.%d.%d", &latestMajor, &latestMinor, &latestPatch);
-  sscanf(currentVersion, "%d.%d.%d", &currentMajor, &currentMinor, &currentPatch);
+  parseSemver(latestVersion, latestMajor, latestMinor, latestPatch);
+  parseSemver(std::string(CROSSPOINT_VERSION), currentMajor, currentMinor, currentPatch);
 
-  /*
-   * Compare major versions.
-   * If they differ, return true if latest major version greater than current major version
-   * otherwise return false.
-   */
-  if (latestMajor != currentMajor) return latestMajor > currentMajor;
+  Serial.printf("[%lu] [OTA] Comparing parsed: latest=%d.%d.%d current=%d.%d.%d\n", millis(), latestMajor,
+                latestMinor, latestPatch, currentMajor, currentMinor, currentPatch);
 
-  /*
-   * Compare minor versions.
-   * If they differ, return true if latest minor version greater than current minor version
-   * otherwise return false.
-   */
-  if (latestMinor != currentMinor) return latestMinor > currentMinor;
+  // If latest parsed to all zeros and equals current parsed to all zeros, fall back to string compare
+  if (latestMajor == 0 && latestMinor == 0 && latestPatch == 0 && currentMajor == 0 && currentMinor == 0 &&
+      currentPatch == 0) {
+    // basic string comparison (lexicographic) as last resort
+    return latestVersion > std::string(CROSSPOINT_VERSION);
+  }
 
-  /*
-   * Check patch versions.
-   */
+  if (latestMajor != currentMajor)
+    return latestMajor > currentMajor;
+  if (latestMinor != currentMinor)
+    return latestMinor > currentMinor;
   return latestPatch > currentPatch;
 }
 
-const std::string& OtaUpdater::getLatestVersion() const { return latestVersion; }
+const std::string &OtaUpdater::getLatestVersion() const { return latestVersion; }
 
 OtaUpdater::OtaUpdaterError OtaUpdater::installUpdate() {
   if (!isUpdateNewer()) {

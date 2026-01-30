@@ -12,7 +12,7 @@ constexpr uint8_t SECTION_FILE_VERSION = 10;
 constexpr uint32_t HEADER_SIZE = sizeof(uint8_t) + sizeof(int) + sizeof(float) + sizeof(bool) + sizeof(uint8_t) +
                                  sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(bool) +
                                  sizeof(uint32_t);
-}  // namespace
+} // namespace
 
 uint32_t Section::onPageComplete(std::unique_ptr<Page> page) {
   if (!file) {
@@ -51,8 +51,8 @@ void Section::writeSectionFileHeader(const int fontId, const float lineCompressi
   serialization::writePod(file, viewportWidth);
   serialization::writePod(file, viewportHeight);
   serialization::writePod(file, hyphenationEnabled);
-  serialization::writePod(file, pageCount);  // Placeholder for page count (will be initially 0 when written)
-  serialization::writePod(file, static_cast<uint32_t>(0));  // Placeholder for LUT offset
+  serialization::writePod(file, pageCount); // Placeholder for page count (will be initially 0 when written)
+  serialization::writePod(file, static_cast<uint32_t>(0)); // Placeholder for LUT offset
 }
 
 bool Section::loadSectionFile(const int fontId, const float lineCompression, const bool extraParagraphSpacing,
@@ -123,9 +123,9 @@ bool Section::clearCache() const {
 bool Section::createSectionFile(const int fontId, const float lineCompression, const bool extraParagraphSpacing,
                                 const uint8_t paragraphAlignment, const uint16_t viewportWidth,
                                 const uint16_t viewportHeight, const bool hyphenationEnabled,
-                                const std::function<void()>& progressSetupFn,
-                                const std::function<void(int)>& progressFn) {
-  constexpr uint32_t MIN_SIZE_FOR_PROGRESS = 50 * 1024;  // 50KB
+                                const std::function<void()> &progressSetupFn,
+                                const std::function<void(int)> &progressFn) {
+  constexpr uint32_t MIN_SIZE_FOR_PROGRESS = 50 * 1024; // 50KB
   const auto localPath = epub->getSpineItem(spineIndex).href;
   const auto tmpHtmlPath = epub->getCachePath() + "/.tmp_" + std::to_string(spineIndex) + ".html";
 
@@ -141,7 +141,7 @@ bool Section::createSectionFile(const int fontId, const float lineCompression, c
   for (int attempt = 0; attempt < 3 && !success; attempt++) {
     if (attempt > 0) {
       Serial.printf("[%lu] [SCT] Retrying stream (attempt %d)...\n", millis(), attempt + 1);
-      delay(50);  // Brief delay before retry
+      delay(50); // Brief delay before retry
     }
 
     // Remove any incomplete file from previous attempt before retrying
@@ -202,7 +202,7 @@ bool Section::createSectionFile(const int fontId, const float lineCompression, c
   const uint32_t lutOffset = file.position();
   bool hasFailedLutRecords = false;
   // Write LUT
-  for (const uint32_t& pos : lut) {
+  for (const uint32_t &pos : lut) {
     if (pos == 0) {
       hasFailedLutRecords = true;
       break;

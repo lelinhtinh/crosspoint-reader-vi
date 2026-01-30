@@ -30,14 +30,15 @@ TocNavParser::~TocNavParser() {
 
 size_t TocNavParser::write(const uint8_t data) { return write(&data, 1); }
 
-size_t TocNavParser::write(const uint8_t* buffer, const size_t size) {
-  if (!parser) return 0;
+size_t TocNavParser::write(const uint8_t *buffer, const size_t size) {
+  if (!parser)
+    return 0;
 
-  const uint8_t* currentBufferPos = buffer;
+  const uint8_t *currentBufferPos = buffer;
   auto remainingInBuffer = size;
 
   while (remainingInBuffer > 0) {
-    void* const buf = XML_GetBuffer(parser, 1024);
+    void *const buf = XML_GetBuffer(parser, 1024);
     if (!buf) {
       Serial.printf("[%lu] [NAV] Couldn't allocate memory for buffer\n", millis());
       XML_StopParser(parser, XML_FALSE);
@@ -69,8 +70,8 @@ size_t TocNavParser::write(const uint8_t* buffer, const size_t size) {
   return size;
 }
 
-void XMLCALL TocNavParser::startElement(void* userData, const XML_Char* name, const XML_Char** atts) {
-  auto* self = static_cast<TocNavParser*>(userData);
+void XMLCALL TocNavParser::startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  auto *self = static_cast<TocNavParser *>(userData);
 
   // Track HTML structure loosely - we mainly care about finding <nav epub:type="toc">
   if (strcmp(name, "html") == 0) {
@@ -126,8 +127,8 @@ void XMLCALL TocNavParser::startElement(void* userData, const XML_Char* name, co
   }
 }
 
-void XMLCALL TocNavParser::characterData(void* userData, const XML_Char* s, const int len) {
-  auto* self = static_cast<TocNavParser*>(userData);
+void XMLCALL TocNavParser::characterData(void *userData, const XML_Char *s, const int len) {
+  auto *self = static_cast<TocNavParser *>(userData);
 
   // Only collect text when inside an anchor within the TOC nav
   if (self->state == IN_ANCHOR) {
@@ -135,8 +136,8 @@ void XMLCALL TocNavParser::characterData(void* userData, const XML_Char* s, cons
   }
 }
 
-void XMLCALL TocNavParser::endElement(void* userData, const XML_Char* name) {
-  auto* self = static_cast<TocNavParser*>(userData);
+void XMLCALL TocNavParser::endElement(void *userData, const XML_Char *name) {
+  auto *self = static_cast<TocNavParser *>(userData);
 
   if (strcmp(name, "a") == 0 && self->state == IN_ANCHOR) {
     // Create TOC entry when closing anchor tag (we have all data now)
@@ -172,7 +173,7 @@ void XMLCALL TocNavParser::endElement(void* userData, const XML_Char* name) {
     if (self->olDepth == 0) {
       self->state = IN_NAV_TOC;
     } else {
-      self->state = IN_LI;  // Back to parent li
+      self->state = IN_LI; // Back to parent li
     }
     return;
   }

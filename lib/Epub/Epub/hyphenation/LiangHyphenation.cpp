@@ -63,7 +63,7 @@ struct AugmentedWord {
 };
 
 // Encode a single Unicode codepoint into UTF-8 and append to the provided buffer.
-size_t encodeUtf8(uint32_t cp, std::vector<uint8_t>& out) {
+size_t encodeUtf8(uint32_t cp, std::vector<uint8_t> &out) {
   if (cp <= 0x7Fu) {
     out.push_back(static_cast<uint8_t>(cp));
     return 1;
@@ -87,7 +87,7 @@ size_t encodeUtf8(uint32_t cp, std::vector<uint8_t>& out) {
 }
 
 // Build the dotted, lowercase UTF-8 representation plus lookup tables.
-AugmentedWord buildAugmentedWord(const std::vector<CodepointInfo>& cps, const LiangWordConfig& config) {
+AugmentedWord buildAugmentedWord(const std::vector<CodepointInfo> &cps, const LiangWordConfig &config) {
   AugmentedWord word;
   if (cps.empty()) {
     return word;
@@ -99,7 +99,7 @@ AugmentedWord buildAugmentedWord(const std::vector<CodepointInfo>& cps, const Li
   word.charByteOffsets.push_back(0);
   word.bytes.push_back('.');
 
-  for (const auto& info : cps) {
+  for (const auto &info : cps) {
     if (!config.isLetter(info.value)) {
       word.bytes.clear();
       word.charByteOffsets.clear();
@@ -128,14 +128,14 @@ AugmentedWord buildAugmentedWord(const std::vector<CodepointInfo>& cps, const Li
 // - targets: packed relative offsets (1/2/3 bytes) for each transition
 // - levels: optional pointer into the global levels list with packed dist/level pairs
 struct AutomatonState {
-  const uint8_t* data = nullptr;
+  const uint8_t *data = nullptr;
   size_t size = 0;
   size_t addr = 0;
   uint8_t stride = 1;
   size_t childCount = 0;
-  const uint8_t* transitions = nullptr;
-  const uint8_t* targets = nullptr;
-  const uint8_t* levels = nullptr;
+  const uint8_t *transitions = nullptr;
+  const uint8_t *targets = nullptr;
+  const uint8_t *levels = nullptr;
   size_t levelsLen = 0;
 
   bool valid() const { return data != nullptr; }
@@ -146,7 +146,7 @@ struct AutomatonState {
 //   [0..3]  - big-endian root offset
 //   [4....] - node heap containing variable-sized headers + transition data
 struct EmbeddedAutomaton {
-  const uint8_t* data = nullptr;
+  const uint8_t *data = nullptr;
   size_t size = 0;
   uint32_t rootOffset = 0;
 
@@ -154,7 +154,7 @@ struct EmbeddedAutomaton {
 };
 
 // Decode the serialized automaton header and root offset.
-EmbeddedAutomaton parseAutomaton(const SerializedHyphenationPatterns& patterns) {
+EmbeddedAutomaton parseAutomaton(const SerializedHyphenationPatterns &patterns) {
   EmbeddedAutomaton automaton;
   if (!patterns.data || patterns.size < 4) {
     return automaton;
@@ -173,14 +173,14 @@ EmbeddedAutomaton parseAutomaton(const SerializedHyphenationPatterns& patterns) 
 }
 
 // Cache parsed automata per blob pointer to avoid reparsing.
-const EmbeddedAutomaton& getAutomaton(const SerializedHyphenationPatterns& patterns) {
+const EmbeddedAutomaton &getAutomaton(const SerializedHyphenationPatterns &patterns) {
   struct CacheEntry {
-    const SerializedHyphenationPatterns* key;
+    const SerializedHyphenationPatterns *key;
     EmbeddedAutomaton automaton;
   };
   static std::vector<CacheEntry> cache;
 
-  for (const auto& entry : cache) {
+  for (const auto &entry : cache) {
     if (entry.key == &patterns) {
       return entry.automaton;
     }
@@ -191,13 +191,13 @@ const EmbeddedAutomaton& getAutomaton(const SerializedHyphenationPatterns& patte
 }
 
 // Interpret the node located at `addr`, returning transition metadata.
-AutomatonState decodeState(const EmbeddedAutomaton& automaton, size_t addr) {
+AutomatonState decodeState(const EmbeddedAutomaton &automaton, size_t addr) {
   AutomatonState state;
   if (!automaton.valid() || addr >= automaton.size) {
     return state;
   }
 
-  const uint8_t* base = automaton.data + addr;
+  const uint8_t *base = automaton.data + addr;
   size_t remaining = automaton.size - addr;
   size_t pos = 0;
 
@@ -219,7 +219,7 @@ AutomatonState decodeState(const EmbeddedAutomaton& automaton, size_t addr) {
     childCount = base[pos++];
   }
 
-  const uint8_t* levelsPtr = nullptr;
+  const uint8_t *levelsPtr = nullptr;
   size_t levelsLen = 0;
   if (hasLevels) {
     if (pos + 1 >= remaining) {
@@ -240,14 +240,14 @@ AutomatonState decodeState(const EmbeddedAutomaton& automaton, size_t addr) {
   if (pos + childCount > remaining) {
     return AutomatonState{};
   }
-  const uint8_t* transitions = base + pos;
+  const uint8_t *transitions = base + pos;
   pos += childCount;
 
   const size_t targetsBytes = childCount * stride;
   if (pos + targetsBytes > remaining) {
     return AutomatonState{};
   }
-  const uint8_t* targets = base + pos;
+  const uint8_t *targets = base + pos;
 
   state.data = automaton.data;
   state.size = automaton.size;
@@ -262,7 +262,7 @@ AutomatonState decodeState(const EmbeddedAutomaton& automaton, size_t addr) {
 }
 
 // Convert the packed stride-sized delta back into a signed offset.
-int32_t decodeDelta(const uint8_t* buf, uint8_t stride) {
+int32_t decodeDelta(const uint8_t *buf, uint8_t stride) {
   if (stride == 1) {
     return static_cast<int8_t>(buf[0]);
   }
@@ -275,7 +275,7 @@ int32_t decodeDelta(const uint8_t* buf, uint8_t stride) {
 }
 
 // Follow a single byte transition from `state`, decoding the child node on success.
-bool transition(const EmbeddedAutomaton& automaton, const AutomatonState& state, uint8_t letter, AutomatonState& out) {
+bool transition(const EmbeddedAutomaton &automaton, const AutomatonState &state, uint8_t letter, AutomatonState &out) {
   if (!state.valid()) {
     return false;
   }
@@ -286,7 +286,7 @@ bool transition(const EmbeddedAutomaton& automaton, const AutomatonState& state,
     if (state.transitions[idx] != letter) {
       continue;
     }
-    const uint8_t* deltaPtr = state.targets + idx * state.stride;
+    const uint8_t *deltaPtr = state.targets + idx * state.stride;
     const int32_t delta = decodeDelta(deltaPtr, state.stride);
     // Deltas are relative to the current node's address, allowing us to keep all
     // targets within 24 bits while still referencing further nodes in the blob.
@@ -303,7 +303,7 @@ bool transition(const EmbeddedAutomaton& automaton, const AutomatonState& state,
 // Converts odd score positions back into codepoint indexes, honoring min prefix/suffix constraints.
 // Each break corresponds to scores[breakIndex + 1] because of the leading '.' sentinel.
 // Convert odd score entries into hyphen positions while honoring prefix/suffix limits.
-std::vector<size_t> collectBreakIndexes(const std::vector<CodepointInfo>& cps, const std::vector<uint8_t>& scores,
+std::vector<size_t> collectBreakIndexes(const std::vector<CodepointInfo> &cps, const std::vector<uint8_t> &scores,
                                         const size_t minPrefix, const size_t minSuffix) {
   std::vector<size_t> indexes;
   const size_t cpCount = cps.size();
@@ -334,17 +334,17 @@ std::vector<size_t> collectBreakIndexes(const std::vector<CodepointInfo>& cps, c
   return indexes;
 }
 
-}  // namespace
+} // namespace
 
 // Entry point that runs the full Liang pipeline for a single word.
-std::vector<size_t> liangBreakIndexes(const std::vector<CodepointInfo>& cps,
-                                      const SerializedHyphenationPatterns& patterns, const LiangWordConfig& config) {
+std::vector<size_t> liangBreakIndexes(const std::vector<CodepointInfo> &cps,
+                                      const SerializedHyphenationPatterns &patterns, const LiangWordConfig &config) {
   const auto augmented = buildAugmentedWord(cps, config);
   if (augmented.empty()) {
     return {};
   }
 
-  const EmbeddedAutomaton& automaton = getAutomaton(patterns);
+  const EmbeddedAutomaton &automaton = getAutomaton(patterns);
   if (!automaton.valid()) {
     return {};
   }
@@ -365,7 +365,7 @@ std::vector<size_t> liangBreakIndexes(const std::vector<CodepointInfo>& cps,
     for (size_t cursor = byteStart; cursor < augmented.bytes.size(); ++cursor) {
       AutomatonState next;
       if (!transition(automaton, state, augmented.bytes[cursor], next)) {
-        break;  // No more matches for this prefix.
+        break; // No more matches for this prefix.
       }
       state = next;
 
@@ -385,10 +385,10 @@ std::vector<size_t> liangBreakIndexes(const std::vector<CodepointInfo>& cps,
 
           const int32_t boundary = augmented.byteToCharIndex[splitByte];
           if (boundary < 0) {
-            continue;  // Mid-codepoint byte, wait for the next one.
+            continue; // Mid-codepoint byte, wait for the next one.
           }
           if (boundary < 2 || boundary + 2 > static_cast<int32_t>(augmented.charCount())) {
-            continue;  // Skip splits that land in the leading/trailing sentinels.
+            continue; // Skip splits that land in the leading/trailing sentinels.
           }
 
           const size_t idx = static_cast<size_t>(boundary);

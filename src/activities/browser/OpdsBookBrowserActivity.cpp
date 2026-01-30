@@ -18,10 +18,10 @@
 namespace {
 constexpr int PAGE_ITEMS = 23;
 constexpr int SKIP_PAGE_MS = 700;
-}  // namespace
+} // namespace
 
-void OpdsBookBrowserActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<OpdsBookBrowserActivity*>(param);
+void OpdsBookBrowserActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<OpdsBookBrowserActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -32,17 +32,17 @@ void OpdsBookBrowserActivity::onEnter() {
   state = BrowserState::CHECK_WIFI;
   entries.clear();
   navigationHistory.clear();
-  currentPath = "";  // Root path - user provides full URL in settings
+  currentPath = ""; // Root path - user provides full URL in settings
   selectorIndex = 0;
   errorMessage.clear();
   statusMessage = "Checking WiFi...";
   updateRequired = true;
 
   xTaskCreate(&OpdsBookBrowserActivity::taskTrampoline, "OpdsBookBrowserTask",
-              4096,               // Stack size (larger for HTTP operations)
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              4096,              // Stack size (larger for HTTP operations)
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 
   // Check WiFi and connect if needed, then fetch feed
@@ -126,7 +126,7 @@ void OpdsBookBrowserActivity::loop() {
 
     if (mappedInput.wasReleased(MappedInputManager::Button::Confirm)) {
       if (!entries.empty()) {
-        const auto& entry = entries[selectorIndex];
+        const auto &entry = entries[selectorIndex];
         if (entry.type == OpdsEntryType::BOOK) {
           downloadBook(entry);
         } else {
@@ -214,7 +214,7 @@ void OpdsBookBrowserActivity::render() const {
 
   // Browsing state
   // Show appropriate button hint based on selected entry type
-  const char* confirmLabel = "Open";
+  const char *confirmLabel = "Open";
   if (!entries.empty() && entries[selectorIndex].type == OpdsEntryType::BOOK) {
     confirmLabel = "Download";
   }
@@ -231,12 +231,12 @@ void OpdsBookBrowserActivity::render() const {
   renderer.fillRect(0, 60 + (selectorIndex % PAGE_ITEMS) * 30 - 2, pageWidth - 1, 30);
 
   for (size_t i = pageStartIndex; i < entries.size() && i < static_cast<size_t>(pageStartIndex + PAGE_ITEMS); i++) {
-    const auto& entry = entries[i];
+    const auto &entry = entries[i];
 
     // Format display text with type indicator
     std::string displayText;
     if (entry.type == OpdsEntryType::NAVIGATION) {
-      displayText = "> " + entry.title;  // Folder/navigation indicator
+      displayText = "> " + entry.title; // Folder/navigation indicator
     } else {
       // Book: "Title - Author" or just "Title"
       displayText = entry.title;
@@ -253,8 +253,8 @@ void OpdsBookBrowserActivity::render() const {
   renderer.displayBuffer();
 }
 
-void OpdsBookBrowserActivity::fetchFeed(const std::string& path) {
-  const char* serverUrl = SETTINGS.opdsServerUrl;
+void OpdsBookBrowserActivity::fetchFeed(const std::string &path) {
+  const char *serverUrl = SETTINGS.opdsServerUrl;
   if (strlen(serverUrl) == 0) {
     state = BrowserState::ERROR;
     errorMessage = "No server URL configured";
@@ -299,7 +299,7 @@ void OpdsBookBrowserActivity::fetchFeed(const std::string& path) {
   updateRequired = true;
 }
 
-void OpdsBookBrowserActivity::navigateToEntry(const OpdsEntry& entry) {
+void OpdsBookBrowserActivity::navigateToEntry(const OpdsEntry &entry) {
   // Push current path to history before navigating
   navigationHistory.push_back(currentPath);
   currentPath = entry.href;
@@ -332,7 +332,7 @@ void OpdsBookBrowserActivity::navigateBack() {
   }
 }
 
-void OpdsBookBrowserActivity::downloadBook(const OpdsEntry& book) {
+void OpdsBookBrowserActivity::downloadBook(const OpdsEntry &book) {
   state = BrowserState::DOWNLOADING;
   statusMessage = book.title;
   downloadProgress = 0;

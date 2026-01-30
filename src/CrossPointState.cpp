@@ -7,7 +7,7 @@
 namespace {
 constexpr uint8_t STATE_FILE_VERSION = 2;
 constexpr char STATE_FILE[] = "/.crosspoint/state.bin";
-}  // namespace
+} // namespace
 
 CrossPointState CrossPointState::instance;
 

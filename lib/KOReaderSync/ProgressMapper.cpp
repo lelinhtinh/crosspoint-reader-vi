@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-KOReaderPosition ProgressMapper::toKOReader(const std::shared_ptr<Epub>& epub, const CrossPointPosition& pos) {
+KOReaderPosition ProgressMapper::toKOReader(const std::shared_ptr<Epub> &epub, const CrossPointPosition &pos) {
   KOReaderPosition result;
 
   // Calculate page progress within current spine item
@@ -29,7 +29,7 @@ KOReaderPosition ProgressMapper::toKOReader(const std::shared_ptr<Epub>& epub, c
   return result;
 }
 
-CrossPointPosition ProgressMapper::toCrossPoint(const std::shared_ptr<Epub>& epub, const KOReaderPosition& koPos,
+CrossPointPosition ProgressMapper::toCrossPoint(const std::shared_ptr<Epub> &epub, const KOReaderPosition &koPos,
                                                 int totalPagesInSpine) {
   CrossPointPosition result;
   result.spineIndex = 0;
@@ -89,14 +89,14 @@ std::string ProgressMapper::generateXPath(int spineIndex, int pageNumber, int to
   return "/body/DocFragment[" + std::to_string(spineIndex + 1) + "]/body";
 }
 
-int ProgressMapper::parseDocFragmentIndex(const std::string& xpath) {
+int ProgressMapper::parseDocFragmentIndex(const std::string &xpath) {
   // Look for DocFragment[N] pattern
   const size_t start = xpath.find("DocFragment[");
   if (start == std::string::npos) {
     return -1;
   }
 
-  const size_t numStart = start + 12;  // Length of "DocFragment["
+  const size_t numStart = start + 12; // Length of "DocFragment["
   const size_t numEnd = xpath.find(']', numStart);
   if (numEnd == std::string::npos) {
     return -1;

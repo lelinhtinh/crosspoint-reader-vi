@@ -22,9 +22,9 @@
  *   5. When complete or cancelled, callbacks will be invoked
  */
 class KeyboardEntryActivity : public Activity {
- public:
+public:
   // Callback types
-  using OnCompleteCallback = std::function<void(const std::string&)>;
+  using OnCompleteCallback = std::function<void(const std::string &)>;
   using OnCancelCallback = std::function<void()>;
 
   /**
@@ -39,17 +39,12 @@ class KeyboardEntryActivity : public Activity {
    * @param onComplete Callback invoked when input is complete
    * @param onCancel Callback invoked when input is cancelled
    */
-  explicit KeyboardEntryActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
+  explicit KeyboardEntryActivity(GfxRenderer &renderer, MappedInputManager &mappedInput,
                                  std::string title = "Enter Text", std::string initialText = "", const int startY = 10,
                                  const size_t maxLength = 0, const bool isPassword = false,
                                  OnCompleteCallback onComplete = nullptr, OnCancelCallback onCancel = nullptr)
-      : Activity("KeyboardEntry", renderer, mappedInput),
-        title(std::move(title)),
-        text(std::move(initialText)),
-        startY(startY),
-        maxLength(maxLength),
-        isPassword(isPassword),
-        onComplete(std::move(onComplete)),
+      : Activity("KeyboardEntry", renderer, mappedInput), title(std::move(title)), text(std::move(initialText)),
+        startY(startY), maxLength(maxLength), isPassword(isPassword), onComplete(std::move(onComplete)),
         onCancel(std::move(onCancel)) {}
 
   // Activity overrides
@@ -57,7 +52,7 @@ class KeyboardEntryActivity : public Activity {
   void onExit() override;
   void loop() override;
 
- private:
+private:
   std::string title;
   int startY;
   std::string text;
@@ -78,9 +73,9 @@ class KeyboardEntryActivity : public Activity {
 
   // Keyboard layout
   static constexpr int NUM_ROWS = 5;
-  static constexpr int KEYS_PER_ROW = 13;  // Max keys per row (rows 0 and 1 have 13 keys)
-  static const char* const keyboard[NUM_ROWS];
-  static const char* const keyboardShift[NUM_ROWS];
+  static constexpr int KEYS_PER_ROW = 13; // Max keys per row (rows 0 and 1 have 13 keys)
+  static const char *const keyboard[NUM_ROWS];
+  static const char *const keyboardShift[NUM_ROWS];
 
   // Special key positions (bottom row)
   static constexpr int SPECIAL_ROW = 4;
@@ -89,11 +84,11 @@ class KeyboardEntryActivity : public Activity {
   static constexpr int BACKSPACE_COL = 7;
   static constexpr int DONE_COL = 9;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   char getSelectedChar() const;
   void handleKeyPress();
   int getRowLength(int row) const;
   void render() const;
-  void renderItemWithSelector(int x, int y, const char* item, bool isSelected) const;
+  void renderItemWithSelector(int x, int y, const char *item, bool isSelected) const;
 };

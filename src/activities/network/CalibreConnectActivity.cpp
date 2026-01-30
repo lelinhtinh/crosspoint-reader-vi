@@ -11,11 +11,11 @@
 #include "fontIds.h"
 
 namespace {
-constexpr const char* HOSTNAME = "crosspoint";
-}  // namespace
+constexpr const char *HOSTNAME = "crosspoint";
+} // namespace
 
-void CalibreConnectActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<CalibreConnectActivity*>(param);
+void CalibreConnectActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<CalibreConnectActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -36,10 +36,10 @@ void CalibreConnectActivity::onEnter() {
   exitRequested = false;
 
   xTaskCreate(&CalibreConnectActivity::taskTrampoline, "CalibreConnectTask",
-              2048,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
+              2048,              // Stack size
+              this,              // Parameters
+              1,                 // Priority
+              &displayTaskHandle // Task handle
   );
 
   if (WiFi.status() != WL_CONNECTED) {
@@ -81,7 +81,7 @@ void CalibreConnectActivity::onWifiSelectionComplete(const bool connected) {
   }
 
   if (subActivity) {
-    connectedIP = static_cast<WifiSelectionActivity*>(subActivity.get())->getConnectedIP();
+    connectedIP = static_cast<WifiSelectionActivity *>(subActivity.get())->getConnectedIP();
   } else {
     connectedIP = WiFi.localIP().toString().c_str();
   }

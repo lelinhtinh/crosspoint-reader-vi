@@ -9,8 +9,8 @@
  * Type of OPDS entry.
  */
 enum class OpdsEntryType {
-  NAVIGATION,  // Link to another catalog
-  BOOK         // Downloadable book
+  NAVIGATION, // Link to another catalog
+  BOOK        // Downloadable book
 };
 
 /**
@@ -19,8 +19,8 @@ enum class OpdsEntryType {
 struct OpdsEntry {
   OpdsEntryType type = OpdsEntryType::NAVIGATION;
   std::string title;
-  std::string author;  // Only for books
-  std::string href;    // Navigation URL or epub download URL
+  std::string author; // Only for books
+  std::string href;   // Navigation URL or epub download URL
   std::string id;
 };
 
@@ -44,16 +44,16 @@ using OpdsBook = OpdsEntry;
  *   }
  */
 class OpdsParser final : public Print {
- public:
+public:
   OpdsParser();
   ~OpdsParser();
 
   // Disable copy
-  OpdsParser(const OpdsParser&) = delete;
-  OpdsParser& operator=(const OpdsParser&) = delete;
+  OpdsParser(const OpdsParser &) = delete;
+  OpdsParser &operator=(const OpdsParser &) = delete;
 
   size_t write(uint8_t) override;
-  size_t write(const uint8_t*, size_t) override;
+  size_t write(const uint8_t *, size_t) override;
 
   void flush() override;
 
@@ -65,7 +65,7 @@ class OpdsParser final : public Print {
    * Get the parsed entries (both navigation and book entries).
    * @return Vector of OpdsEntry entries
    */
-  const std::vector<OpdsEntry>& getEntries() const& { return entries; }
+  const std::vector<OpdsEntry> &getEntries() const & { return entries; }
   std::vector<OpdsEntry> getEntries() && { return std::move(entries); }
 
   /**
@@ -79,14 +79,14 @@ class OpdsParser final : public Print {
    */
   void clear();
 
- private:
+private:
   // Expat callbacks
-  static void XMLCALL startElement(void* userData, const XML_Char* name, const XML_Char** atts);
-  static void XMLCALL endElement(void* userData, const XML_Char* name);
-  static void XMLCALL characterData(void* userData, const XML_Char* s, int len);
+  static void XMLCALL startElement(void *userData, const XML_Char *name, const XML_Char **atts);
+  static void XMLCALL endElement(void *userData, const XML_Char *name);
+  static void XMLCALL characterData(void *userData, const XML_Char *s, int len);
 
   // Helper to find attribute value
-  static const char* findAttribute(const XML_Char** atts, const char* name);
+  static const char *findAttribute(const XML_Char **atts, const char *name);
 
   XML_Parser parser = nullptr;
   std::vector<OpdsEntry> entries;

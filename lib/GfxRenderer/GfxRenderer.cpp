@@ -428,10 +428,11 @@ void GfxRenderer::displayBuffer(const HalDisplay::RefreshMode refreshMode) const
 
 std::string GfxRenderer::truncatedText(const int fontId, const char *text, const int maxWidth,
                                        const EpdFontFamily::Style style) const {
-  if (!text || maxWidth <= 0) return "";
+  if (!text || maxWidth <= 0)
+    return "";
 
   std::string item = text;
-  const char* ellipsis = "...";
+  const char *ellipsis = "...";
   int textWidth = getTextWidth(fontId, item.c_str(), style);
   if (textWidth <= maxWidth) {
     // Text fits, return as is

@@ -15,6 +15,7 @@
 #include "KOReaderCredentialStore.h"
 #include "MappedInputManager.h"
 #include "RecentBooksStore.h"
+#include "ScreenComponents.h"
 #include "activities/boot_sleep/BootActivity.h"
 #include "activities/boot_sleep/SleepActivity.h"
 #include "activities/browser/OpdsBookBrowserActivity.h"
@@ -225,21 +226,21 @@ void setup() {
   KOREADER_STORE.loadFromFile();
 
   switch (gpio.getWakeupReason()) {
-    case HalGPIO::WakeupReason::PowerButton:
-      // For normal wakeups, verify power button press duration
-      Serial.printf("[%lu] [   ] Verifying power button press duration\n", millis());
-      verifyPowerButtonDuration();
-      break;
-    case HalGPIO::WakeupReason::AfterUSBPower:
-      // If USB power caused a cold boot, go back to sleep
-      Serial.printf("[%lu] [   ] Wakeup reason: After USB Power\n", millis());
-      gpio.startDeepSleep();
-      break;
-    case HalGPIO::WakeupReason::AfterFlash:
-      // After flashing, just proceed to boot
-    case HalGPIO::WakeupReason::Other:
-    default:
-      break;
+  case HalGPIO::WakeupReason::PowerButton:
+    // For normal wakeups, verify power button press duration
+    Serial.printf("[%lu] [   ] Verifying power button press duration\n", millis());
+    verifyPowerButtonDuration();
+    break;
+  case HalGPIO::WakeupReason::AfterUSBPower:
+    // If USB power caused a cold boot, go back to sleep
+    Serial.printf("[%lu] [   ] Wakeup reason: After USB Power\n", millis());
+    gpio.startDeepSleep();
+    break;
+  case HalGPIO::WakeupReason::AfterFlash:
+    // After flashing, just proceed to boot
+  case HalGPIO::WakeupReason::Other:
+  default:
+    break;
   }
 
   // First serial output only here to avoid timing inconsistencies for power button press duration verification
@@ -288,14 +289,11 @@ void loop() {
       Serial.printf("[%lu] [SCR] Shortcut Power+VolDown detected\n", millis());
       if (!SETTINGS.screenshotEnabled) {
         Serial.printf("[%lu] [SCR] Screenshot feature is disabled in settings\n", millis());
-        exitActivity();
-        enterNewActivity(
-            new FullScreenMessageActivity(renderer, mappedInputManager, "Screenshot disabled", EpdFontFamily::BOLD));
+        ScreenComponents::drawPopup(renderer, "Screenshot disabled");
       } else {
         const bool success = renderer.saveScreenshot("/screenshots");
         const char *msg = success ? "Screenshot saved" : "Failed to save screenshot";
-        exitActivity();
-        enterNewActivity(new FullScreenMessageActivity(renderer, mappedInputManager, msg, EpdFontFamily::BOLD));
+        ScreenComponents::drawPopup(renderer, msg);
       }
     }
   }

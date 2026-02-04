@@ -8,6 +8,7 @@
 #include "CrossPointSettings.h"
 #include "CrossPointState.h"
 #include "EpubReaderChapterSelectionActivity.h"
+#include "EpubReaderMenuActivity.h"
 #include "MappedInputManager.h"
 #include "RecentBooksStore.h"
 #include "ScreenComponents.h"
@@ -127,42 +128,14 @@ void EpubReaderActivity::loop() {
     return;
   }
 
-  // Enter chapter selection activity
+  // Enter reader menu activity
   if (mappedInput.wasReleased(MappedInputManager::Button::Confirm)) {
     // Don't start activity transition while rendering
     xSemaphoreTake(renderingMutex, portMAX_DELAY);
-    const int currentPage = section ? section->currentPage : 0;
-    const int totalPages = section ? section->pageCount : 0;
     exitActivity();
-    enterNewActivity(new EpubReaderChapterSelectionActivity(
-        this->renderer, this->mappedInput, epub, epub->getPath(), currentSpineIndex, currentPage, totalPages,
-        [this] {
-          exitActivity();
-          updateRequired = true;
-        },
-        [this](const int newSpineIndex) {
-          if (currentSpineIndex != newSpineIndex) {
-            currentSpineIndex = newSpineIndex;
-            nextPageNumber = 0;
-            section.reset();
-            // Save progress immediately so Recents/Home reflect the current chapter (not furthest read)
-            saveProgressToDisk();
-          }
-          exitActivity();
-          updateRequired = true;
-        },
-        [this](const int newSpineIndex, const int newPage) {
-          // Handle sync position
-          if (currentSpineIndex != newSpineIndex || (section && section->currentPage != newPage)) {
-            currentSpineIndex = newSpineIndex;
-            nextPageNumber = newPage;
-            section.reset();
-            // Persist sync changes immediately
-            saveProgressToDisk();
-          }
-          exitActivity();
-          updateRequired = true;
-        }));
+    enterNewActivity(new EpubReaderMenuActivity(
+        this->renderer, this->mappedInput, epub->getTitle(), [this]() { onReaderMenuBack(); },
+        [this](EpubReaderMenuActivity::MenuAction action) { onReaderMenuConfirm(action); }));
     xSemaphoreGive(renderingMutex);
   }
 
@@ -258,6 +231,93 @@ void EpubReaderActivity::loop() {
       xSemaphoreGive(renderingMutex);
     }
     updateRequired = true;
+  }
+}
+
+void EpubReaderActivity::onReaderMenuBack() {
+  exitActivity();
+  updateRequired = true;
+}
+
+void EpubReaderActivity::onReaderMenuConfirm(EpubReaderMenuActivity::MenuAction action) {
+  switch (action) {
+  case EpubReaderMenuActivity::MenuAction::SELECT_CHAPTER: {
+    // Calculate values BEFORE we start destroying things
+    const int currentP = section ? section->currentPage : 0;
+    const int totalP = section ? section->pageCount : 0;
+    const int spineIdx = currentSpineIndex;
+    const std::string path = epub->getPath();
+
+    xSemaphoreTake(renderingMutex, portMAX_DELAY);
+
+    // 1. Close the menu
+    exitActivity();
+
+    // 2. Open the Chapter Selector
+    enterNewActivity(new EpubReaderChapterSelectionActivity(
+        this->renderer, this->mappedInput, epub, path, spineIdx, currentP, totalP,
+        [this] {
+          exitActivity();
+          updateRequired = true;
+        },
+        [this](const int newSpineIndex) {
+          if (currentSpineIndex != newSpineIndex) {
+            currentSpineIndex = newSpineIndex;
+            nextPageNumber = 0;
+            section.reset();
+            // Save progress immediately so Recents/Home reflect the current chapter (not furthest read)
+            saveProgressToDisk();
+          }
+          exitActivity();
+          updateRequired = true;
+        },
+        [this](const int newSpineIndex, const int newPage) {
+          // Handle sync position
+          if (currentSpineIndex != newSpineIndex || (section && section->currentPage != newPage)) {
+            currentSpineIndex = newSpineIndex;
+            nextPageNumber = newPage;
+            section.reset();
+            // Persist sync changes immediately
+            saveProgressToDisk();
+          }
+          exitActivity();
+          updateRequired = true;
+        }));
+
+    xSemaphoreGive(renderingMutex);
+    break;
+  }
+  case EpubReaderMenuActivity::MenuAction::GO_HOME: {
+    // Trigger the reader's "Go Home" callback
+    if (onGoHome) {
+      onGoHome();
+    }
+    break;
+  }
+  case EpubReaderMenuActivity::MenuAction::DELETE_CACHE: {
+    xSemaphoreTake(renderingMutex, portMAX_DELAY);
+    if (epub) {
+      // BACKUP: Read current progress
+      uint16_t backupSpine = currentSpineIndex;
+      uint16_t backupPage = section ? section->currentPage : 0;
+      uint16_t backupPageCount = section ? section->pageCount : 0;
+
+      section.reset();
+      // WIPE: Clear the cache directory
+      epub->clearCache();
+
+      // RESTORE: Re-setup the directory and rewrite the progress file
+      epub->setupCacheDir();
+      saveProgress(backupSpine, backupPage, backupPageCount);
+    }
+    exitActivity();
+    updateRequired = true;
+    xSemaphoreGive(renderingMutex);
+    if (onGoHome) {
+      onGoHome();
+    }
+    break;
+  }
   }
 }
 
@@ -429,6 +489,24 @@ void EpubReaderActivity::renderScreen() {
 
   // Note: we intentionally do not persist progress on every render to avoid frequent SD writes.
   // Progress should be saved when chapter (spine) changes via explicit calls to saveProgressToDisk().
+}
+
+void EpubReaderActivity::saveProgress(int spineIndex, int currentPage, int pageCount) {
+  FsFile f;
+  if (SdMan.openFileForWrite("ERS", epub->getCachePath() + "/progress.bin", f)) {
+    uint8_t data[6];
+    data[0] = spineIndex & 0xFF;
+    data[1] = (spineIndex >> 8) & 0xFF;
+    data[2] = currentPage & 0xFF;
+    data[3] = (currentPage >> 8) & 0xFF;
+    data[4] = pageCount & 0xFF;
+    data[5] = (pageCount >> 8) & 0xFF;
+    f.write(data, 6);
+    f.close();
+    Serial.printf("[ERS] Progress saved: Chapter %d, Page %d\n", spineIndex, currentPage);
+  } else {
+    Serial.printf("[ERS] Could not save progress!\n");
+  }
 }
 
 void EpubReaderActivity::saveProgressToDisk(bool force) {

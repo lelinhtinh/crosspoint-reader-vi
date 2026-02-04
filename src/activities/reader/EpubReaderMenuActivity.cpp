@@ -23,8 +23,8 @@ void EpubReaderMenuActivity::onExit() {
   renderingMutex = nullptr;
 }
 
-void EpubReaderMenuActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<EpubReaderMenuActivity*>(param);
+void EpubReaderMenuActivity::taskTrampoline(void *param) {
+  auto *self = static_cast<EpubReaderMenuActivity *>(param);
   self->displayTaskLoop();
 }
 
@@ -67,7 +67,7 @@ void EpubReaderMenuActivity::loop() {
     return;
   } else if (mappedInput.wasReleased(MappedInputManager::Button::Back)) {
     onBack();
-    return;  // Also return here just in case
+    return; // Also return here just in case
   }
 }
 

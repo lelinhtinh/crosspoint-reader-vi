@@ -12,21 +12,19 @@
 #include "MappedInputManager.h"
 
 class EpubReaderMenuActivity final : public ActivityWithSubactivity {
- public:
+public:
   enum class MenuAction { SELECT_CHAPTER, GO_HOME, DELETE_CACHE };
 
-  explicit EpubReaderMenuActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, const std::string& title,
-                                  const std::function<void()>& onBack, const std::function<void(MenuAction)>& onAction)
-      : ActivityWithSubactivity("EpubReaderMenu", renderer, mappedInput),
-        title(title),
-        onBack(onBack),
+  explicit EpubReaderMenuActivity(GfxRenderer &renderer, MappedInputManager &mappedInput, const std::string &title,
+                                  const std::function<void()> &onBack, const std::function<void(MenuAction)> &onAction)
+      : ActivityWithSubactivity("EpubReaderMenu", renderer, mappedInput), title(title), onBack(onBack),
         onAction(onAction) {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
 
- private:
+private:
   struct MenuItem {
     MenuAction action;
     std::string label;
@@ -45,7 +43,7 @@ class EpubReaderMenuActivity final : public ActivityWithSubactivity {
   const std::function<void()> onBack;
   const std::function<void(MenuAction)> onAction;
 
-  static void taskTrampoline(void* param);
+  static void taskTrampoline(void *param);
   [[noreturn]] void displayTaskLoop();
   void renderScreen();
 };

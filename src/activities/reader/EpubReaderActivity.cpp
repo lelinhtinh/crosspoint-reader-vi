@@ -134,35 +134,9 @@ void EpubReaderActivity::loop() {
     const int currentPage = section ? section->currentPage : 0;
     const int totalPages = section ? section->pageCount : 0;
     exitActivity();
-    enterNewActivity(new EpubReaderChapterSelectionActivity(
-        this->renderer, this->mappedInput, epub, epub->getPath(), currentSpineIndex, currentPage, totalPages,
-        [this] {
-          exitActivity();
-          updateRequired = true;
-        },
-        [this](const int newSpineIndex) {
-          if (currentSpineIndex != newSpineIndex) {
-            currentSpineIndex = newSpineIndex;
-            nextPageNumber = 0;
-            section.reset();
-            // Save progress immediately so Recents/Home reflect the current chapter (not furthest read)
-            saveProgressToDisk();
-          }
-          exitActivity();
-          updateRequired = true;
-        },
-        [this](const int newSpineIndex, const int newPage) {
-          // Handle sync position
-          if (currentSpineIndex != newSpineIndex || (section && section->currentPage != newPage)) {
-            currentSpineIndex = newSpineIndex;
-            nextPageNumber = newPage;
-            section.reset();
-            // Persist sync changes immediately
-            saveProgressToDisk();
-          }
-          exitActivity();
-          updateRequired = true;
-        }));
+    enterNewActivity(new EpubReaderMenuActivity(
+        this->renderer, this->mappedInput, epub->getTitle(), [this]() { onReaderMenuBack(); },
+        [this](EpubReaderMenuActivity::MenuAction action) { onReaderMenuConfirm(action); }));
     xSemaphoreGive(renderingMutex);
   }
 
@@ -261,6 +235,90 @@ void EpubReaderActivity::loop() {
   }
 }
 
+void EpubReaderActivity::onReaderMenuBack() {
+  exitActivity();
+  updateRequired = true;
+}
+
+void EpubReaderActivity::onReaderMenuConfirm(EpubReaderMenuActivity::MenuAction action) {
+  switch (action) {
+  case EpubReaderMenuActivity::MenuAction::SELECT_CHAPTER: {
+    // Calculate values BEFORE we start destroying things
+    const int currentP = section ? section->currentPage : 0;
+    const int totalP = section ? section->pageCount : 0;
+    const int spineIdx = currentSpineIndex;
+    const std::string path = epub->getPath();
+
+    xSemaphoreTake(renderingMutex, portMAX_DELAY);
+
+    // 1. Close the menu
+    exitActivity();
+
+    // 2. Open the Chapter Selector
+    enterNewActivity(new EpubReaderChapterSelectionActivity(
+        this->renderer, this->mappedInput, epub, path, spineIdx, currentP, totalP,
+        [this] {
+          exitActivity();
+          updateRequired = true;
+        },
+        [this](const int newSpineIndex) {
+          if (currentSpineIndex != newSpineIndex) {
+            currentSpineIndex = newSpineIndex;
+            nextPageNumber = 0;
+            section.reset();
+          }
+          exitActivity();
+          updateRequired = true;
+        },
+        [this](const int newSpineIndex, const int newPage) {
+          if (currentSpineIndex != newSpineIndex || (section && section->currentPage != newPage)) {
+            currentSpineIndex = newSpineIndex;
+            nextPageNumber = newPage;
+            section.reset();
+          }
+          exitActivity();
+          updateRequired = true;
+        }));
+
+    xSemaphoreGive(renderingMutex);
+    break;
+  }
+  case EpubReaderMenuActivity::MenuAction::GO_HOME: {
+    // 2. Trigger the reader's "Go Home" callback
+    if (onGoHome) {
+      onGoHome();
+    }
+
+    break;
+  }
+  case EpubReaderMenuActivity::MenuAction::DELETE_CACHE: {
+    xSemaphoreTake(renderingMutex, portMAX_DELAY);
+    if (epub) {
+      // 2. BACKUP: Read current progress
+      // We use the current variables that track our position
+      uint16_t backupSpine = currentSpineIndex;
+      uint16_t backupPage = section->currentPage;
+      uint16_t backupPageCount = section->pageCount;
+
+      section.reset();
+      // 3. WIPE: Clear the cache directory
+      epub->clearCache();
+
+      // 4. RESTORE: Re-setup the directory and rewrite the progress file
+      epub->setupCacheDir();
+
+      saveProgress(backupSpine, backupPage, backupPageCount);
+    }
+    exitActivity();
+    updateRequired = true;
+    xSemaphoreGive(renderingMutex);
+    if (onGoHome)
+      onGoHome();
+    break;
+  }
+  }
+}
+
 void EpubReaderActivity::displayTaskLoop() {
   while (true) {
     if (updateRequired) {
@@ -327,49 +385,11 @@ void EpubReaderActivity::renderScreen() {
                                   viewportHeight, SETTINGS.hyphenationEnabled)) {
       Serial.printf("[%lu] [ERS] Cache not found, building...\n", millis());
 
-      // Progress bar dimensions
-      constexpr int barWidth = 200;
-      constexpr int barHeight = 10;
-      constexpr int boxMargin = 20;
-      const int textWidth = renderer.getTextWidth(UI_12_FONT_ID, "Indexing...");
-      const int boxWidthWithBar = (barWidth > textWidth ? barWidth : textWidth) + boxMargin * 2;
-      const int boxWidthNoBar = textWidth + boxMargin * 2;
-      const int boxHeightWithBar = renderer.getLineHeight(UI_12_FONT_ID) + barHeight + boxMargin * 3;
-      const int boxHeightNoBar = renderer.getLineHeight(UI_12_FONT_ID) + boxMargin * 2;
-      const int boxXWithBar = (renderer.getScreenWidth() - boxWidthWithBar) / 2;
-      const int boxXNoBar = (renderer.getScreenWidth() - boxWidthNoBar) / 2;
-      constexpr int boxY = 50;
-      const int barX = boxXWithBar + (boxWidthWithBar - barWidth) / 2;
-      const int barY = boxY + renderer.getLineHeight(UI_12_FONT_ID) + boxMargin * 2;
-
-      // Always show "Indexing..." text first
-      {
-        renderer.fillRect(boxXNoBar, boxY, boxWidthNoBar, boxHeightNoBar, false);
-        renderer.drawText(UI_12_FONT_ID, boxXNoBar + boxMargin, boxY + boxMargin, "Indexing...");
-        renderer.drawRect(boxXNoBar + 5, boxY + 5, boxWidthNoBar - 10, boxHeightNoBar - 10);
-        renderer.displayBuffer();
-        pagesUntilFullRefresh = 0;
-      }
-
-      // Setup callback - only called for chapters >= 50KB, redraws with progress bar
-      auto progressSetup = [this, boxXWithBar, boxWidthWithBar, boxHeightWithBar, barX, barY] {
-        renderer.fillRect(boxXWithBar, boxY, boxWidthWithBar, boxHeightWithBar, false);
-        renderer.drawText(UI_12_FONT_ID, boxXWithBar + boxMargin, boxY + boxMargin, "Indexing...");
-        renderer.drawRect(boxXWithBar + 5, boxY + 5, boxWidthWithBar - 10, boxHeightWithBar - 10);
-        renderer.drawRect(barX, barY, barWidth, barHeight);
-        renderer.displayBuffer();
-      };
-
-      // Progress callback to update progress bar
-      auto progressCallback = [this, barX, barY, barWidth, barHeight](int progress) {
-        const int fillWidth = (barWidth - 2) * progress / 100;
-        renderer.fillRect(barX + 1, barY + 1, fillWidth, barHeight - 2, true);
-        renderer.displayBuffer(HalDisplay::FAST_REFRESH);
-      };
+      const auto popupFn = [this]() { ScreenComponents::drawPopup(renderer, "Indexing..."); };
 
       if (!section->createSectionFile(SETTINGS.getReaderFontId(), SETTINGS.getReaderLineCompression(),
                                       SETTINGS.extraParagraphSpacing, SETTINGS.paragraphAlignment, viewportWidth,
-                                      viewportHeight, SETTINGS.hyphenationEnabled, progressSetup, progressCallback)) {
+                                      viewportHeight, SETTINGS.hyphenationEnabled, popupFn)) {
         Serial.printf("[%lu] [ERS] Failed to persist page data to SD\n", millis());
         section.reset();
         return;
@@ -426,11 +446,10 @@ void EpubReaderActivity::renderScreen() {
     renderContents(std::move(p), orientedMarginTop, orientedMarginRight, orientedMarginBottom, orientedMarginLeft);
     Serial.printf("[%lu] [ERS] Rendered page in %dms\n", millis(), millis() - start);
   }
-
-  // Note: we intentionally do not persist progress on every render to avoid frequent SD writes.
-  // Progress should be saved when chapter (spine) changes via explicit calls to saveProgressToDisk().
+  saveProgress(currentSpineIndex, section->currentPage, section->pageCount);
 }
 
+// Persist progress only when the chapter changes or when forced.
 void EpubReaderActivity::saveProgressToDisk(bool force) {
   // Only write to disk when the chapter changed (spine index) unless forced.
   if (!force && lastSavedSpineIndex == currentSpineIndex) {
@@ -447,22 +466,28 @@ void EpubReaderActivity::saveProgressToDisk(bool force) {
     pageCount = 0;
   }
 
+  saveProgress(currentSpineIndex, page, pageCount);
+  lastSavedSpineIndex = currentSpineIndex;
+}
+
+void EpubReaderActivity::saveProgress(int spineIndex, int currentPage, int pageCount) {
   FsFile f;
   if (SdMan.openFileForWrite("ERS", epub->getCachePath() + "/progress.bin", f)) {
     uint8_t data[6];
-    data[0] = currentSpineIndex & 0xFF;
-    data[1] = (currentSpineIndex >> 8) & 0xFF;
-    data[2] = page & 0xFF;
-    data[3] = (page >> 8) & 0xFF;
+    data[0] = spineIndex & 0xFF;
+    data[1] = (spineIndex >> 8) & 0xFF;
+    data[2] = currentPage & 0xFF;
+    data[3] = (currentPage >> 8) & 0xFF;
     data[4] = pageCount & 0xFF;
     data[5] = (pageCount >> 8) & 0xFF;
     f.write(data, 6);
     f.close();
-    lastSavedSpineIndex = currentSpineIndex;
-    Serial.printf("[%lu] [ERS] Progress saved: spine=%d, page=%d\n", millis(), currentSpineIndex, page);
+    lastSavedSpineIndex = spineIndex;
+    Serial.printf("[ERS] Progress saved: Chapter %d, Page %d\n", spineIndex, currentPage);
+  } else {
+    Serial.printf("[ERS] Could not save progress!\n");
   }
 }
-
 void EpubReaderActivity::renderContents(std::unique_ptr<Page> page, const int orientedMarginTop,
                                         const int orientedMarginRight, const int orientedMarginBottom,
                                         const int orientedMarginLeft) {

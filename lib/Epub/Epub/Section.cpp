@@ -124,7 +124,7 @@ bool Section::createSectionFile(const int fontId, const float lineCompression, c
                                 const uint8_t paragraphAlignment, const uint16_t viewportWidth,
                                 const uint16_t viewportHeight, const bool hyphenationEnabled,
                                 const std::function<void()> &progressSetupFn,
-                                const std::function<void(int)> &progressFn) {
+                                const std::function<void(int)> &progressFn, const std::function<void()> &popupFn) {
   constexpr uint32_t MIN_SIZE_FOR_PROGRESS = 50 * 1024; // 50KB
   const auto localPath = epub->getSpineItem(spineIndex).href;
   const auto tmpHtmlPath = epub->getCachePath() + "/.tmp_" + std::to_string(spineIndex) + ".html";
@@ -171,8 +171,8 @@ bool Section::createSectionFile(const int fontId, const float lineCompression, c
 
   Serial.printf("[%lu] [SCT] Streamed temp HTML to %s (%d bytes)\n", millis(), tmpHtmlPath.c_str(), fileSize);
 
-  // Only show progress bar for larger chapters where rendering overhead is worth it
-  if (progressSetupFn && fileSize >= MIN_SIZE_FOR_PROGRESS) {
+  // Determine if we should show progress
+  if (fileSize >= MIN_SIZE_FOR_PROGRESS && progressSetupFn) {
     progressSetupFn();
   }
 
@@ -184,10 +184,15 @@ bool Section::createSectionFile(const int fontId, const float lineCompression, c
   std::vector<uint32_t> lut = {};
 
   ChapterHtmlSlimParser visitor(
-      tmpHtmlPath, renderer, fontId, lineCompression, extraParagraphSpacing, paragraphAlignment, viewportWidth,
+      epub, tmpHtmlPath, renderer, fontId, lineCompression, extraParagraphSpacing, paragraphAlignment, viewportWidth,
       viewportHeight, hyphenationEnabled,
-      [this, &lut](std::unique_ptr<Page> page) { lut.emplace_back(this->onPageComplete(std::move(page))); },
-      progressFn);
+      [this, &lut, &progressFn](std::unique_ptr<Page> page) {
+        lut.emplace_back(this->onPageComplete(std::move(page)));
+        if (progressFn) {
+          progressFn(static_cast<int>(lut.size()));
+        }
+      },
+      progressFn, popupFn);
   Hyphenator::setPreferredLanguage(epub->getLanguage());
   success = visitor.parseAndBuildPages();
 

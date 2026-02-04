@@ -153,11 +153,11 @@ def main():
         print(f"ERROR: Fonts directory not found: {fonts_dir}")
         return 1
 
-    # Find all pridi font headers
-    font_headers = sorted(fonts_dir.glob("pridi_*.h"))
+    # Find all system font headers
+    font_headers = sorted(fonts_dir.glob("system_font_*.h"))
 
     if not font_headers:
-        print("ERROR: No Pridi font headers found!")
+        print("ERROR: No system font headers found!")
         return 1
 
     print(f"Found {len(font_headers)} font header files\n")

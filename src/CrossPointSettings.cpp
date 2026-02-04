@@ -231,16 +231,16 @@ int CrossPointSettings::getRefreshFrequency() const {
 }
 
 int CrossPointSettings::getReaderFontId() const {
-  // Pridi font only for Vietnamese support
+  // Andada Pro font for Vietnamese support
   switch (fontSize) {
   case SMALL:
-    return PRIDI_12_FONT_ID;
+    return SYSTEM_FONT_12_ID;
   case MEDIUM:
   default:
-    return PRIDI_14_FONT_ID;
+    return SYSTEM_FONT_14_ID;
   case LARGE:
-    return PRIDI_16_FONT_ID;
+    return SYSTEM_FONT_16_ID;
   case EXTRA_LARGE:
-    return PRIDI_18_FONT_ID;
+    return SYSTEM_FONT_18_ID;
   }
 }

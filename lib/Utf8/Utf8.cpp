@@ -91,7 +91,7 @@ static uint32_t composeVietnamese(uint32_t base, uint32_t combining) {
     return 0;
   }
 
-  // Handle circumflex (U+0302) - for Â, Ê, Ô
+  // Handle circumflex (U+0302) - for Â, Ê, Ô and vowels with dot below
   if (combining == 0x0302) {
     switch (base) {
     case 'A':
@@ -106,6 +106,19 @@ static uint32_t composeVietnamese(uint32_t base, uint32_t combining) {
       return 0x00D4; // Ô
     case 'o':
       return 0x00F4; // ô
+    // Circumflex on vowels with dot below (NFD ordering: base + dot below + circumflex)
+    case 0x1EA0:
+      return 0x1EAC; // Ạ + ^ = Ậ
+    case 0x1EA1:
+      return 0x1EAD; // ạ + ^ = ậ
+    case 0x1EB8:
+      return 0x1EC6; // Ẹ + ^ = Ệ
+    case 0x1EB9:
+      return 0x1EC7; // ẹ + ^ = ệ
+    case 0x1ECC:
+      return 0x1ED8; // Ọ + ^ = Ộ
+    case 0x1ECD:
+      return 0x1ED9; // ọ + ^ = ộ
     }
     return 0;
   }

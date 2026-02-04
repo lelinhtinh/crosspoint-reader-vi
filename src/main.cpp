@@ -33,32 +33,32 @@ MappedInputManager mappedInputManager(gpio);
 GfxRenderer renderer(display);
 Activity *currentActivity;
 
-// Fonts - Pridi only for Vietnamese support (Regular and Bold only)
+// Fonts - Andada Pro for Vietnamese support (Regular and Bold only)
 // Italic will fallback to Regular, BoldItalic will fallback to Bold
-EpdFont pridi14RegularFont(&pridi_14_regular);
-EpdFont pridi14BoldFont(&pridi_14_bold);
-EpdFontFamily pridi14FontFamily(&pridi14RegularFont, &pridi14BoldFont);
+EpdFont systemFont14RegularFont(&system_font_14_regular);
+EpdFont systemFont14BoldFont(&system_font_14_bold);
+EpdFontFamily systemFont14FontFamily(&systemFont14RegularFont, &systemFont14BoldFont);
 #ifndef OMIT_FONTS
-EpdFont pridi12RegularFont(&pridi_12_regular);
-EpdFont pridi12BoldFont(&pridi_12_bold);
-EpdFontFamily pridi12FontFamily(&pridi12RegularFont, &pridi12BoldFont);
-EpdFont pridi16RegularFont(&pridi_16_regular);
-EpdFont pridi16BoldFont(&pridi_16_bold);
-EpdFontFamily pridi16FontFamily(&pridi16RegularFont, &pridi16BoldFont);
-EpdFont pridi18RegularFont(&pridi_18_regular);
-EpdFont pridi18BoldFont(&pridi_18_bold);
-EpdFontFamily pridi18FontFamily(&pridi18RegularFont, &pridi18BoldFont);
+EpdFont systemFont12RegularFont(&system_font_12_regular);
+EpdFont systemFont12BoldFont(&system_font_12_bold);
+EpdFontFamily systemFont12FontFamily(&systemFont12RegularFont, &systemFont12BoldFont);
+EpdFont systemFont16RegularFont(&system_font_16_regular);
+EpdFont systemFont16BoldFont(&system_font_16_bold);
+EpdFontFamily systemFont16FontFamily(&systemFont16RegularFont, &systemFont16BoldFont);
+EpdFont systemFont18RegularFont(&system_font_18_regular);
+EpdFont systemFont18BoldFont(&system_font_18_bold);
+EpdFontFamily systemFont18FontFamily(&systemFont18RegularFont, &systemFont18BoldFont);
 #endif // OMIT_FONTS
 
-EpdFont smallFont(&pridi_8_regular);
+EpdFont smallFont(&system_font_8_regular);
 EpdFontFamily smallFontFamily(&smallFont);
 
-EpdFont ui10RegularFont(&pridi_10_regular);
-EpdFont ui10BoldFont(&pridi_10_bold);
+EpdFont ui10RegularFont(&system_font_10_regular);
+EpdFont ui10BoldFont(&system_font_10_bold);
 EpdFontFamily ui10FontFamily(&ui10RegularFont, &ui10BoldFont);
 
-EpdFont ui12RegularFont(&pridi_12_regular);
-EpdFont ui12BoldFont(&pridi_12_bold);
+EpdFont ui12RegularFont(&system_font_12_regular);
+EpdFont ui12BoldFont(&system_font_12_bold);
 EpdFontFamily ui12FontFamily(&ui12RegularFont, &ui12BoldFont);
 
 // measurement of power button press duration calibration value
@@ -185,11 +185,11 @@ void onGoHome() {
 void setupDisplayAndFonts() {
   display.begin();
   Serial.printf("[%lu] [   ] Display initialized\n", millis());
-  renderer.insertFont(PRIDI_14_FONT_ID, pridi14FontFamily);
+  renderer.insertFont(SYSTEM_FONT_14_ID, systemFont14FontFamily);
 #ifndef OMIT_FONTS
-  renderer.insertFont(PRIDI_12_FONT_ID, pridi12FontFamily);
-  renderer.insertFont(PRIDI_16_FONT_ID, pridi16FontFamily);
-  renderer.insertFont(PRIDI_18_FONT_ID, pridi18FontFamily);
+  renderer.insertFont(SYSTEM_FONT_12_ID, systemFont12FontFamily);
+  renderer.insertFont(SYSTEM_FONT_16_ID, systemFont16FontFamily);
+  renderer.insertFont(SYSTEM_FONT_18_ID, systemFont18FontFamily);
 #endif // OMIT_FONTS
   renderer.insertFont(UI_10_FONT_ID, ui10FontFamily);
   renderer.insertFont(UI_12_FONT_ID, ui12FontFamily);

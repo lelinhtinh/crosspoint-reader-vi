@@ -165,7 +165,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Default font path
-    default_font = os.path.join(script_dir, "../builtinFonts/source/Pridi/Pridi-Regular.ttf")
+    default_font = os.path.join(script_dir, "../builtinFonts/source/Andada_Pro/AndadaPro-Regular.ttf")
 
     if len(sys.argv) > 1:
         font_path = sys.argv[1]
@@ -181,7 +181,7 @@ def main():
     test_font(font_path, output_dir)
 
     # Also test Bold if available
-    bold_path = font_path.replace("-Regular", "-Bold").replace("_regular", "_bold")
+    bold_path = font_path.replace("Regular", "Bold")
     if os.path.exists(bold_path) and bold_path != font_path:
         test_font(bold_path, output_dir)
 

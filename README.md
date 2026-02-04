@@ -6,7 +6,7 @@ Built using **PlatformIO** and targeting the **ESP32-C3** microcontroller.
 **This is a Vietnamese language fork** of [CrossPoint Reader](https://github.com/crosspoint-reader/crosspoint-reader) with:
 
 - 🇻🇳 Full Vietnamese language support (NFC/NFD Unicode normalization)
-- Vietnamese-optimized Pridi font family
+- Vietnamese-optimized Andada Pro font family
 - Simplified font system for reduced firmware size
 
 | Home                                       | Recents                                          | Reader                                         | TOC                                      |
@@ -171,5 +171,5 @@ CrossPoint Reader is **not affiliated with Xteink or any manufacturer of the X4 
 
 - [CrossPoint Reader](https://github.com/crosspoint-reader/crosspoint-reader) by [@daveallie](https://github.com/daveallie) - Original project
 - [diy-esp32-epub-reader](https://github.com/atomic14/diy-esp32-epub-reader) by atomic14 - Inspiration for the original project
-- [Pridi Font](https://fonts.google.com/specimen/Pridi) - Thai/Vietnamese font family
+- [Andada Pro Font](https://fonts.google.com/specimen/Andada+Pro) - Serif font with excellent Vietnamese support
 - [crosspoint-reader-vi](https://github.com/danoooob/crosspoint-reader-vi) - Vietnamese display solution

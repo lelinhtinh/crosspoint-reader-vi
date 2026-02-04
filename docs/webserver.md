@@ -168,11 +168,26 @@ This is useful for organizing your ebooks by genre, author, or series.
 
 **Note:** Folders must be empty before they can be deleted.
 
+#### Downloading Files
+
+You can download files from your device back to your computer:
+
+1. In the File Manager, navigate to any folder
+2. Locate the file you want to download
+3. Click the **📥** (download) icon next to the file
+4. Your browser will automatically save the file to your Downloads folder
+
+**Supported Download:**
+
+- All file types (EPUB, TXT, PDF, images, etc.)
+- Files of any size
+- Multiple simultaneous downloads
+
 ---
 
 ## Command Line File Management
 
-For power users, you can manage files directly from your terminal using `curl` while the device is in File Upload mode a detailed documentation can be found [here](./webserver-endpoints.md). 
+For power users, you can manage files directly from your terminal using `curl` while the device is in File Upload mode a detailed documentation can be found [here](./webserver-endpoints.md).
 
 ## Security Notes
 

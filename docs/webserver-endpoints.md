@@ -2,23 +2,20 @@
 
 This document describes all HTTP and WebSocket endpoints available on the CrossPoint Reader webserver.
 
-- [Webserver Endpoints](#webserver-endpoints)
-  - [Overview](#overview)
-  - [HTTP Endpoints](#http-endpoints)
-    - [GET `/` - Home Page](#get----home-page)
-    - [GET `/files` - File Browser Page](#get-files---file-browser-page)
-    - [GET `/api/status` - Device Status](#get-apistatus---device-status)
-    - [GET `/api/files` - List Files](#get-apifiles---list-files)
-    - [POST `/upload` - Upload File](#post-upload---upload-file)
-    - [POST `/mkdir` - Create Folder](#post-mkdir---create-folder)
-    - [POST `/delete` - Delete File or Folder](#post-delete---delete-file-or-folder)
-  - [WebSocket Endpoint](#websocket-endpoint)
-    - [Port 81 - Fast Binary Upload](#port-81---fast-binary-upload)
-  - [Network Modes](#network-modes)
-    - [Station Mode (STA)](#station-mode-sta)
-    - [Access Point Mode (AP)](#access-point-mode-ap)
-  - [Notes](#notes)
-
+- [Overview](#overview)
+- [HTTP Endpoints](#http-endpoints)
+  - [GET `/` - Home Page](#get----home-page)
+  - [GET `/files` - File Browser Page](#get-files---file-browser-page)
+  - [GET `/api/status` - Device Status](#get-apistatus---device-status)
+  - [GET `/api/files` - List Files](#get-apifiles---list-files)
+  - [POST `/upload` - Upload File](#post-upload---upload-file)
+  - [POST `/mkdir` - Create Folder](#post-mkdir---create-folder)
+  - [POST `/delete` - Delete File or Folder](#post-delete---delete-file-or-folder)
+- [WebSocket Endpoint](#websocket-endpoint)
+  - [Port 81 - Fast Binary Upload](#port-81---fast-binary-upload)
+- [Network Modes](#network-modes)
+  - [Access Point Mode (AP)](#access-point-mode-ap)
+- [Notes](#notes)
 
 ## Overview
 
@@ -36,6 +33,7 @@ The CrossPoint Reader exposes a webserver for file management and device monitor
 Serves the home page HTML interface.
 
 **Request:**
+
 ```bash
 curl http://crosspoint.local/
 ```
@@ -49,6 +47,7 @@ curl http://crosspoint.local/
 Serves the file browser HTML interface.
 
 **Request:**
+
 ```bash
 curl http://crosspoint.local/files
 ```
@@ -62,11 +61,13 @@ curl http://crosspoint.local/files
 Returns JSON with device status information.
 
 **Request:**
+
 ```bash
 curl http://crosspoint.local/api/status
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "version": "1.0.0",
@@ -94,6 +95,7 @@ curl http://crosspoint.local/api/status
 Returns a JSON array of files and folders in the specified directory.
 
 **Request:**
+
 ```bash
 # List root directory
 curl http://crosspoint.local/api/files
@@ -109,6 +111,7 @@ curl "http://crosspoint.local/api/files?path=/Books"
 | `path`    | No       | `/`     | Directory path to list |
 
 **Response (200 OK):**
+
 ```json
 [
   {"name": "MyBook.epub", "size": 1234567, "isDirectory": false, "isEpub": true},
@@ -125,6 +128,7 @@ curl "http://crosspoint.local/api/files?path=/Books"
 | `isEpub`      | boolean | `true` if the file has `.epub` extension |
 
 **Notes:**
+
 - Hidden files (starting with `.`) are automatically filtered out
 - System folders (`System Volume Information`, `XTCache`) are hidden
 
@@ -135,6 +139,7 @@ curl "http://crosspoint.local/api/files?path=/Books"
 Uploads a file to the SD card via multipart form data.
 
 **Request:**
+
 ```bash
 # Upload to root directory
 curl -X POST -F "file=@mybook.epub" http://crosspoint.local/upload
@@ -150,6 +155,7 @@ curl -X POST -F "file=@mybook.epub" "http://crosspoint.local/upload?path=/Books"
 | `path`    | No       | `/`     | Target directory for the upload |
 
 **Response (200 OK):**
+
 ```
 File uploaded successfully: mybook.epub
 ```
@@ -165,6 +171,7 @@ File uploaded successfully: mybook.epub
 | 400    | `Unknown error during upload`                   | Unspecified error           |
 
 **Notes:**
+
 - Existing files with the same name will be overwritten
 - Uses a 4KB buffer for efficient SD card writes
 
@@ -175,6 +182,7 @@ File uploaded successfully: mybook.epub
 Creates a new folder on the SD card.
 
 **Request:**
+
 ```bash
 curl -X POST -d "name=NewFolder&path=/" http://crosspoint.local/mkdir
 ```
@@ -187,6 +195,7 @@ curl -X POST -d "name=NewFolder&path=/" http://crosspoint.local/mkdir
 | `path`    | No       | `/`     | Parent directory path        |
 
 **Response (200 OK):**
+
 ```
 Folder created: NewFolder
 ```
@@ -207,6 +216,7 @@ Folder created: NewFolder
 Deletes a file or folder from the SD card.
 
 **Request:**
+
 ```bash
 # Delete a file
 curl -X POST -d "path=/Books/mybook.epub&type=file" http://crosspoint.local/delete
@@ -223,6 +233,7 @@ curl -X POST -d "path=/OldFolder&type=folder" http://crosspoint.local/delete
 | `type`    | No       | `file`  | Type of item: `file` or `folder` |
 
 **Response (200 OK):**
+
 ```
 Deleted successfully
 ```
@@ -240,6 +251,7 @@ Deleted successfully
 | 500    | `Failed to delete item`                       | SD card error                 |
 
 **Protected Items:**
+
 - Files/folders starting with `.`
 - `System Volume Information`
 - `XTCache`
@@ -253,6 +265,7 @@ Deleted successfully
 A WebSocket endpoint for high-speed binary file uploads. More efficient than HTTP multipart for large files.
 
 **Connection:**
+
 ```
 ws://crosspoint.local:81/
 ```
@@ -289,16 +302,16 @@ Server -> "DONE"
 | `ERROR:Write failed - disk full?` | SD card write error                |
 
 **Example with `websocat`:**
+
 ```bash
-# Interactive session
 websocat ws://crosspoint.local:81
 
 # Then type:
-START:mybook.epub:1234567:/Books
 # Wait for READY, then send binary data
 ```
 
 **Notes:**
+
 - Progress updates are sent every 64KB or at completion
 - Disconnection during upload will delete the incomplete file
 - Existing files with the same name will be overwritten
@@ -309,14 +322,11 @@ START:mybook.epub:1234567:/Books
 
 The device can operate in two network modes:
 
-### Station Mode (STA)
 - Device connects to an existing WiFi network
 - IP address assigned by router/DHCP
-- `mode` field in `/api/status` returns `"STA"`
-- `rssi` field shows signal strength
 
 ### Access Point Mode (AP)
-- Device creates its own WiFi hotspot
+
 - Default IP is typically `192.168.4.1`
 - `mode` field in `/api/status` returns `"AP"`
 - `rssi` field returns `0`

@@ -337,9 +337,27 @@
       background-color: #fee;
       color: #e74c3c;
     }
+    .download-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1em;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #3498db;
+      transition: all 0.15s;
+    }
+    .download-btn:hover {
+      background-color: #e8f4fd;
+      color: #2c7cb8;
+    }
     .actions-col {
-      width: 60px;
+      width: 100px;
       text-align: center;
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      align-items: center;
     }
     /* Failed uploads banner */
     .failed-uploads-banner {
@@ -558,9 +576,14 @@
         font-size: 1.1em;
       }
       .actions-col {
-        width: 40px;
+        width: 70px;
+        gap: 4px;
       }
       .delete-btn {
+        font-size: 1em;
+        padding: 2px 4px;
+      }
+      .download-btn {
         font-size: 1em;
         padding: 2px 4px;
       }
@@ -773,7 +796,7 @@
           fileTableContent += '</td>';
           fileTableContent += `<td>${file.name.split('.').pop().toUpperCase()}</td>`;
           fileTableContent += `<td>${formatFileSize(file.size)}</td>`;
-          fileTableContent += `<td class="actions-col"><button class="delete-btn" onclick="openDeleteModal('${file.name.replaceAll("'", "\\'")}', '${filePath.replaceAll("'", "\\'")}', false)" title="Delete file">🗑️</button></td>`;
+            fileTableContent += `<td class="actions-col"><button class="download-btn" onclick="downloadFile('${filePath.replaceAll("'", "\\'")}', '${file.name.replaceAll("'", "\\'")}' )" title="Download file">📥</button><button class="delete-btn" onclick="openDeleteModal('${file.name.replaceAll("'", "\\'")}', '${filePath.replaceAll("'", "\\'")}', false)" title="Delete file">🗑️</button></td>`;
           fileTableContent += '</tr>';
         }
       });
@@ -1064,9 +1087,9 @@ function uploadFile() {
 function showFailedUploadsBanner() {
   const banner = document.getElementById('failedUploadsBanner');
   const filesList = document.getElementById('failedFilesList');
-  
+
   filesList.innerHTML = '';
-  
+
   failedUploadsGlobal.forEach((failedFile, index) => {
     const item = document.createElement('div');
     item.className = 'failed-file-item';
@@ -1079,11 +1102,11 @@ function showFailedUploadsBanner() {
     `;
     filesList.appendChild(item);
   });
-  
+
   // Ensure retry all button is visible
   const retryAllBtn = banner.querySelector('.retry-all-btn');
   if (retryAllBtn) retryAllBtn.style.display = '';
-  
+
   banner.classList.add('show');
 }
 
@@ -1096,22 +1119,22 @@ function dismissFailedUploads() {
 function retrySingleUpload(index) {
   const failedFile = failedUploadsGlobal[index];
   if (!failedFile) return;
-  
+
   // Create a DataTransfer to set the file input
   const dt = new DataTransfer();
   dt.items.add(failedFile.file);
-  
+
   const fileInput = document.getElementById('fileInput');
   fileInput.files = dt.files;
-  
+
   // Remove this file from failed list
   failedUploadsGlobal.splice(index, 1);
-  
+
   // If no more failed files, hide banner
   if (failedUploadsGlobal.length === 0) {
     dismissFailedUploads();
   }
-  
+
   // Open modal and trigger upload
   openUploadModal();
   validateFile();
@@ -1119,20 +1142,20 @@ function retrySingleUpload(index) {
 
 function retryAllFailedUploads() {
   if (failedUploadsGlobal.length === 0) return;
-  
+
   // Create a DataTransfer with all failed files
   const dt = new DataTransfer();
   failedUploadsGlobal.forEach(failedFile => {
     dt.items.add(failedFile.file);
   });
-  
+
   const fileInput = document.getElementById('fileInput');
   fileInput.files = dt.files;
-  
+
   // Clear failed files list
   failedUploadsGlobal = [];
   dismissFailedUploads();
-  
+
   // Open modal and trigger upload
   openUploadModal();
   validateFile();
@@ -1173,6 +1196,23 @@ function retryAllFailedUploads() {
     };
 
     xhr.send(formData);
+  }
+
+  function downloadFile(filePath, fileName) {
+    let normalizedPath = filePath.replace(/\/+/g, '/');
+    if (!normalizedPath.startsWith('/')) {
+      normalizedPath = '/' + normalizedPath;
+    }
+
+    const downloadUrl = `/download?path=${encodeURIComponent(normalizedPath)}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    if (fileName) {
+      link.download = fileName;
+    }
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   // Delete functions

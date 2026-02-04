@@ -9,9 +9,9 @@ Built using **PlatformIO** and targeting the **ESP32-C3** microcontroller.
 - Vietnamese-optimized Pridi font family
 - Simplified font system for reduced firmware size
 
-| Home                                                  | Recents                                                   | Reader                                                   | TOC                                                  |
-| ----------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
-| ![home](./docs/images/vietnamese/screenshot_8471.png) | ![recents](./docs/images/vietnamese/screenshot_14421.png) | ![reader](./docs/images/vietnamese/screenshot_10361.png) | ![toc](./docs/images/vietnamese/screenshot_8862.png) |
+| Home                                       | Recents                                          | Reader                                         | TOC                                      |
+|--------------------------------------------|--------------------------------------------------|------------------------------------------------|------------------------------------------|
+| ![home](./docs/images/vietnamese/home.png) | ![recents](./docs/images/vietnamese/recents.png) | ![reader](./docs/images/vietnamese/reader.png) | ![toc](./docs/images/vietnamese/toc.png) |
 
 ## Motivation
 
@@ -93,6 +93,7 @@ Connect your Xteink X4 to your computer via USB-C and run the following command.
 ```sh
 pio run --target upload
 ```
+
 ### Debugging
 
 After flashing the new features, it’s recommended to capture detailed logs from the serial port.
@@ -102,7 +103,9 @@ First, make sure all required Python packages are installed:
 ```python
 python3 -m pip install pyserial colorama matplotlib
 ```
+
 after that run the script:
+
 ```sh
 # For Linux
 # This was tested on Debian and should work on most Linux systems.
@@ -111,6 +114,7 @@ python3 scripts/debugging_monitor.py
 # For macOS
 python3 scripts/debugging_monitor.py /dev/cu.usbmodem2101
 ```
+
 Minor adjustments may be required for Windows.
 
 ## Internals

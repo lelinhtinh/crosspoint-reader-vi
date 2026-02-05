@@ -8,6 +8,8 @@
 #include <cstring>
 #include <esp_heap_caps.h>
 
+#include "VietnameseNFC.h"
+
 void GfxRenderer::insertFont(const int fontId, EpdFontFamily font) { fontMap.insert({fontId, font}); }
 
 void GfxRenderer::rotateCoordinates(const int x, const int y, int *rotatedX, int *rotatedY) const {

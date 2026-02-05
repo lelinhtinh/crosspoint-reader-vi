@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include "VietnameseNFC.h"
+
 void EpdFont::getTextBounds(const char *string, const int startX, const int startY, int *minX, int *minY, int *maxX,
                             int *maxY) const {
   *minX = startX;

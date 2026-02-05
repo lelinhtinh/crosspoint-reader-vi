@@ -34,7 +34,7 @@ The device utilises the standard buttons on the Xtink X4 (in the same layout as 
 | **Bottom Edge** | **Back**, **Confirm**, **Left**, **Right**           |
 | **Right Side**  | **Power**, **Volume Up**, **Volume Down**, **Reset** |
 
-**Shortcut:** Press **Power + Volume Down** together to take a screenshot (saved to `/screenshots` on the SD card) when the feature is enabled in **Settings → System → Enable Screenshot**.
+**Shortcut:** Hold the **Confirm** button for 2 seconds to take a screenshot (saved to `/screenshots` on the SD card) when the feature is enabled in **Settings → System → Enable Screenshot**.
 
 Button layout can be customized in **[Settings](#35-settings)**.
 
@@ -153,7 +153,7 @@ The Settings screen allows you to configure the device's behavior. There are a f
 - **Time to Sleep**: Set the duration of inactivity before the device automatically goes to sleep.
 - **Refresh Frequency**: Set how often the screen does a full refresh while reading to reduce ghosting.
 - **OPDS Browser**: Configure OPDS server settings for browsing and downloading books. Set the server URL (for Calibre Content Server, add `/opds` to the end), and optionally configure username and password for servers requiring authentication. Note: Only HTTP Basic authentication is supported. If using Calibre Content Server with authentication enabled, you must set it to use Basic authentication instead of the default Digest authentication.
-- **Enable Screenshot**: Toggle whether the global shortcut (Power + Volume Down) saves a screenshot to the SD card's `/screenshots` directory. When disabled, the screenshot feature will not run and does not allocate the temporary buffer, saving RAM on memory-constrained devices.
+- **Enable Screenshot**: Toggle whether the global shortcut (hold Confirm for 2 seconds) saves a screenshot to the SD card's `/screenshots` directory. When disabled, the screenshot feature will not run and does not allocate the temporary buffer, saving RAM on memory-constrained devices.
 - **Check for updates**: Check for firmware updates over WiFi.
 
 ### 3.6 Sleep Screen

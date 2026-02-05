@@ -281,20 +281,32 @@ void loop() {
     lastMemPrint = millis();
   }
 
-  // Global shortcut: Power + Volume Down -> take screenshot (not configurable)
+  // Screenshot shortcut: Hold BTN_CONFIRM for 2 seconds
   static unsigned long lastScreenshotAt = 0;
-  if (millis() - lastScreenshotAt > 1000) {
-    if (gpio.isPressed(HalGPIO::BTN_POWER) && gpio.isPressed(HalGPIO::BTN_DOWN)) {
-      lastScreenshotAt = millis();
-      Serial.printf("[%lu] [SCR] Shortcut Power+VolDown detected\n", millis());
-      if (!SETTINGS.screenshotEnabled) {
-        Serial.printf("[%lu] [SCR] Screenshot feature is disabled in settings\n", millis());
-        ScreenComponents::drawPopup(renderer, "Screenshot disabled");
-      } else {
+  static unsigned long popupDismissAt = 0;
+
+  if (popupDismissAt > 0 && millis() >= popupDismissAt) {
+    popupDismissAt = 0;
+    if (currentActivity) {
+      currentActivity->onEnter();
+    }
+  }
+
+  if (SETTINGS.screenshotEnabled && millis() - lastScreenshotAt > 1000) {
+    static bool screenshotTaken = false;
+    if (gpio.isPressed(HalGPIO::BTN_CONFIRM) && gpio.getHeldTime() > 2000) {
+      if (!screenshotTaken) {
+        screenshotTaken = true;
+        lastScreenshotAt = millis();
+        Serial.printf("[%lu] [SCR] Hold BTN_CONFIRM detected\n", millis());
+        gpio.consumeButtonUntilRelease(HalGPIO::BTN_CONFIRM);
         const bool success = renderer.saveScreenshot("/screenshots");
         const char *msg = success ? "Screenshot saved" : "Failed to save screenshot";
         ScreenComponents::drawPopup(renderer, msg);
+        popupDismissAt = millis() + 1500;
       }
+    } else if (!gpio.isPressed(HalGPIO::BTN_CONFIRM)) {
+      screenshotTaken = false;
     }
   }
 

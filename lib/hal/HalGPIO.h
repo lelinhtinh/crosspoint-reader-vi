@@ -22,6 +22,8 @@ class HalGPIO {
 #if CROSSPOINT_EMULATED == 0
   InputManager inputMgr;
 #endif
+  bool buttonEventsConsumed = false;
+  mutable uint8_t consumeUntilRelease = 0xFF;
 
 public:
   HalGPIO() = default;
@@ -37,6 +39,7 @@ public:
   bool wasReleased(uint8_t buttonIndex) const;
   bool wasAnyReleased() const;
   unsigned long getHeldTime() const;
+  void consumeButtonUntilRelease(uint8_t buttonIdx);
 
   // Setup wake up GPIO and enter deep sleep
   void startDeepSleep();

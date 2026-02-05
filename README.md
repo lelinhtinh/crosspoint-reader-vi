@@ -9,9 +9,9 @@ Built using **PlatformIO** and targeting the **ESP32-C3** microcontroller.
 - Vietnamese-optimized Andada Pro font family
 - Simplified font system for reduced firmware size
 
-| Home                                       | Recents                                          | Reader                                         | TOC                                      |
-|--------------------------------------------|--------------------------------------------------|------------------------------------------------|------------------------------------------|
-| ![home](./docs/images/vietnamese/home.png) | ![recents](./docs/images/vietnamese/recents.png) | ![reader](./docs/images/vietnamese/reader.png) | ![toc](./docs/images/vietnamese/toc.png) |
+| Home                                       | Recent                                          | Reader                                         | TOC                                      |
+|--------------------------------------------|-------------------------------------------------|------------------------------------------------|------------------------------------------|
+| ![home](./docs/images/vietnamese/home.png) | ![recents](./docs/images/vietnamese/recent.png) | ![reader](./docs/images/vietnamese/reader.png) | ![toc](./docs/images/vietnamese/toc.png) |
 
 ## Motivation
 

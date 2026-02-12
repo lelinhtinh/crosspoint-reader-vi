@@ -8,7 +8,15 @@
 #include <cstring>
 #include <esp_heap_caps.h>
 
+// FORK-FEATURE-BEGIN: VIETNAMESE
+// Vietnamese NFC normalization for proper text rendering
+#ifdef ENABLE_VIETNAMESE_SUPPORT
 #include "VietnameseNFC.h"
+#else
+// Fallback: use standard UTF-8 without composition
+#define utf8NextCodepointNFC utf8NextCodepoint
+#endif
+// FORK-FEATURE-END: VIETNAMESE
 
 void GfxRenderer::insertFont(const int fontId, EpdFontFamily font) { fontMap.insert({fontId, font}); }
 

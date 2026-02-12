@@ -1,0 +1,23 @@
+{
+  "name": "VietnameseSupport",
+  "version": "1.0.0",
+  "description": "Vietnamese NFC normalization for CrossPoint Reader fork",
+  "keywords": ["vietnamese", "unicode", "nfc", "normalization", "text-rendering"],
+  "authors": [
+    {
+      "name": "CrossPoint Reader Vietnamese Fork Contributors"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baivong/crosspoint-reader-vi"
+  },
+  "dependencies": {
+    "Utf8": "*"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "build": {
+    "flags": ["-DENABLE_VIETNAMESE_SUPPORT=1"]
+  }
+}

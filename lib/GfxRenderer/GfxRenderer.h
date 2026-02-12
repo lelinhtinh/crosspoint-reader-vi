@@ -127,4 +127,11 @@ class GfxRenderer {
   // Low level functions
   uint8_t* getFrameBuffer() const;
   static size_t getBufferSize();
+  // FORK-FEATURE-BEGIN: SCREENSHOT
+  // Save the current framebuffer to a PBM file in `directory` (creates directory if missing)
+  // Returns true on success
+#ifdef ENABLE_SCREENSHOT_FEATURE
+  bool saveScreenshot(const std::string &directory = "/screenshots") const;
+#endif
+  // FORK-FEATURE-END: SCREENSHOT
 };

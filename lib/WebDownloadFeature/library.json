@@ -1,0 +1,20 @@
+{
+  "name": "WebDownloadFeature",
+  "version": "1.0.0",
+  "description": "Web file download endpoint feature for CrossPoint Reader fork",
+  "keywords": ["web", "download", "http", "webserver", "file-transfer"],
+  "authors": [
+    {
+      "name": "CrossPoint Reader Vietnamese Fork Contributors"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baivong/crosspoint-reader-vi"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "build": {
+    "flags": ["-DENABLE_WEB_DOWNLOAD_FEATURE=1"]
+  }
+}

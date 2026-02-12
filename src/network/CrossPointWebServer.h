@@ -73,7 +73,11 @@ private:
   void handleStatus() const;
   void handleFileList() const;
   void handleFileListData() const;
+  // FORK-FEATURE-BEGIN: WEBDOWNLOAD
+#ifdef ENABLE_WEB_DOWNLOAD_FEATURE
   void handleDownload() const;
+#endif
+  // FORK-FEATURE-END: WEBDOWNLOAD
   void handleUpload() const;
   void handleUploadPost() const;
   void handleCreateFolder() const;

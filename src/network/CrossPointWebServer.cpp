@@ -101,7 +101,11 @@ void CrossPointWebServer::begin() {
 
   server->on("/api/status", HTTP_GET, [this] { handleStatus(); });
   server->on("/api/files", HTTP_GET, [this] { handleFileListData(); });
+  // FORK-FEATURE-BEGIN: WEBDOWNLOAD
+#ifdef ENABLE_WEB_DOWNLOAD_FEATURE
   server->on("/download", HTTP_GET, [this] { handleDownload(); });
+#endif
+  // FORK-FEATURE-END: WEBDOWNLOAD
 
   // Upload endpoint with special handling for multipart form data
   server->on("/upload", HTTP_POST, [this] { handleUploadPost(); }, [this] { handleUpload(); });
@@ -395,6 +399,11 @@ void CrossPointWebServer::handleFileListData() const {
   Serial.printf("[%lu] [WEB] Served file listing page for path: %s\n", millis(), currentPath.c_str());
 }
 
+// FORK-FEATURE-BEGIN: WEBDOWNLOAD
+// HTTP GET /download endpoint
+// Provides file download with proper Content-Disposition headers
+// Security: blocks hidden files and protected items
+#ifdef ENABLE_WEB_DOWNLOAD_FEATURE
 void CrossPointWebServer::handleDownload() const {
   if (!server->hasArg("path")) {
     server->send(400, "text/plain", "Missing path");
@@ -457,6 +466,8 @@ void CrossPointWebServer::handleDownload() const {
   client.write(file);
   file.close();
 }
+#endif
+// FORK-FEATURE-END: WEBDOWNLOAD
 
 // Static variables for upload handling
 static FsFile uploadFile;

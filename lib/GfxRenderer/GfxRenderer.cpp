@@ -686,6 +686,11 @@ uint8_t *GfxRenderer::getFrameBuffer() const { return display.getFrameBuffer(); 
 
 size_t GfxRenderer::getBufferSize() { return HalDisplay::BUFFER_SIZE; }
 
+// FORK-FEATURE-BEGIN: SCREENSHOT
+// Saves screenshot in PBM format (Portable Bitmap)
+// Rotates 90° counterclockwise (landscape → portrait)
+// Allocates ~48KB for rotation buffer
+#ifdef ENABLE_SCREENSHOT_FEATURE
 bool GfxRenderer::saveScreenshot(const std::string &directory) const {
   // Ensure the screenshots directory exists
   if (!SdMan.exists(directory.c_str())) {
@@ -768,6 +773,8 @@ bool GfxRenderer::saveScreenshot(const std::string &directory) const {
   Serial.printf("[%lu] [GFX] Saved screenshot to %s\n", millis(), filename.c_str());
   return true;
 }
+#endif
+// FORK-FEATURE-END: SCREENSHOT
 
 // unused
 // void GfxRenderer::grayscaleRevert() const { display.grayscaleRevert(); }

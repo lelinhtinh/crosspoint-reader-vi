@@ -48,14 +48,23 @@ const SettingInfo controlsSettings[controlsSettingsCount] = {
     SettingInfo::Toggle("Long-press Chapter Skip", &CrossPointSettings::longPressChapterSkip),
     SettingInfo::Enum("Short Power Button Click", &CrossPointSettings::shortPwrBtn, {"Ignore", "Sleep", "Page Turn"})};
 
+// FORK-FEATURE-BEGIN: SCREENSHOT
+// Count varies based on enabled features
+#ifdef ENABLE_SCREENSHOT_FEATURE
 constexpr int systemSettingsCount = 6;
+#else
+constexpr int systemSettingsCount = 5;
+#endif
+// FORK-FEATURE-END: SCREENSHOT
 const SettingInfo systemSettings[systemSettingsCount] = {
     SettingInfo::Enum("Time to Sleep", &CrossPointSettings::sleepTimeout,
                       {"1 min", "5 min", "10 min", "15 min", "30 min"}),
-    SettingInfo::Action("KOReader Sync"),
-    SettingInfo::Action("OPDS Browser"),
-    SettingInfo::Action("Clear Cache"),
+    SettingInfo::Action("KOReader Sync"), SettingInfo::Action("OPDS Browser"), SettingInfo::Action("Clear Cache"),
+// FORK-FEATURE-BEGIN: SCREENSHOT
+#ifdef ENABLE_SCREENSHOT_FEATURE
     SettingInfo::Toggle("Enable Screenshot", &CrossPointSettings::screenshotEnabled),
+#endif
+    // FORK-FEATURE-END: SCREENSHOT
     SettingInfo::Action("Check for updates")};
 } // namespace
 

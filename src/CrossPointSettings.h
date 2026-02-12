@@ -126,8 +126,12 @@ public:
   // E-ink refresh frequency (default 15 pages)
   uint8_t refreshFrequency = REFRESH_15;
   uint8_t hyphenationEnabled = 0;
+  // FORK-FEATURE-BEGIN: SCREENSHOT
+#ifdef ENABLE_SCREENSHOT_FEATURE
   // Enable/disable screenshot feature - 1 = enabled, 0 = disabled
   uint8_t screenshotEnabled = 0;
+#endif
+  // FORK-FEATURE-END: SCREENSHOT
 
   // Reader screen margin settings
   uint8_t screenMargin = 5;

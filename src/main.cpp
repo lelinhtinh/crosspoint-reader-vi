@@ -292,6 +292,10 @@ void loop() {
     }
   }
 
+  // FORK-FEATURE-BEGIN: SCREENSHOT
+  // Screenshot capture via long-press BTN_CONFIRM (2 seconds)
+  // Saves PBM format to /screenshots/ directory
+#ifdef ENABLE_SCREENSHOT_FEATURE
   if (SETTINGS.screenshotEnabled && millis() - lastScreenshotAt > 1000) {
     static bool screenshotTaken = false;
     if (gpio.isPressed(HalGPIO::BTN_CONFIRM) && gpio.getHeldTime() > 2000) {
@@ -309,6 +313,8 @@ void loop() {
       screenshotTaken = false;
     }
   }
+#endif
+  // FORK-FEATURE-END: SCREENSHOT
 
   // Check for any user activity (button press or release) or active background work
   static unsigned long lastActivityTime = millis();

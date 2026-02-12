@@ -60,8 +60,16 @@ bool CrossPointSettings::saveToFile() const {
   serialization::writeString(outputFile, std::string(opdsUsername));
   serialization::writeString(outputFile, std::string(opdsPassword));
   serialization::writePod(outputFile, sleepScreenCoverFilter);
+  // FORK-FEATURE-BEGIN: SCREENSHOT
   // New: screenshotEnabled (1 = enabled, 0 = disabled)
+#ifdef ENABLE_SCREENSHOT_FEATURE
   serialization::writePod(outputFile, screenshotEnabled);
+#else
+  // Maintain file format compatibility when feature is disabled
+  uint8_t dummy = 0;
+  serialization::writePod(outputFile, dummy);
+#endif
+  // FORK-FEATURE-END: SCREENSHOT
   // New fields added at end for backward compatibility
   outputFile.close();
 
@@ -173,8 +181,16 @@ bool CrossPointSettings::loadFromFile() {
     readAndValidate(inputFile, sleepScreenCoverFilter, SLEEP_SCREEN_COVER_FILTER_COUNT);
     if (++settingsRead >= fileSettingsCount)
       break;
-    // New: screenshotEnabled (1 = enabled, 0 = disabled)
+      // FORK-FEATURE-BEGIN: SCREENSHOT
+      // New: screenshotEnabled (1 = enabled, 0 = disabled)
+#ifdef ENABLE_SCREENSHOT_FEATURE
     serialization::readPod(inputFile, screenshotEnabled);
+#else
+    // Skip field when disabled (maintain file format compatibility)
+    uint8_t dummy;
+    serialization::readPod(inputFile, dummy);
+#endif
+    // FORK-FEATURE-END: SCREENSHOT
     if (++settingsRead >= fileSettingsCount)
       break;
     // New fields added at end for backward compatibility

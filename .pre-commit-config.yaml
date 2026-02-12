@@ -1,0 +1,21 @@
+repos:
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: Run clang-format-fix
+        entry: scripts/pre-commit-clang-format.sh
+        language: system
+        files: \.(cpp|cc|c|h|hpp|hh)$
+        stages: [pre-commit]
+
+      - id: cppcheck
+        name: Run cppcheck (PlatformIO)
+        entry: scripts/pre-commit-cppcheck.sh
+        language: system
+        stages: [pre-commit]
+
+      - id: full-ci
+        name: Run full CI (build & tests)
+        entry: scripts/pre-push-ci.sh
+        language: system
+        stages: [pre-push]

@@ -2,6 +2,16 @@
 
 #include <Utf8.h>
 
+// FORK-FEATURE-BEGIN: VIETNAMESE
+// Vietnamese NFC normalization for proper text rendering
+#ifdef ENABLE_VIETNAMESE_SUPPORT
+#include "VietnameseNFC.h"
+#else
+// Fallback: use standard UTF-8 without composition
+#define utf8NextCodepointNFC utf8NextCodepoint
+#endif
+// FORK-FEATURE-END: VIETNAMESE
+
 void GfxRenderer::begin() {
   frameBuffer = display.getFrameBuffer();
   if (!frameBuffer) {

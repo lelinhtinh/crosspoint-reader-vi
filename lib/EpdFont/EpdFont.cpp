@@ -4,6 +4,16 @@
 
 #include <algorithm>
 
+// FORK-FEATURE-BEGIN: VIETNAMESE
+// Vietnamese NFC normalization for text dimension calculation
+#ifdef ENABLE_VIETNAMESE_SUPPORT
+#include "VietnameseNFC.h"
+#else
+// Fallback: use standard UTF-8 without composition
+#define utf8NextCodepointNFC utf8NextCodepoint
+#endif
+// FORK-FEATURE-END: VIETNAMESE
+
 void EpdFont::getTextBounds(const char* string, const int startX, const int startY, int* minX, int* minY, int* maxX,
                             int* maxY) const {
   *minX = startX;

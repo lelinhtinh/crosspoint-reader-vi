@@ -23,4 +23,4 @@
  * @param string Pointer to pointer to UTF-8 string (will be advanced past consumed bytes)
  * @return The next codepoint (NFC normalized for Vietnamese)
  */
-uint32_t utf8NextCodepointNFC(const unsigned char **string);
+uint32_t utf8NextCodepointNFC(const unsigned char** string);

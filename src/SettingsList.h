@@ -29,9 +29,24 @@ inline std::vector<SettingInfo> getSettingsList() {
       SettingInfo::Enum("UI Theme", &CrossPointSettings::uiTheme, {"Classic", "Lyra"}, "uiTheme", "Display"),
       SettingInfo::Toggle("Sunlight Fading Fix", &CrossPointSettings::fadingFix, "fadingFix", "Display"),
 
-      // --- Reader ---
+  // --- Reader ---
+  // FORK-FEATURE-BEGIN: VIETNAMESE
+  // When Vietnamese support is enabled, NotoSans is used as the UI font (replacing Ubuntu).
+  // Hide it from reader font choices to avoid confusion; Bookerly and OpenDyslexic cover reading.
+  // DynamicEnum maps display indexes to the correct enum values (BOOKERLY=0, OPENDYSLEXIC=2).
+#if ENABLE_VIETNAMESE_SUPPORT
+      SettingInfo::DynamicEnum(
+          "Font Family", {"Bookerly", "Open Dyslexic"},
+          []() -> uint8_t { return (SETTINGS.fontFamily == CrossPointSettings::OPENDYSLEXIC) ? 1 : 0; },
+          [](uint8_t idx) {
+            SETTINGS.fontFamily = (idx == 1) ? CrossPointSettings::OPENDYSLEXIC : CrossPointSettings::BOOKERLY;
+          },
+          "fontFamily", "Reader"),
+#else
       SettingInfo::Enum("Font Family", &CrossPointSettings::fontFamily, {"Bookerly", "Noto Sans", "Open Dyslexic"},
                         "fontFamily", "Reader"),
+#endif
+      // FORK-FEATURE-END: VIETNAMESE
       SettingInfo::Enum("Font Size", &CrossPointSettings::fontSize, {"Small", "Medium", "Large", "X Large"}, "fontSize",
                         "Reader"),
       SettingInfo::Enum("Line Spacing", &CrossPointSettings::lineSpacing, {"Tight", "Normal", "Wide"}, "lineSpacing",

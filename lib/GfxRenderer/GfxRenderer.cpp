@@ -1059,7 +1059,7 @@ void GfxRenderer::getOrientedViewableTRBL(int* outTop, int* outRight, int* outBo
 // Rotates 90° counterclockwise (landscape → portrait)
 // Allocates ~48KB for rotation buffer
 #ifdef ENABLE_SCREENSHOT_FEATURE
-bool GfxRenderer::saveScreenshot(const std::string &directory) const {
+bool GfxRenderer::saveScreenshot(const std::string& directory) const {
   // Ensure the screenshots directory exists
   if (!SdMan.exists(directory.c_str())) {
     if (!SdMan.mkdir(directory.c_str())) {
@@ -1079,15 +1079,15 @@ bool GfxRenderer::saveScreenshot(const std::string &directory) const {
     return false;
   }
 
-  const int DISPLAY_WIDTH_LOCAL = HalDisplay::DISPLAY_WIDTH;   // 800
-  const int DISPLAY_HEIGHT_LOCAL = HalDisplay::DISPLAY_HEIGHT; // 480
+  const int DISPLAY_WIDTH_LOCAL = HalDisplay::DISPLAY_WIDTH;    // 800
+  const int DISPLAY_HEIGHT_LOCAL = HalDisplay::DISPLAY_HEIGHT;  // 480
   const int DISPLAY_WIDTH_BYTES_LOCAL = DISPLAY_WIDTH_LOCAL / 8;
 
   // PBM header: rotate image 90° counterclockwise when saving (portrait)
   // We follow the same convention as desktop helper: output dimensions swapped
   char header[64];
   int headerLen = snprintf(header, sizeof(header), "P4\n%d %d\n", DISPLAY_HEIGHT_LOCAL, DISPLAY_WIDTH_LOCAL);
-  out.write(reinterpret_cast<const uint8_t *>(header), headerLen);
+  out.write(reinterpret_cast<const uint8_t*>(header), headerLen);
 
   // Allocate rotated buffer size (size = DISPLAY_WIDTH_LOCAL * (DISPLAY_HEIGHT_LOCAL / 8) == BUFFER_SIZE)
   const size_t outSize = (DISPLAY_HEIGHT_LOCAL / 8) * DISPLAY_WIDTH_LOCAL;
@@ -1100,7 +1100,7 @@ bool GfxRenderer::saveScreenshot(const std::string &directory) const {
     return false;
   }
 
-  uint8_t *rotated = static_cast<uint8_t *>(malloc(outSize));
+  uint8_t* rotated = static_cast<uint8_t*>(malloc(outSize));
   if (!rotated) {
     Serial.printf("[%lu] [GFX] Failed to allocate rotated buffer\n", millis());
     out.close();
@@ -1108,7 +1108,7 @@ bool GfxRenderer::saveScreenshot(const std::string &directory) const {
   }
   memset(rotated, 0, outSize);
 
-  const uint8_t *buffer = display.getFrameBuffer();
+  const uint8_t* buffer = display.getFrameBuffer();
   if (!buffer) {
     Serial.printf("[%lu] [GFX] No framebuffer available\n", millis());
     free(rotated);
@@ -1128,7 +1128,7 @@ bool GfxRenderer::saveScreenshot(const std::string &directory) const {
 
       const int outByteIndex = outY * (DISPLAY_HEIGHT_LOCAL / 8) + (outX / 8);
       const int outBitPosition = 7 - (outX % 8);
-      if (!isWhite) { // invert: e-ink white=1 -> PBM black=1
+      if (!isWhite) {  // invert: e-ink white=1 -> PBM black=1
         rotated[outByteIndex] |= (1 << outBitPosition);
       }
     }

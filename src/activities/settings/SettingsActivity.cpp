@@ -173,6 +173,9 @@ void SettingsActivity::toggleCurrentSetting() {
   } else if (setting.type == SettingType::ENUM && setting.valuePtr != nullptr) {
     const uint8_t currentValue = SETTINGS.*(setting.valuePtr);
     SETTINGS.*(setting.valuePtr) = (currentValue + 1) % static_cast<uint8_t>(setting.enumValues.size());
+  } else if (setting.type == SettingType::ENUM && setting.valueGetter) {
+    const uint8_t currentValue = setting.valueGetter();
+    setting.valueSetter((currentValue + 1) % static_cast<uint8_t>(setting.enumValues.size()));
   } else if (setting.type == SettingType::VALUE && setting.valuePtr != nullptr) {
     const int8_t currentValue = SETTINGS.*(setting.valuePtr);
     if (currentValue + setting.valueRange.step > setting.valueRange.max) {
@@ -273,6 +276,9 @@ void SettingsActivity::render() const {
           valueText = value ? "ON" : "OFF";
         } else if (settings[i].type == SettingType::ENUM && settings[i].valuePtr != nullptr) {
           const uint8_t value = SETTINGS.*(settings[i].valuePtr);
+          valueText = settings[i].enumValues[value];
+        } else if (settings[i].type == SettingType::ENUM && settings[i].valueGetter) {
+          const uint8_t value = settings[i].valueGetter();
           valueText = settings[i].enumValues[value];
         } else if (settings[i].type == SettingType::VALUE && settings[i].valuePtr != nullptr) {
           valueText = std::to_string(SETTINGS.*(settings[i].valuePtr));

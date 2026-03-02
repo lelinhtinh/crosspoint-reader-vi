@@ -8,37 +8,25 @@
 #pragma once
 
 #include <Xtc.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
 
-#include "activities/ActivityWithSubactivity.h"
+#include "activities/Activity.h"
 
-class XtcReaderActivity final : public ActivityWithSubactivity {
+class XtcReaderActivity final : public Activity {
   std::shared_ptr<Xtc> xtc;
-  TaskHandle_t displayTaskHandle = nullptr;
-  SemaphoreHandle_t renderingMutex = nullptr;
+
   uint32_t currentPage = 0;
   int pagesUntilFullRefresh = 0;
-  bool updateRequired = false;
-  const std::function<void()> onGoBack;
-  const std::function<void()> onGoHome;
 
-  static void taskTrampoline(void* param);
-  [[noreturn]] void displayTaskLoop();
-  void renderScreen();
   void renderPage();
   void saveProgress() const;
   void loadProgress();
 
  public:
-  explicit XtcReaderActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, std::unique_ptr<Xtc> xtc,
-                             const std::function<void()>& onGoBack, const std::function<void()>& onGoHome)
-      : ActivityWithSubactivity("XtcReader", renderer, mappedInput),
-        xtc(std::move(xtc)),
-        onGoBack(onGoBack),
-        onGoHome(onGoHome) {}
+  explicit XtcReaderActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, std::unique_ptr<Xtc> xtc)
+      : Activity("XtcReader", renderer, mappedInput), xtc(std::move(xtc)) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;
+  void render(RenderLock&&) override;
+  bool isReaderActivity() const override { return true; }
 };

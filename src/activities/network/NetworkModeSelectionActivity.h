@@ -1,14 +1,10 @@
 #pragma once
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
 
 #include <functional>
 
 #include "../Activity.h"
 #include "util/ButtonNavigator.h"
 
-// Enum for network mode selection
 enum class NetworkMode { JOIN_NETWORK, CONNECT_CALIBRE, CREATE_HOTSPOT };
 
 /**
@@ -21,25 +17,18 @@ enum class NetworkMode { JOIN_NETWORK, CONNECT_CALIBRE, CREATE_HOTSPOT };
  * The onCancel callback is called if the user presses back.
  */
 class NetworkModeSelectionActivity final : public Activity {
-  TaskHandle_t displayTaskHandle = nullptr;
-  SemaphoreHandle_t renderingMutex = nullptr;
   ButtonNavigator buttonNavigator;
 
   int selectedIndex = 0;
-  bool updateRequired = false;
-  const std::function<void(NetworkMode)> onModeSelected;
-  const std::function<void()> onCancel;
-
-  static void taskTrampoline(void* param);
-  [[noreturn]] void displayTaskLoop();
-  void render() const;
 
  public:
-  explicit NetworkModeSelectionActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                        const std::function<void(NetworkMode)>& onModeSelected,
-                                        const std::function<void()>& onCancel)
-      : Activity("NetworkModeSelection", renderer, mappedInput), onModeSelected(onModeSelected), onCancel(onCancel) {}
+  explicit NetworkModeSelectionActivity(GfxRenderer& renderer, MappedInputManager& mappedInput)
+      : Activity("NetworkModeSelection", renderer, mappedInput) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;
+  void render(RenderLock&&) override;
+
+  void onModeSelected(NetworkMode mode);
+  void onCancel();
 };

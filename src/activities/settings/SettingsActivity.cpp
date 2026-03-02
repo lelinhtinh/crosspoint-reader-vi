@@ -1,30 +1,27 @@
 #include "SettingsActivity.h"
 
 #include <GfxRenderer.h>
-#include <HardwareSerial.h>
+#include <Logging.h>
 
 #include "ButtonRemapActivity.h"
 #include "CalibreSettingsActivity.h"
 #include "ClearCacheActivity.h"
 #include "CrossPointSettings.h"
 #include "KOReaderSettingsActivity.h"
+#include "LanguageSelectActivity.h"
 #include "MappedInputManager.h"
 #include "OtaUpdateActivity.h"
 #include "SettingsList.h"
+#include "StatusBarSettingsActivity.h"
 #include "activities/network/WifiSelectionActivity.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
 
-const char* SettingsActivity::categoryNames[categoryCount] = {"Display", "Reader", "Controls", "System"};
-
-void SettingsActivity::taskTrampoline(void* param) {
-  auto* self = static_cast<SettingsActivity*>(param);
-  self->displayTaskLoop();
-}
+const StrId SettingsActivity::categoryNames[categoryCount] = {StrId::STR_CAT_DISPLAY, StrId::STR_CAT_READER,
+                                                              StrId::STR_CAT_CONTROLS, StrId::STR_CAT_SYSTEM};
 
 void SettingsActivity::onEnter() {
   Activity::onEnter();
-  renderingMutex = xSemaphoreCreateMutex();
 
   // Build per-category vectors from the shared settings list
   displaySettings.clear();
@@ -32,28 +29,30 @@ void SettingsActivity::onEnter() {
   controlsSettings.clear();
   systemSettings.clear();
 
-  for (auto& setting : getSettingsList()) {
-    if (!setting.category) continue;
-    if (strcmp(setting.category, "Display") == 0) {
-      displaySettings.push_back(std::move(setting));
-    } else if (strcmp(setting.category, "Reader") == 0) {
-      readerSettings.push_back(std::move(setting));
-    } else if (strcmp(setting.category, "Controls") == 0) {
-      controlsSettings.push_back(std::move(setting));
-    } else if (strcmp(setting.category, "System") == 0) {
-      systemSettings.push_back(std::move(setting));
+  for (const auto& setting : getSettingsList()) {
+    if (setting.category == StrId::STR_NONE_OPT) continue;
+    if (setting.category == StrId::STR_CAT_DISPLAY) {
+      displaySettings.push_back(setting);
+    } else if (setting.category == StrId::STR_CAT_READER) {
+      readerSettings.push_back(setting);
+    } else if (setting.category == StrId::STR_CAT_CONTROLS) {
+      controlsSettings.push_back(setting);
+    } else if (setting.category == StrId::STR_CAT_SYSTEM) {
+      systemSettings.push_back(setting);
     }
     // Web-only categories (KOReader Sync, OPDS Browser) are skipped for device UI
   }
 
   // Append device-only ACTION items
   controlsSettings.insert(controlsSettings.begin(),
-                          SettingInfo::Action("Remap Front Buttons", SettingAction::RemapFrontButtons));
-  systemSettings.push_back(SettingInfo::Action("Network", SettingAction::Network));
-  systemSettings.push_back(SettingInfo::Action("KOReader Sync", SettingAction::KOReaderSync));
-  systemSettings.push_back(SettingInfo::Action("OPDS Browser", SettingAction::OPDSBrowser));
-  systemSettings.push_back(SettingInfo::Action("Clear Cache", SettingAction::ClearCache));
-  systemSettings.push_back(SettingInfo::Action("Check for updates", SettingAction::CheckForUpdates));
+                          SettingInfo::Action(StrId::STR_REMAP_FRONT_BUTTONS, SettingAction::RemapFrontButtons));
+  systemSettings.push_back(SettingInfo::Action(StrId::STR_WIFI_NETWORKS, SettingAction::Network));
+  systemSettings.push_back(SettingInfo::Action(StrId::STR_KOREADER_SYNC, SettingAction::KOReaderSync));
+  systemSettings.push_back(SettingInfo::Action(StrId::STR_OPDS_BROWSER, SettingAction::OPDSBrowser));
+  systemSettings.push_back(SettingInfo::Action(StrId::STR_CLEAR_READING_CACHE, SettingAction::ClearCache));
+  systemSettings.push_back(SettingInfo::Action(StrId::STR_CHECK_UPDATES, SettingAction::CheckForUpdates));
+  systemSettings.push_back(SettingInfo::Action(StrId::STR_LANGUAGE, SettingAction::Language));
+  readerSettings.push_back(SettingInfo::Action(StrId::STR_CUSTOMISE_STATUS_BAR, SettingAction::CustomiseStatusBar));
 
   // Reset selection to first category
   selectedCategoryIndex = 0;
@@ -64,36 +63,16 @@ void SettingsActivity::onEnter() {
   settingsCount = static_cast<int>(displaySettings.size());
 
   // Trigger first update
-  updateRequired = true;
-
-  xTaskCreate(&SettingsActivity::taskTrampoline, "SettingsActivityTask",
-              4096,               // Stack size
-              this,               // Parameters
-              1,                  // Priority
-              &displayTaskHandle  // Task handle
-  );
+  requestUpdate();
 }
 
 void SettingsActivity::onExit() {
-  ActivityWithSubactivity::onExit();
-
-  // Wait until not rendering to delete task to avoid killing mid-instruction to EPD
-  xSemaphoreTake(renderingMutex, portMAX_DELAY);
-  if (displayTaskHandle) {
-    vTaskDelete(displayTaskHandle);
-    displayTaskHandle = nullptr;
-  }
-  vSemaphoreDelete(renderingMutex);
-  renderingMutex = nullptr;
+  Activity::onExit();
 
   UITheme::getInstance().reload();  // Re-apply theme in case it was changed
 }
 
 void SettingsActivity::loop() {
-  if (subActivity) {
-    subActivity->loop();
-    return;
-  }
   bool hasChangedCategory = false;
 
   // Handle actions with early return
@@ -101,10 +80,10 @@ void SettingsActivity::loop() {
     if (selectedSettingIndex == 0) {
       selectedCategoryIndex = (selectedCategoryIndex < categoryCount - 1) ? (selectedCategoryIndex + 1) : 0;
       hasChangedCategory = true;
-      updateRequired = true;
+      requestUpdate();
     } else {
       toggleCurrentSetting();
-      updateRequired = true;
+      requestUpdate();
       return;
     }
   }
@@ -118,24 +97,24 @@ void SettingsActivity::loop() {
   // Handle navigation
   buttonNavigator.onNextRelease([this] {
     selectedSettingIndex = ButtonNavigator::nextIndex(selectedSettingIndex, settingsCount + 1);
-    updateRequired = true;
+    requestUpdate();
   });
 
   buttonNavigator.onPreviousRelease([this] {
     selectedSettingIndex = ButtonNavigator::previousIndex(selectedSettingIndex, settingsCount + 1);
-    updateRequired = true;
+    requestUpdate();
   });
 
   buttonNavigator.onNextContinuous([this, &hasChangedCategory] {
     hasChangedCategory = true;
     selectedCategoryIndex = ButtonNavigator::nextIndex(selectedCategoryIndex, categoryCount);
-    updateRequired = true;
+    requestUpdate();
   });
 
   buttonNavigator.onPreviousContinuous([this, &hasChangedCategory] {
     hasChangedCategory = true;
     selectedCategoryIndex = ButtonNavigator::previousIndex(selectedCategoryIndex, categoryCount);
-    updateRequired = true;
+    requestUpdate();
   });
 
   if (hasChangedCategory) {
@@ -184,46 +163,38 @@ void SettingsActivity::toggleCurrentSetting() {
       SETTINGS.*(setting.valuePtr) = currentValue + setting.valueRange.step;
     }
   } else if (setting.type == SettingType::ACTION) {
-    auto enterSubActivity = [this](Activity* activity) {
-      xSemaphoreTake(renderingMutex, portMAX_DELAY);
-      exitActivity();
-      enterNewActivity(activity);
-      xSemaphoreGive(renderingMutex);
-    };
-
-    auto onComplete = [this] {
-      exitActivity();
-      updateRequired = true;
-    };
-
-    auto onCompleteBool = [this](bool) {
-      exitActivity();
-      updateRequired = true;
-    };
+    auto resultHandler = [this](const ActivityResult&) { SETTINGS.saveToFile(); };
 
     switch (setting.action) {
       case SettingAction::RemapFrontButtons:
-        enterSubActivity(new ButtonRemapActivity(renderer, mappedInput, onComplete));
+        startActivityForResult(std::make_unique<ButtonRemapActivity>(renderer, mappedInput), resultHandler);
+        break;
+      case SettingAction::CustomiseStatusBar:
+        startActivityForResult(std::make_unique<StatusBarSettingsActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::KOReaderSync:
-        enterSubActivity(new KOReaderSettingsActivity(renderer, mappedInput, onComplete));
+        startActivityForResult(std::make_unique<KOReaderSettingsActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::OPDSBrowser:
-        enterSubActivity(new CalibreSettingsActivity(renderer, mappedInput, onComplete));
+        startActivityForResult(std::make_unique<CalibreSettingsActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::Network:
-        enterSubActivity(new WifiSelectionActivity(renderer, mappedInput, onCompleteBool, false));
+        startActivityForResult(std::make_unique<WifiSelectionActivity>(renderer, mappedInput, false), resultHandler);
         break;
       case SettingAction::ClearCache:
-        enterSubActivity(new ClearCacheActivity(renderer, mappedInput, onComplete));
+        startActivityForResult(std::make_unique<ClearCacheActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::CheckForUpdates:
-        enterSubActivity(new OtaUpdateActivity(renderer, mappedInput, onComplete));
+        startActivityForResult(std::make_unique<OtaUpdateActivity>(renderer, mappedInput), resultHandler);
+        break;
+      case SettingAction::Language:
+        startActivityForResult(std::make_unique<LanguageSelectActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::None:
         // Do nothing
         break;
     }
+    return;  // Results will be handled in the result handler, so we can return early here
   } else {
     return;
   }
@@ -231,32 +202,21 @@ void SettingsActivity::toggleCurrentSetting() {
   SETTINGS.saveToFile();
 }
 
-void SettingsActivity::displayTaskLoop() {
-  while (true) {
-    if (updateRequired && !subActivity) {
-      updateRequired = false;
-      xSemaphoreTake(renderingMutex, portMAX_DELAY);
-      render();
-      xSemaphoreGive(renderingMutex);
-    }
-    vTaskDelay(10 / portTICK_PERIOD_MS);
-  }
-}
-
-void SettingsActivity::render() const {
+void SettingsActivity::render(RenderLock&&) {
   renderer.clearScreen();
 
   const auto pageWidth = renderer.getScreenWidth();
   const auto pageHeight = renderer.getScreenHeight();
 
-  auto metrics = UITheme::getInstance().getMetrics();
+  const auto& metrics = UITheme::getInstance().getMetrics();
 
-  GUI.drawHeader(renderer, Rect{0, metrics.topPadding, pageWidth, metrics.headerHeight}, "Settings");
+  GUI.drawHeader(renderer, Rect{0, metrics.topPadding, pageWidth, metrics.headerHeight}, tr(STR_SETTINGS_TITLE),
+                 CROSSPOINT_VERSION);
 
   std::vector<TabInfo> tabs;
   tabs.reserve(categoryCount);
   for (int i = 0; i < categoryCount; i++) {
-    tabs.push_back({categoryNames[i], selectedCategoryIndex == i});
+    tabs.push_back({I18N.get(categoryNames[i]), selectedCategoryIndex == i});
   }
   GUI.drawTabBar(renderer, Rect{0, metrics.topPadding + metrics.headerHeight, pageWidth, metrics.tabBarHeight}, tabs,
                  selectedSettingIndex == 0);
@@ -267,32 +227,30 @@ void SettingsActivity::render() const {
       Rect{0, metrics.topPadding + metrics.headerHeight + metrics.tabBarHeight + metrics.verticalSpacing, pageWidth,
            pageHeight - (metrics.topPadding + metrics.headerHeight + metrics.tabBarHeight + metrics.buttonHintsHeight +
                          metrics.verticalSpacing * 2)},
-      settingsCount, selectedSettingIndex - 1, [&settings](int index) { return std::string(settings[index].name); },
-      nullptr, nullptr,
+      settingsCount, selectedSettingIndex - 1,
+      [&settings](int index) { return std::string(I18N.get(settings[index].nameId)); }, nullptr, nullptr,
       [&settings](int i) {
+        const auto& setting = settings[i];
         std::string valueText = "";
-        if (settings[i].type == SettingType::TOGGLE && settings[i].valuePtr != nullptr) {
-          const bool value = SETTINGS.*(settings[i].valuePtr);
-          valueText = value ? "ON" : "OFF";
-        } else if (settings[i].type == SettingType::ENUM && settings[i].valuePtr != nullptr) {
-          const uint8_t value = SETTINGS.*(settings[i].valuePtr);
-          valueText = settings[i].enumValues[value];
-        } else if (settings[i].type == SettingType::ENUM && settings[i].valueGetter) {
-          const uint8_t value = settings[i].valueGetter();
-          valueText = settings[i].enumValues[value];
-        } else if (settings[i].type == SettingType::VALUE && settings[i].valuePtr != nullptr) {
-          valueText = std::to_string(SETTINGS.*(settings[i].valuePtr));
+        if (setting.type == SettingType::TOGGLE && setting.valuePtr != nullptr) {
+          const bool value = SETTINGS.*(setting.valuePtr);
+          valueText = value ? tr(STR_STATE_ON) : tr(STR_STATE_OFF);
+        } else if (setting.type == SettingType::ENUM && setting.valuePtr != nullptr) {
+          const uint8_t value = SETTINGS.*(setting.valuePtr);
+          valueText = I18N.get(setting.enumValues[value]);
+        } else if (setting.type == SettingType::ENUM && setting.valueGetter) {
+          // FORK-FEATURE: DynamicEnum - custom getter
+          const uint8_t value = setting.valueGetter();
+          valueText = I18N.get(setting.enumValues[value]);
+        } else if (setting.type == SettingType::VALUE && setting.valuePtr != nullptr) {
+          valueText = std::to_string(SETTINGS.*(setting.valuePtr));
         }
         return valueText;
-      });
-
-  // Draw version text
-  renderer.drawText(SMALL_FONT_ID,
-                    pageWidth - metrics.versionTextRightX - renderer.getTextWidth(SMALL_FONT_ID, CROSSPOINT_VERSION),
-                    metrics.versionTextY, CROSSPOINT_VERSION);
+      },
+      true);
 
   // Draw help text
-  const auto labels = mappedInput.mapLabels("« Back", "Toggle", "Up", "Down");
+  const auto labels = mappedInput.mapLabels(tr(STR_BACK), tr(STR_TOGGLE), tr(STR_DIR_UP), tr(STR_DIR_DOWN));
   GUI.drawButtonHints(renderer, labels.btn1, labels.btn2, labels.btn3, labels.btn4);
 
   // Always use standard refresh for settings screen

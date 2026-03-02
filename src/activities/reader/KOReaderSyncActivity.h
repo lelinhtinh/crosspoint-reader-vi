@@ -1,15 +1,12 @@
 #pragma once
 #include <Epub.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
 
 #include <functional>
 #include <memory>
 
 #include "KOReaderSyncClient.h"
 #include "ProgressMapper.h"
-#include "activities/ActivityWithSubactivity.h"
+#include "activities/Activity.h"
 
 /**
  * Activity for syncing reading progress with KOReader sync server.
@@ -21,16 +18,12 @@
  * 4. Show comparison and options (Apply/Upload)
  * 5. Apply or upload progress
  */
-class KOReaderSyncActivity final : public ActivityWithSubactivity {
+class KOReaderSyncActivity final : public Activity {
  public:
-  using OnCancelCallback = std::function<void()>;
-  using OnSyncCompleteCallback = std::function<void(int newSpineIndex, int newPageNumber)>;
-
   explicit KOReaderSyncActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
                                 const std::shared_ptr<Epub>& epub, const std::string& epubPath, int currentSpineIndex,
-                                int currentPage, int totalPagesInSpine, OnCancelCallback onCancel,
-                                OnSyncCompleteCallback onSyncComplete)
-      : ActivityWithSubactivity("KOReaderSync", renderer, mappedInput),
+                                int currentPage, int totalPagesInSpine)
+      : Activity("KOReaderSync", renderer, mappedInput),
         epub(epub),
         epubPath(epubPath),
         currentSpineIndex(currentSpineIndex),
@@ -38,13 +31,12 @@ class KOReaderSyncActivity final : public ActivityWithSubactivity {
         totalPagesInSpine(totalPagesInSpine),
         remoteProgress{},
         remotePosition{},
-        localProgress{},
-        onCancel(std::move(onCancel)),
-        onSyncComplete(std::move(onSyncComplete)) {}
+        localProgress{} {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
+  void render(RenderLock&&) override;
   bool preventAutoSleep() override { return state == CONNECTING || state == SYNCING; }
 
  private:
@@ -66,10 +58,6 @@ class KOReaderSyncActivity final : public ActivityWithSubactivity {
   int currentPage;
   int totalPagesInSpine;
 
-  TaskHandle_t displayTaskHandle = nullptr;
-  SemaphoreHandle_t renderingMutex = nullptr;
-  bool updateRequired = false;
-
   State state = WIFI_SELECTION;
   std::string statusMessage;
   std::string documentHash;
@@ -85,14 +73,7 @@ class KOReaderSyncActivity final : public ActivityWithSubactivity {
   // Selection in result screen (0=Apply, 1=Upload)
   int selectedOption = 0;
 
-  OnCancelCallback onCancel;
-  OnSyncCompleteCallback onSyncComplete;
-
   void onWifiSelectionComplete(bool success);
   void performSync();
   void performUpload();
-
-  static void taskTrampoline(void* param);
-  [[noreturn]] void displayTaskLoop();
-  void render();
 };

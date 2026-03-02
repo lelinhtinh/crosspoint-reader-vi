@@ -1,38 +1,25 @@
 #pragma once
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
 
-#include <functional>
-
-#include "activities/ActivityWithSubactivity.h"
+#include "activities/Activity.h"
 #include "util/ButtonNavigator.h"
 
 /**
  * Submenu for OPDS Browser settings.
  * Shows OPDS Server URL and HTTP authentication options.
  */
-class CalibreSettingsActivity final : public ActivityWithSubactivity {
+class CalibreSettingsActivity final : public Activity {
  public:
-  explicit CalibreSettingsActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                   const std::function<void()>& onBack)
-      : ActivityWithSubactivity("CalibreSettings", renderer, mappedInput), onBack(onBack) {}
+  explicit CalibreSettingsActivity(GfxRenderer& renderer, MappedInputManager& mappedInput)
+      : Activity("CalibreSettings", renderer, mappedInput) {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
+  void render(RenderLock&&) override;
 
  private:
-  TaskHandle_t displayTaskHandle = nullptr;
-  SemaphoreHandle_t renderingMutex = nullptr;
   ButtonNavigator buttonNavigator;
-  bool updateRequired = false;
 
-  int selectedIndex = 0;
-  const std::function<void()> onBack;
-
-  static void taskTrampoline(void* param);
-  [[noreturn]] void displayTaskLoop();
-  void render();
+  size_t selectedIndex = 0;
   void handleSelection();
 };

@@ -1,14 +1,11 @@
 #pragma once
 #include <OpdsParser.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
 
 #include <functional>
 #include <string>
 #include <vector>
 
-#include "../ActivityWithSubactivity.h"
+#include "../Activity.h"
 #include "util/ButtonNavigator.h"
 
 /**
@@ -16,7 +13,7 @@
  * Supports navigation through catalog hierarchy and downloading EPUBs.
  * When WiFi connection fails, launches WiFi selection to let user connect.
  */
-class OpdsBookBrowserActivity final : public ActivityWithSubactivity {
+class OpdsBookBrowserActivity final : public Activity {
  public:
   enum class BrowserState {
     CHECK_WIFI,      // Checking WiFi connection
@@ -27,20 +24,16 @@ class OpdsBookBrowserActivity final : public ActivityWithSubactivity {
     ERROR            // Error state with message
   };
 
-  explicit OpdsBookBrowserActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                   const std::function<void()>& onGoHome)
-      : ActivityWithSubactivity("OpdsBookBrowser", renderer, mappedInput), onGoHome(onGoHome) {}
+  explicit OpdsBookBrowserActivity(GfxRenderer& renderer, MappedInputManager& mappedInput)
+      : Activity("OpdsBookBrowser", renderer, mappedInput) {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
+  void render(RenderLock&&) override;
 
  private:
-  TaskHandle_t displayTaskHandle = nullptr;
-  SemaphoreHandle_t renderingMutex = nullptr;
   ButtonNavigator buttonNavigator;
-  bool updateRequired = false;
-
   BrowserState state = BrowserState::LOADING;
   std::vector<OpdsEntry> entries;
   std::vector<std::string> navigationHistory;  // Stack of previous feed paths for back navigation
@@ -50,12 +43,6 @@ class OpdsBookBrowserActivity final : public ActivityWithSubactivity {
   std::string statusMessage;
   size_t downloadProgress = 0;
   size_t downloadTotal = 0;
-
-  const std::function<void()> onGoHome;
-
-  static void taskTrampoline(void* param);
-  [[noreturn]] void displayTaskLoop();
-  void render() const;
 
   void checkAndConnectWifi();
   void launchWifiSelection();

@@ -1,31 +1,70 @@
 #include "HttpDownloader.h"
 
 #include <HTTPClient.h>
-#include <HardwareSerial.h>
+#include <Logging.h>
+#include <NetworkClient.h>
+#include <NetworkClientSecure.h>
 #include <StreamString.h>
-#include <WiFiClient.h>
-#include <WiFiClientSecure.h>
 #include <base64.h>
 
 #include <cstring>
 #include <memory>
+#include <utility>
 
 #include "CrossPointSettings.h"
 #include "util/UrlUtils.h"
 
+namespace {
+class FileWriteStream final : public Stream {
+ public:
+  FileWriteStream(FsFile& file, size_t total, HttpDownloader::ProgressCallback progress)
+      : file_(file), total_(total), progress_(std::move(progress)) {}
+
+  size_t write(uint8_t byte) override { return write(&byte, 1); }
+
+  size_t write(const uint8_t* buffer, size_t size) override {
+    // Write-through stream for HTTPClient::writeToStream with progress tracking.
+    const size_t written = file_.write(buffer, size);
+    if (written != size) {
+      writeOk_ = false;
+    }
+    downloaded_ += written;
+    if (progress_ && total_ > 0) {
+      progress_(downloaded_, total_);
+    }
+    return written;
+  }
+
+  int available() override { return 0; }
+  int read() override { return -1; }
+  int peek() override { return -1; }
+  void flush() override { file_.flush(); }
+
+  size_t downloaded() const { return downloaded_; }
+  bool ok() const { return writeOk_; }
+
+ private:
+  FsFile& file_;
+  size_t total_;
+  size_t downloaded_ = 0;
+  bool writeOk_ = true;
+  HttpDownloader::ProgressCallback progress_;
+};
+}  // namespace
+
 bool HttpDownloader::fetchUrl(const std::string& url, Stream& outContent) {
-  // Use WiFiClientSecure for HTTPS, regular WiFiClient for HTTP
-  std::unique_ptr<WiFiClient> client;
+  // Use NetworkClientSecure for HTTPS, regular NetworkClient for HTTP
+  std::unique_ptr<NetworkClient> client;
   if (UrlUtils::isHttpsUrl(url)) {
-    auto* secureClient = new WiFiClientSecure();
+    auto* secureClient = new NetworkClientSecure();
     secureClient->setInsecure();
     client.reset(secureClient);
   } else {
-    client.reset(new WiFiClient());
+    client.reset(new NetworkClient());
   }
   HTTPClient http;
 
-  Serial.printf("[%lu] [HTTP] Fetching: %s\n", millis(), url.c_str());
+  LOG_DBG("HTTP", "Fetching: %s", url.c_str());
 
   http.begin(*client, url.c_str());
   http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
@@ -40,7 +79,7 @@ bool HttpDownloader::fetchUrl(const std::string& url, Stream& outContent) {
 
   const int httpCode = http.GET();
   if (httpCode != HTTP_CODE_OK) {
-    Serial.printf("[%lu] [HTTP] Fetch failed: %d\n", millis(), httpCode);
+    LOG_ERR("HTTP", "Fetch failed: %d", httpCode);
     http.end();
     return false;
   }
@@ -49,7 +88,7 @@ bool HttpDownloader::fetchUrl(const std::string& url, Stream& outContent) {
 
   http.end();
 
-  Serial.printf("[%lu] [HTTP] Fetch success\n", millis());
+  LOG_DBG("HTTP", "Fetch success");
   return true;
 }
 
@@ -64,19 +103,19 @@ bool HttpDownloader::fetchUrl(const std::string& url, std::string& outContent) {
 
 HttpDownloader::DownloadError HttpDownloader::downloadToFile(const std::string& url, const std::string& destPath,
                                                              ProgressCallback progress) {
-  // Use WiFiClientSecure for HTTPS, regular WiFiClient for HTTP
-  std::unique_ptr<WiFiClient> client;
+  // Use NetworkClientSecure for HTTPS, regular NetworkClient for HTTP
+  std::unique_ptr<NetworkClient> client;
   if (UrlUtils::isHttpsUrl(url)) {
-    auto* secureClient = new WiFiClientSecure();
+    auto* secureClient = new NetworkClientSecure();
     secureClient->setInsecure();
     client.reset(secureClient);
   } else {
-    client.reset(new WiFiClient());
+    client.reset(new NetworkClient());
   }
   HTTPClient http;
 
-  Serial.printf("[%lu] [HTTP] Downloading: %s\n", millis(), url.c_str());
-  Serial.printf("[%lu] [HTTP] Destination: %s\n", millis(), destPath.c_str());
+  LOG_DBG("HTTP", "Downloading: %s", url.c_str());
+  LOG_DBG("HTTP", "Destination: %s", destPath.c_str());
 
   http.begin(*client, url.c_str());
   http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
@@ -91,13 +130,18 @@ HttpDownloader::DownloadError HttpDownloader::downloadToFile(const std::string& 
 
   const int httpCode = http.GET();
   if (httpCode != HTTP_CODE_OK) {
-    Serial.printf("[%lu] [HTTP] Download failed: %d\n", millis(), httpCode);
+    LOG_ERR("HTTP", "Download failed: %d", httpCode);
     http.end();
     return HTTP_ERROR;
   }
 
-  const size_t contentLength = http.getSize();
-  Serial.printf("[%lu] [HTTP] Content-Length: %zu\n", millis(), contentLength);
+  const int64_t reportedLength = http.getSize();
+  const size_t contentLength = reportedLength > 0 ? static_cast<size_t>(reportedLength) : 0;
+  if (contentLength > 0) {
+    LOG_DBG("HTTP", "Content-Length: %zu", contentLength);
+  } else {
+    LOG_DBG("HTTP", "Content-Length: unknown");
+  }
 
   // Remove existing file if present
   if (Storage.exists(destPath.c_str())) {
@@ -107,64 +151,43 @@ HttpDownloader::DownloadError HttpDownloader::downloadToFile(const std::string& 
   // Open file for writing
   FsFile file;
   if (!Storage.openFileForWrite("HTTP", destPath.c_str(), file)) {
-    Serial.printf("[%lu] [HTTP] Failed to open file for writing\n", millis());
+    LOG_ERR("HTTP", "Failed to open file for writing");
     http.end();
     return FILE_ERROR;
   }
 
-  // Get the stream for chunked reading
-  WiFiClient* stream = http.getStreamPtr();
-  if (!stream) {
-    Serial.printf("[%lu] [HTTP] Failed to get stream\n", millis());
-    file.close();
-    Storage.remove(destPath.c_str());
-    http.end();
-    return HTTP_ERROR;
-  }
-
-  // Download in chunks
-  uint8_t buffer[DOWNLOAD_CHUNK_SIZE];
-  size_t downloaded = 0;
-  const size_t total = contentLength > 0 ? contentLength : 0;
-
-  while (http.connected() && (contentLength == 0 || downloaded < contentLength)) {
-    const size_t available = stream->available();
-    if (available == 0) {
-      delay(1);
-      continue;
-    }
-
-    const size_t toRead = available < DOWNLOAD_CHUNK_SIZE ? available : DOWNLOAD_CHUNK_SIZE;
-    const size_t bytesRead = stream->readBytes(buffer, toRead);
-
-    if (bytesRead == 0) {
-      break;
-    }
-
-    const size_t written = file.write(buffer, bytesRead);
-    if (written != bytesRead) {
-      Serial.printf("[%lu] [HTTP] Write failed: wrote %zu of %zu bytes\n", millis(), written, bytesRead);
-      file.close();
-      Storage.remove(destPath.c_str());
-      http.end();
-      return FILE_ERROR;
-    }
-
-    downloaded += bytesRead;
-
-    if (progress && total > 0) {
-      progress(downloaded, total);
-    }
-  }
+  // Let HTTPClient handle chunked decoding and stream body bytes into the file.
+  FileWriteStream fileStream(file, contentLength, progress);
+  const int writeResult = http.writeToStream(&fileStream);
 
   file.close();
   http.end();
 
-  Serial.printf("[%lu] [HTTP] Downloaded %zu bytes\n", millis(), downloaded);
+  if (writeResult < 0) {
+    LOG_ERR("HTTP", "writeToStream error: %d", writeResult);
+    Storage.remove(destPath.c_str());
+    return HTTP_ERROR;
+  }
+
+  const size_t downloaded = fileStream.downloaded();
+  LOG_DBG("HTTP", "Downloaded %zu bytes", downloaded);
+
+  // Guard against partial writes even if HTTPClient completes.
+  if (!fileStream.ok()) {
+    LOG_ERR("HTTP", "Write failed during download");
+    Storage.remove(destPath.c_str());
+    return FILE_ERROR;
+  }
+
+  if (contentLength == 0 && downloaded == 0) {
+    LOG_ERR("HTTP", "Download failed: no data received");
+    Storage.remove(destPath.c_str());
+    return HTTP_ERROR;
+  }
 
   // Verify download size if known
   if (contentLength > 0 && downloaded != contentLength) {
-    Serial.printf("[%lu] [HTTP] Size mismatch: got %zu, expected %zu\n", millis(), downloaded, contentLength);
+    LOG_ERR("HTTP", "Size mismatch: got %zu, expected %zu", downloaded, contentLength);
     Storage.remove(destPath.c_str());
     return HTTP_ERROR;
   }

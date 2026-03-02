@@ -1,14 +1,11 @@
 #pragma once
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
 
 #include <functional>
 #include <memory>
 #include <string>
 
 #include "NetworkModeSelectionActivity.h"
-#include "activities/ActivityWithSubactivity.h"
+#include "activities/Activity.h"
 #include "network/CrossPointWebServer.h"
 
 // Web server activity states
@@ -30,12 +27,8 @@ enum class WebServerActivityState {
  * - Handles client requests in its loop() function
  * - Cleans up the server and shuts down WiFi on exit
  */
-class CrossPointWebServerActivity final : public ActivityWithSubactivity {
-  TaskHandle_t displayTaskHandle = nullptr;
-  SemaphoreHandle_t renderingMutex = nullptr;
-  bool updateRequired = false;
+class CrossPointWebServerActivity final : public Activity {
   WebServerActivityState state = WebServerActivityState::MODE_SELECTION;
-  const std::function<void()> onGoBack;
 
   // Network mode
   NetworkMode networkMode = NetworkMode::JOIN_NETWORK;
@@ -51,9 +44,6 @@ class CrossPointWebServerActivity final : public ActivityWithSubactivity {
   // Performance monitoring
   unsigned long lastHandleClientTime = 0;
 
-  static void taskTrampoline(void* param);
-  [[noreturn]] void displayTaskLoop();
-  void render() const;
   void renderServerRunning() const;
 
   void onNetworkModeSelected(NetworkMode mode);
@@ -63,12 +53,12 @@ class CrossPointWebServerActivity final : public ActivityWithSubactivity {
   void stopWebServer();
 
  public:
-  explicit CrossPointWebServerActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                       const std::function<void()>& onGoBack)
-      : ActivityWithSubactivity("CrossPointWebServer", renderer, mappedInput), onGoBack(onGoBack) {}
+  explicit CrossPointWebServerActivity(GfxRenderer& renderer, MappedInputManager& mappedInput)
+      : Activity("CrossPointWebServer", renderer, mappedInput) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;
+  void render(RenderLock&&) override;
   bool skipLoopDelay() override { return webServer && webServer->isRunning(); }
   bool preventAutoSleep() override { return webServer && webServer->isRunning(); }
 };

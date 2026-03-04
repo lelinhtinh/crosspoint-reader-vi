@@ -10,8 +10,12 @@
 #define NOTOSANS_16_FONT_ID (-1422711852)
 #define NOTOSANS_18_FONT_ID (1237754772)
 // FORK-FEATURE-BEGIN: BOOKERLY_ONLY
-// OpenDyslexic font IDs removed — fork locked to Bookerly only (saves flash).
-// Upstream: OPENDYSLEXIC_8=1331369208, _10=-1374689004, _12=-795539541, _14=-1676627620
+// OpenDyslexic font objects are not loaded (see main.cpp), but IDs are kept
+// here so getReaderFontId() compiles unchanged from upstream.
+#define OPENDYSLEXIC_8_FONT_ID (1331369208)
+#define OPENDYSLEXIC_10_FONT_ID (-1374689004)
+#define OPENDYSLEXIC_12_FONT_ID (-795539541)
+#define OPENDYSLEXIC_14_FONT_ID (-1676627620)
 // FORK-FEATURE-END: BOOKERLY_ONLY
 #define UI_10_FONT_ID (-1246724383)
 #define UI_12_FONT_ID (-359249323)

@@ -90,6 +90,10 @@ class CrossPointSettings {
   // Default: Previous, Next
   // Swapped: Next, Previous
   enum SIDE_BUTTON_LAYOUT { PREV_NEXT = 0, NEXT_PREV = 1, SIDE_BUTTON_LAYOUT_COUNT };
+  // FORK-FEATURE-BEGIN: BOOKERLY_ONLY
+  // FONT_FAMILY enum removed — fork locked to Bookerly to save ~7MB flash.
+  // Upstream: enum FONT_FAMILY { BOOKERLY = 0, NOTOSANS = 1, OPENDYSLEXIC = 2, FONT_FAMILY_COUNT };
+  // FORK-FEATURE-END: BOOKERLY_ONLY
   // Font size options
   enum FONT_SIZE { SMALL = 0, MEDIUM = 1, LARGE = 2, EXTRA_LARGE = 3, FONT_SIZE_COUNT };
   enum LINE_COMPRESSION { TIGHT = 0, NORMAL = 1, WIDE = 2, LINE_COMPRESSION_COUNT };
@@ -166,6 +170,9 @@ class CrossPointSettings {
   uint8_t frontButtonLeft = FRONT_HW_LEFT;
   uint8_t frontButtonRight = FRONT_HW_RIGHT;
   // Reader font settings
+  // FORK-FEATURE-BEGIN: BOOKERLY_ONLY
+  // uint8_t fontFamily = BOOKERLY; — removed, fork locked to Bookerly only.
+  // FORK-FEATURE-END: BOOKERLY_ONLY
   uint8_t fontSize = MEDIUM;
   uint8_t lineSpacing = NORMAL;
   uint8_t paragraphAlignment = JUSTIFIED;

@@ -89,6 +89,10 @@ EpdFontFamily notosans18FontFamily(&notosans18RegularFont, &notosans18BoldFont, 
 #endif  // !ENABLE_VIETNAMESE_SUPPORT
 // FORK-FEATURE-END: VIETNAMESE
 
+// FORK-FEATURE-BEGIN: BOOKERLY_ONLY
+// OpenDyslexic fonts (opendyslexic_8..14, all 4 styles) removed — fork locked to Bookerly only.
+// FORK-FEATURE-END: BOOKERLY_ONLY
+
 #endif  // OMIT_FONTS
 
 EpdFont smallFont(&notosans_8_regular);
@@ -198,6 +202,9 @@ void setupDisplayAndFonts() {
   renderer.insertFont(NOTOSANS_18_FONT_ID, notosans18FontFamily);
 #endif  // !ENABLE_VIETNAMESE_SUPPORT
         // FORK-FEATURE-END: VIETNAMESE
+// FORK-FEATURE-BEGIN: BOOKERLY_ONLY
+// renderer.insertFont(OPENDYSLEXIC_*) calls removed — fork locked to Bookerly only.
+// FORK-FEATURE-END: BOOKERLY_ONLY
 #endif  // OMIT_FONTS
   renderer.insertFont(UI_10_FONT_ID, ui10FontFamily);
   renderer.insertFont(UI_12_FONT_ID, ui12FontFamily);

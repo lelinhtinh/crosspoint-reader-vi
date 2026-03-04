@@ -37,6 +37,9 @@ inline const std::vector<SettingInfo>& getSettingsList() {
                           StrId::STR_CAT_DISPLAY),
 
       // --- Reader ---
+      // FORK-FEATURE-BEGIN: BOOKERLY_ONLY
+      // SettingInfo::Enum(StrId::STR_FONT_FAMILY, ...) removed — fork locked to Bookerly only.
+      // FORK-FEATURE-END: BOOKERLY_ONLY
       SettingInfo::Enum(StrId::STR_FONT_SIZE, &CrossPointSettings::fontSize,
                         {StrId::STR_SMALL, StrId::STR_MEDIUM, StrId::STR_LARGE, StrId::STR_X_LARGE}, "fontSize",
                         StrId::STR_CAT_READER),

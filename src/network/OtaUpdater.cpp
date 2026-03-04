@@ -8,7 +8,9 @@
 #include "esp_wifi.h"
 
 namespace {
+// FORK-FEATURE-BEGIN: FORK_OTA_URL
 constexpr char latestReleaseUrl[] = "https://api.github.com/repos/lelinhtinh/crosspoint-reader-vi/releases/latest";
+// FORK-FEATURE-END: FORK_OTA_URL
 
 /* This is buffer and size holder to keep upcoming data from latestReleaseUrl */
 char* local_buf;
@@ -188,7 +190,8 @@ bool OtaUpdater::isUpdateNewer() const {
    */
   if (latestPatch != currentPatch) return latestPatch > currentPatch;
 
-  // Check the fork suffix version number (e.g., "1.1.1-fork.vi.2" > "1.1.1-fork.vi.1").
+  // FORK-FEATURE-BEGIN: FORK_VERSION_SUFFIX
+  // Compare fork suffix (e.g. "1.1.1-fork.vi.2" > "1.1.1-fork.vi.1").
   // strrchr finds the last dot, so for "1.1.1-fork.vi.2" it parses "2".
   int latestSuffix = 0, currentSuffix = 0;
   const char* latestSuffixPos = strrchr(latestVersion.c_str(), '.');
@@ -199,6 +202,7 @@ bool OtaUpdater::isUpdateNewer() const {
   if (currentSuffixPos && strchr(currentVersion, '-') && currentSuffixPos > strchr(currentVersion, '-'))
     sscanf(currentSuffixPos + 1, "%d", &currentSuffix);
   if (latestSuffix != currentSuffix) return latestSuffix > currentSuffix;
+  // FORK-FEATURE-END: FORK_VERSION_SUFFIX
 
   // If we reach here, it means all segments are equal.
   // One final check, if we're on an RC build (contains "-rc"), we should consider the latest version as newer even if

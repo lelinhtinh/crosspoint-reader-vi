@@ -18,29 +18,7 @@ void HalDisplay::drawImage(const uint8_t* imageData, uint16_t x, uint16_t y, uin
 
 void HalDisplay::drawImageTransparent(const uint8_t* imageData, uint16_t x, uint16_t y, uint16_t w, uint16_t h,
                                       bool fromProgmem) const {
-  // FORK-FEATURE-BEGIN: TRANSPARENT_IMAGE_BLEND
-  // Custom pixel-level AND-blend (white=transparent, black=opaque) replacing SDK drawImageTransparent,
-  // which is unavailable in EINK_DISPLAY_SINGLE_BUFFER_MODE.
-  uint8_t* frameBuffer = einkDisplay.getFrameBuffer();
-  if (!frameBuffer) return;
-
-  const uint16_t imageWidthBytes = w / 8;
-
-  for (uint16_t row = 0; row < h; row++) {
-    const uint16_t destY = y + row;
-    if (destY >= DISPLAY_HEIGHT) break;
-
-    const uint16_t destOffset = destY * DISPLAY_WIDTH_BYTES + (x / 8);
-    const uint16_t srcOffset = row * imageWidthBytes;
-
-    for (uint16_t col = 0; col < imageWidthBytes; col++) {
-      if ((x / 8 + col) >= DISPLAY_WIDTH_BYTES) break;
-      const uint8_t srcByte = fromProgmem ? pgm_read_byte(&imageData[srcOffset + col]) : imageData[srcOffset + col];
-      // AND-blend: white pixels (0xFF) are transparent, black pixels (0x00) are opaque
-      frameBuffer[destOffset + col] &= srcByte;
-    }
-  }
-  // FORK-FEATURE-END: TRANSPARENT_IMAGE_BLEND
+  einkDisplay.drawImageTransparent(imageData, x, y, w, h, fromProgmem);
 }
 
 EInkDisplay::RefreshMode convertRefreshMode(HalDisplay::RefreshMode mode) {

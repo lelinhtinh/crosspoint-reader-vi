@@ -2,6 +2,9 @@
 
 #include <ArduinoJson.h>
 #include <Logging.h>
+// FORK-FEATURE-BEGIN: FORK_VERSION_SUFFIX
+#include <SemVerChecker.h>
+// FORK-FEATURE-END: FORK_VERSION_SUFFIX
 
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
@@ -158,60 +161,16 @@ OtaUpdater::OtaUpdaterError OtaUpdater::checkForUpdate() {
 }
 
 bool OtaUpdater::isUpdateNewer() const {
-  if (!updateAvailable || latestVersion.empty() || latestVersion == CROSSPOINT_VERSION) {
+  if (!updateAvailable || latestVersion.empty()) {
     return false;
   }
 
-  int currentMajor, currentMinor, currentPatch;
-  int latestMajor, latestMinor, latestPatch;
-
-  const auto currentVersion = CROSSPOINT_VERSION;
-
-  // semantic version check (only match on 3 segments)
-  sscanf(latestVersion.c_str(), "%d.%d.%d", &latestMajor, &latestMinor, &latestPatch);
-  sscanf(currentVersion, "%d.%d.%d", &currentMajor, &currentMinor, &currentPatch);
-
-  /*
-   * Compare major versions.
-   * If they differ, return true if latest major version greater than current major version
-   * otherwise return false.
-   */
-  if (latestMajor != currentMajor) return latestMajor > currentMajor;
-
-  /*
-   * Compare minor versions.
-   * If they differ, return true if latest minor version greater than current minor version
-   * otherwise return false.
-   */
-  if (latestMinor != currentMinor) return latestMinor > currentMinor;
-
-  /*
-   * Check patch versions.
-   */
-  if (latestPatch != currentPatch) return latestPatch > currentPatch;
-
   // FORK-FEATURE-BEGIN: FORK_VERSION_SUFFIX
-  // Compare fork suffix (e.g. "1.1.1-fork.vi.2" > "1.1.1-fork.vi.1").
-  // strrchr finds the last dot, so for "1.1.1-fork.vi.2" it parses "2".
-  int latestSuffix = 0, currentSuffix = 0;
-  const char* latestSuffixPos = strrchr(latestVersion.c_str(), '.');
-  const char* currentSuffixPos = strrchr(currentVersion, '.');
-  // Only count the suffix if it's not the patch segment itself (i.e., there's a '-' before the last dot)
-  if (latestSuffixPos && strchr(latestVersion.c_str(), '-') && latestSuffixPos > strchr(latestVersion.c_str(), '-'))
-    sscanf(latestSuffixPos + 1, "%d", &latestSuffix);
-  if (currentSuffixPos && strchr(currentVersion, '-') && currentSuffixPos > strchr(currentVersion, '-'))
-    sscanf(currentSuffixPos + 1, "%d", &currentSuffix);
-  if (latestSuffix != currentSuffix) return latestSuffix > currentSuffix;
+  // SemVer::isUpgrade handles full SemVer 2.0.0 pre-release comparison:
+  // "1.1.1-fork.vi.2" > "1.1.1-fork.vi.1" — identifiers split by '.' and
+  // compared numerically ("1", "2") after matching "fork" and "vi".
+  return SemVer::isUpgrade(CROSSPOINT_VERSION, latestVersion.c_str());
   // FORK-FEATURE-END: FORK_VERSION_SUFFIX
-
-  // If we reach here, it means all segments are equal.
-  // One final check, if we're on an RC build (contains "-rc"), we should consider the latest version as newer even if
-  // the segments are equal, since RC builds are pre-release versions.
-  if (strstr(currentVersion, "-rc") != nullptr) {
-    return true;
-  }
-
-  return false;
 }
 
 const std::string& OtaUpdater::getLatestVersion() const { return latestVersion; }

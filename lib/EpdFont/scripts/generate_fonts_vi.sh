@@ -1,28 +1,30 @@
 #!/usr/bin/env bash
 # generate_fonts_vi.sh
 #
-# Regenerates all built-in font .h files with Vietnamese glyph support.
+# Regenerates all built-in font .h files.
 #
-# fontconvert.py already includes Latin Extended-A (U+0100–U+017F) by default,
-# so we only need to add:
-#   - Latin Extended-B (U+0180–U+024F): base chars ơ (U+01A1), ư (U+01B0), đ (U+0111)
-#   - Latin Extended Additional (U+1E00–U+1EFF): all 134 precomposed Vietnamese NFC chars
+# fontconvert.py already includes Vietnamese glyph ranges by default:
+#   - Latin Extended-B subset: Ơ/ơ (U+01A0-01A1), Ư/ư (U+01AF-01B0)
+#   - Vietnamese Extended: U+1EA0–U+1EF9 (all precomposed NFC chars)
 #
-# fontconvert.py also has Cyrillic, Combining Diacritical Marks, Math symbols
-# and Arrows commented out in this fork (not used in Vietnamese ebooks).
+# This script's primary purpose (post-upstream-sync):
+#   1. Replace Ubuntu UI fonts with NotoSans — Ubuntu lacks U+1EXX entirely,
+#      causing garbled Vietnamese in filenames and UI labels.
+#   2. Delete NotoSans reader fonts (12–18pt, 4 styles = 16 files) to
+#      reclaim ~7MB flash that would otherwise overflow the app partition.
 #
 # Font coverage:
 #   NotoSans      - Full Vietnamese support ✓ (used for UI fonts: ubuntu_10, ubuntu_12)
 #   Bookerly      - Full Vietnamese support ✓ (reader font)
 #   OpenDyslexic  - Full Vietnamese support ✓ (reader font)
-#   Ubuntu        - Partial (lacks full 0x1EXX range) — skipped
+#   Ubuntu        - No 0x1EXX range — replaced by NotoSans for UI
 #
 # Usage:
 #   cd lib/EpdFont
 #   bash scripts/generate_fonts_vi.sh
 #
 # Requirements:
-#   pip install freetype-py
+#   pip install freetype-py fonttools
 #
 # FORK NOTE: Run this script after pulling font updates from upstream,
 # or when adding new font sizes. It ensures Vietnamese text renders
@@ -36,9 +38,8 @@ SOURCE_DIR="$FONT_DIR/source"
 PYTHON="python3"
 CONVERT="$SCRIPT_DIR/fontconvert.py"
 
-# Latin Extended-A (U+0100–U+017F) is already in fontconvert.py defaults.
-# Only Extended-B and Latin Extended Additional are needed as additions.
-VI_INTERVALS="--additional-intervals 0x0180,0x024F --additional-intervals 0x1E00,0x1EFF"
+# All Vietnamese glyph ranges are now built into fontconvert.py defaults.
+# No additional intervals needed.
 
 generate() {
   local name="$1"
@@ -47,8 +48,14 @@ generate() {
   shift 3
   local fonts=("$@")  # font files in priority order
 
+  # Add --compress for 2-bit fonts to reduce flash usage (matches upstream convention)
+  local compress_flag=""
+  if [[ "$mode" == "--2bit" ]]; then
+    compress_flag="--compress"
+  fi
+
   echo "Generating ${name} (${size}pt)..."
-  $PYTHON "$CONVERT" "${name}" "${size}" "${fonts[@]}" $VI_INTERVALS $mode \
+  $PYTHON "$CONVERT" "${name}" "${size}" "${fonts[@]}" $mode $compress_flag \
     > "$FONT_DIR/${name}.h"
 }
 
@@ -56,7 +63,7 @@ generate() {
 # Sizes 14, 16, 18 are full reader fonts (all 4 styles).
 # Size 8 is the SMALL_FONT_ID (regular only).
 # Size 10 and 12 are generated as ubuntu_10_* and ubuntu_12_* (UI font replacement).
-# Size 12 as reader font (notosans_12) is NOT regenerated — NotoSans is hidden
+# NotoSans reader fonts 12pt are NOT regenerated — NotoSans is hidden
 #   from reader font choices when ENABLE_VIETNAMESE_SUPPORT=1.
 NS="$SOURCE_DIR/NotoSans"
 for size in 8 14 16 18; do
@@ -101,7 +108,7 @@ done
 
 echo ""
 echo "Done! All fonts regenerated with Vietnamese glyph support."
-echo "Verify with: grep '0x1E' lib/EpdFont/builtinFonts/notosans_16_regular.h"
+echo "Verify with: grep '1EA0' lib/EpdFont/builtinFonts/notosans_16_regular.h"
 
 # ─── Remove NotoSans reader fonts (12–18pt) ────────────────────────────────
 # When ENABLE_VIETNAMESE_SUPPORT=1, NotoSans is excluded from reader font

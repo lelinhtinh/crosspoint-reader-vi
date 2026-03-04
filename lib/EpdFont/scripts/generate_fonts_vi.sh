@@ -124,3 +124,26 @@ rm -f \
   "$FONT_DIR/notosans_18_italic.h" \
   "$FONT_DIR/notosans_18_bolditalic.h"
 echo "Done. notosans_8_regular.h (SMALL_FONT) kept."
+
+# ─── Remove OpenDyslexic fonts (all sizes) ────────────────────────────────
+# OpenDyslexic is not used in this Vietnamese fork. Delete any leftover files
+# from previous builds or upstream checkouts to keep the build clean.
+echo "Removing OpenDyslexic fonts (not used in VI fork)..."
+rm -f \
+  "$FONT_DIR/opendyslexic_8_regular.h" \
+  "$FONT_DIR/opendyslexic_8_bold.h" \
+  "$FONT_DIR/opendyslexic_8_italic.h" \
+  "$FONT_DIR/opendyslexic_8_bolditalic.h" \
+  "$FONT_DIR/opendyslexic_10_regular.h" \
+  "$FONT_DIR/opendyslexic_10_bold.h" \
+  "$FONT_DIR/opendyslexic_10_italic.h" \
+  "$FONT_DIR/opendyslexic_10_bolditalic.h" \
+  "$FONT_DIR/opendyslexic_12_regular.h" \
+  "$FONT_DIR/opendyslexic_12_bold.h" \
+  "$FONT_DIR/opendyslexic_12_italic.h" \
+  "$FONT_DIR/opendyslexic_12_bolditalic.h" \
+  "$FONT_DIR/opendyslexic_14_regular.h" \
+  "$FONT_DIR/opendyslexic_14_bold.h" \
+  "$FONT_DIR/opendyslexic_14_italic.h" \
+  "$FONT_DIR/opendyslexic_14_bolditalic.h"
+echo "Done."

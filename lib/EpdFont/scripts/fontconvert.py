@@ -64,22 +64,22 @@ intervals = [
     (0x2040, 0x205F),
     # common currency symbols
     (0x20A0, 0x20CF),
-    ### Combining Diacritical Marks ###
-    # Not needed for NFC Vietnamese (precomposed chars in 0x1E00-0x1EFF and 0x0180-0x024F).
-    # (0x0300, 0x036F),
+    ### Combining Diacritical Marks (minimal subset) ###
+    # Needed for proper rendering of many extended Latin languages
+    (0x0300, 0x036F),
     ### Greek & Coptic ###
     # Used in science, maths, philosophy, some academic texts
     # (0x0370, 0x03FF),
     ### Cyrillic ###
-    # Russian, Ukrainian, Bulgarian, etc. — not used in Vietnamese ebooks.
-    # (0x0400, 0x04FF),
-    ### Math Symbols ###
-    # Superscripts and Subscripts — not used in Vietnamese ebooks.
-    # (0x2070, 0x209F),
-    # General math operators — not used in Vietnamese ebooks.
-    # (0x2200, 0x22FF),
-    # Arrows — not used in Vietnamese ebooks.
-    # (0x2190, 0x21FF),
+    # Russian, Ukrainian, Bulgarian, etc.
+    (0x0400, 0x04FF),
+    ### Math Symbols (common subset) ###
+    # Superscripts and Subscripts
+    (0x2070, 0x209F),
+    # General math operators
+    (0x2200, 0x22FF),
+    # Arrows
+    (0x2190, 0x21FF),
     ### CJK ###
     # Core Unified Ideographs
     # (0x4E00, 0x9FFF),

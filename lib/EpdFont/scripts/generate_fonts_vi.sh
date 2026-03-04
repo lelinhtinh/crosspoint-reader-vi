@@ -16,7 +16,6 @@
 # Font coverage:
 #   NotoSans      - Full Vietnamese support ✓ (used for UI fonts: ubuntu_10, ubuntu_12)
 #   Bookerly      - Full Vietnamese support ✓ (reader font)
-#   OpenDyslexic  - Full Vietnamese support ✓ (reader font)
 #   Ubuntu        - No 0x1EXX range — replaced by NotoSans for UI
 #
 # Usage:
@@ -96,15 +95,6 @@ for size in 12 14 16 18; do
   generate "bookerly_${size}_bolditalic" $size --2bit "$BK/Bookerly-BoldItalic.ttf"
 done
 
-# ─── OpenDyslexic ────────────────────────────────────────────────────────────
-OD="$SOURCE_DIR/OpenDyslexic"
-for size in 8 10 12 14; do
-  mode=""; [ "$size" -ge 12 ] && mode="--2bit"
-  generate "opendyslexic_${size}_regular"    $size $mode "$OD/OpenDyslexic-Regular.otf"
-  generate "opendyslexic_${size}_bold"       $size $mode "$OD/OpenDyslexic-Bold.otf"
-  generate "opendyslexic_${size}_italic"     $size $mode "$OD/OpenDyslexic-Italic.otf"
-  generate "opendyslexic_${size}_bolditalic" $size $mode "$OD/OpenDyslexic-BoldItalic.otf"
-done
 
 echo ""
 echo "Done! All fonts regenerated with Vietnamese glyph support."
@@ -113,8 +103,8 @@ echo "Verify with: grep '1EA0' lib/EpdFont/builtinFonts/notosans_16_regular.h"
 # ─── Remove NotoSans reader fonts (12–18pt) ────────────────────────────────
 # When ENABLE_VIETNAMESE_SUPPORT=1, NotoSans is excluded from reader font
 # choices (and guarded by #if !ENABLE_VIETNAMESE_SUPPORT in all.h / main.cpp).
-# Deleting these 13 files reclaims ~7 MB of flash, making room for Vietnamese
-# font data in Bookerly/OpenDyslexic/ubuntu.
+# Deleting these 16 files reclaims ~7 MB of flash, making room for Vietnamese
+# font data in Bookerly/ubuntu.
 echo "Removing unused NotoSans reader fonts (12–18pt)..."
 rm -f \
   "$FONT_DIR/notosans_12_regular.h" \

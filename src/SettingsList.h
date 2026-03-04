@@ -36,25 +36,7 @@ inline const std::vector<SettingInfo>& getSettingsList() {
       SettingInfo::Toggle(StrId::STR_SUNLIGHT_FADING_FIX, &CrossPointSettings::fadingFix, "fadingFix",
                           StrId::STR_CAT_DISPLAY),
 
-  // --- Reader ---
-  // FORK-FEATURE-BEGIN: VIETNAMESE
-  // When Vietnamese support is enabled, NotoSans is used as the UI font (replacing Ubuntu).
-  // Hide it from reader font choices to avoid confusion; Bookerly and OpenDyslexic cover reading.
-  // DynamicEnum maps display indexes to the correct enum values (BOOKERLY=0, OPENDYSLEXIC=2).
-#if ENABLE_VIETNAMESE_SUPPORT
-      SettingInfo::DynamicEnum(
-          StrId::STR_FONT_FAMILY, {StrId::STR_BOOKERLY, StrId::STR_OPEN_DYSLEXIC},
-          []() -> uint8_t { return (SETTINGS.fontFamily == CrossPointSettings::OPENDYSLEXIC) ? 1 : 0; },
-          [](uint8_t idx) {
-            SETTINGS.fontFamily = (idx == 1) ? CrossPointSettings::OPENDYSLEXIC : CrossPointSettings::BOOKERLY;
-          },
-          "fontFamily", StrId::STR_CAT_READER),
-#else
-      SettingInfo::Enum(StrId::STR_FONT_FAMILY, &CrossPointSettings::fontFamily,
-                        {StrId::STR_BOOKERLY, StrId::STR_NOTO_SANS, StrId::STR_OPEN_DYSLEXIC}, "fontFamily",
-                        StrId::STR_CAT_READER),
-#endif
-      // FORK-FEATURE-END: VIETNAMESE
+      // --- Reader ---
       SettingInfo::Enum(StrId::STR_FONT_SIZE, &CrossPointSettings::fontSize,
                         {StrId::STR_SMALL, StrId::STR_MEDIUM, StrId::STR_LARGE, StrId::STR_X_LARGE}, "fontSize",
                         StrId::STR_CAT_READER),

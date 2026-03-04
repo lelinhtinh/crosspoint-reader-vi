@@ -8,7 +8,7 @@
 #include "esp_wifi.h"
 
 namespace {
-constexpr char latestReleaseUrl[] = "https://api.github.com/repos/crosspoint-reader/crosspoint-reader/releases/latest";
+constexpr char latestReleaseUrl[] = "https://api.github.com/repos/lelinhtinh/crosspoint-reader-vi/releases/latest";
 
 /* This is buffer and size holder to keep upcoming data from latestReleaseUrl */
 char* local_buf;
@@ -187,6 +187,18 @@ bool OtaUpdater::isUpdateNewer() const {
    * Check patch versions.
    */
   if (latestPatch != currentPatch) return latestPatch > currentPatch;
+
+  // Check the fork suffix version number (e.g., "1.1.1-fork.vi.2" > "1.1.1-fork.vi.1").
+  // strrchr finds the last dot, so for "1.1.1-fork.vi.2" it parses "2".
+  int latestSuffix = 0, currentSuffix = 0;
+  const char* latestSuffixPos = strrchr(latestVersion.c_str(), '.');
+  const char* currentSuffixPos = strrchr(currentVersion, '.');
+  // Only count the suffix if it's not the patch segment itself (i.e., there's a '-' before the last dot)
+  if (latestSuffixPos && strchr(latestVersion.c_str(), '-') && latestSuffixPos > strchr(latestVersion.c_str(), '-'))
+    sscanf(latestSuffixPos + 1, "%d", &latestSuffix);
+  if (currentSuffixPos && strchr(currentVersion, '-') && currentSuffixPos > strchr(currentVersion, '-'))
+    sscanf(currentSuffixPos + 1, "%d", &currentSuffix);
+  if (latestSuffix != currentSuffix) return latestSuffix > currentSuffix;
 
   // If we reach here, it means all segments are equal.
   // One final check, if we're on an RC build (contains "-rc"), we should consider the latest version as newer even if

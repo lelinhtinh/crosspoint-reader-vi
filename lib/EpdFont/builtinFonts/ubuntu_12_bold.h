@@ -3771,6 +3771,7 @@ static const EpdFontData ubuntu_12_bold = {
     false,
     nullptr,
     0,
+    nullptr,
     ubuntu_12_boldKernLeftClasses,
     ubuntu_12_boldKernRightClasses,
     ubuntu_12_boldKernMatrix,

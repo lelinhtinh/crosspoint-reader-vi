@@ -21,6 +21,12 @@ class TxtReaderActivity final : public Activity {
   int viewportWidth = 0;
   bool initialized = false;
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  uint32_t readingSessionStartMs = 0;
+  uint32_t persistedReadingSeconds = 0;
+  std::string readingTimeCachePath;
+  // FORK-FEATURE-END: READING_TIME
+
   // Cached settings for cache validation (different fonts/margins require re-indexing)
   int cachedFontId = 0;
   uint8_t cachedScreenMargin = 0;

@@ -27,6 +27,7 @@
 #include "components/icons/transfer.h"
 #include "components/icons/wifi.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 // Internal constants
 namespace {
@@ -477,6 +478,12 @@ void LyraTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std:
                                hPaddingInSelection, cornerRadius, false, false, true, true, Color::LightGray);
     }
 
+    // FORK-FEATURE-BEGIN: READING_TIME
+    char timeLabel[20];
+    ReadingTimeTracker::format(book.totalReadingSeconds, timeLabel, sizeof(timeLabel));
+    const bool hasTime = timeLabel[0] != '\0';
+    // FORK-FEATURE-END: READING_TIME
+
     auto titleLines = renderer.wrappedText(UI_12_FONT_ID, book.title.c_str(), textWidth, 3, EpdFontFamily::BOLD);
 
     auto author = renderer.truncatedText(UI_10_FONT_ID, book.author.c_str(), textWidth);
@@ -494,6 +501,18 @@ void LyraTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std:
       titleY += renderer.getLineHeight(UI_10_FONT_ID) / 2;
       renderer.drawText(UI_10_FONT_ID, textX, titleY, author.c_str(), true);
     }
+    // FORK-FEATURE-BEGIN: READING_TIME — bottom-center badge across the full tile (like Classic)
+    if (hasTime) {
+      constexpr int timePad = 4;
+      const int timeLabelWidth = renderer.getTextWidth(UI_10_FONT_ID, timeLabel);
+      const int timeBgW = timeLabelWidth + timePad * 2;
+      const int timeBgH = renderer.getLineHeight(UI_10_FONT_ID) + timePad;
+      const int badgeX = tileX + tileWidth / 2 - timeBgW / 2;
+      const int badgeY = tileY + hPaddingInSelection + LyraMetrics::values.homeCoverHeight - timeBgH - 4;
+      renderer.fillRoundedRect(badgeX, badgeY, timeBgW, timeBgH, 4, Color::Black);
+      renderer.drawText(UI_10_FONT_ID, badgeX + timePad, badgeY, timeLabel, false);
+    }
+    // FORK-FEATURE-END: READING_TIME
   } else {
     drawEmptyRecents(renderer, rect);
   }

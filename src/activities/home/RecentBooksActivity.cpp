@@ -1,5 +1,6 @@
 #include "RecentBooksActivity.h"
 
+#include <FsHelpers.h>
 #include <GfxRenderer.h>
 #include <HalStorage.h>
 #include <I18n.h>
@@ -10,6 +11,7 @@
 #include "RecentBooksStore.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 namespace {
 constexpr unsigned long GO_HOME_MS = 1000;
@@ -25,7 +27,16 @@ void RecentBooksActivity::loadRecentBooks() {
     if (!Storage.exists(book.path.c_str())) {
       continue;
     }
-    recentBooks.push_back(book);
+    // FORK-FEATURE-BEGIN: READING_TIME
+    RecentBook b = book;
+    const size_t hash = std::hash<std::string>{}(b.path);
+    const char* prefix = FsHelpers::hasEpubExtension(b.path)  ? "epub_"
+                         : FsHelpers::hasXtcExtension(b.path) ? "xtc_"
+                                                              : "txt_";
+    const std::string cachePath = std::string("/.crosspoint/") + prefix + std::to_string(hash);
+    b.totalReadingSeconds = ReadingTimeTracker::load(cachePath);
+    recentBooks.push_back(b);
+    // FORK-FEATURE-END: READING_TIME
   }
 }
 
@@ -101,7 +112,15 @@ void RecentBooksActivity::render(RenderLock&&) {
     GUI.drawList(
         renderer, Rect{0, contentTop, pageWidth, contentHeight}, recentBooks.size(), selectorIndex,
         [this](int index) { return recentBooks[index].title; }, [this](int index) { return recentBooks[index].author; },
-        [this](int index) { return UITheme::getFileIcon(recentBooks[index].path); });
+        [this](int index) { return UITheme::getFileIcon(recentBooks[index].path); },
+        // FORK-FEATURE-BEGIN: READING_TIME
+        [this](int index) -> std::string {
+          char buf[16];
+          ReadingTimeTracker::format(recentBooks[index].totalReadingSeconds, buf, sizeof(buf));
+          return buf;
+        }
+        // FORK-FEATURE-END: READING_TIME
+    );
   }
 
   // Help text

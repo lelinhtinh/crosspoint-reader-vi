@@ -28,6 +28,12 @@ class EpubReaderActivity final : public Activity {
   bool skipNextButtonCheck = false;  // Skip button processing for one frame after subactivity exit
   bool automaticPageTurnActive = false;
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  uint32_t readingSessionStartMs = 0;
+  uint32_t persistedReadingSeconds = 0;
+  std::string readingTimeCachePath;
+  // FORK-FEATURE-END: READING_TIME
+
   // Footnote support
   std::vector<FootnoteEntry> currentPageFootnotes;
   struct SavedPosition {

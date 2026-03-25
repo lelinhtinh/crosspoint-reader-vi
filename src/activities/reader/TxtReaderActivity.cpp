@@ -14,6 +14,7 @@
 #include "RecentBooksStore.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 namespace {
 constexpr size_t CHUNK_SIZE = 8 * 1024;  // 8KB chunk for reading
@@ -40,6 +41,12 @@ void TxtReaderActivity::onEnter() {
   APP_STATE.saveToFile();
   RECENT_BOOKS.addBook(filePath, fileName, "", "");
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  readingTimeCachePath = txt->getCachePath();
+  persistedReadingSeconds = ReadingTimeTracker::load(readingTimeCachePath);
+  readingSessionStartMs = millis();
+  // FORK-FEATURE-END: READING_TIME
+
   // Trigger first update
   requestUpdate();
 }
@@ -52,6 +59,12 @@ void TxtReaderActivity::onExit() {
 
   pageOffsets.clear();
   currentPageLines.clear();
+  // FORK-FEATURE-BEGIN: READING_TIME
+  if (!readingTimeCachePath.empty()) {
+    const uint32_t elapsed = (millis() - readingSessionStartMs) / 1000;
+    ReadingTimeTracker::save(readingTimeCachePath, persistedReadingSeconds + elapsed);
+  }
+  // FORK-FEATURE-END: READING_TIME
   APP_STATE.readerActivityLoadCount = 0;
   APP_STATE.saveToFile();
   txt.reset();
@@ -403,6 +416,12 @@ void TxtReaderActivity::saveProgress() const {
     f.write(data, 4);
     f.close();
   }
+  // FORK-FEATURE-BEGIN: READING_TIME
+  if (!readingTimeCachePath.empty()) {
+    const uint32_t elapsed = (millis() - readingSessionStartMs) / 1000;
+    ReadingTimeTracker::save(readingTimeCachePath, persistedReadingSeconds + elapsed);
+  }
+  // FORK-FEATURE-END: READING_TIME
 }
 
 void TxtReaderActivity::loadProgress() {

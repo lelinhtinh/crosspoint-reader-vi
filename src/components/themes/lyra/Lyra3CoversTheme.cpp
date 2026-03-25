@@ -11,6 +11,7 @@
 #include "components/UITheme.h"
 #include "components/icons/cover.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 // Internal constants
 namespace {
@@ -113,6 +114,22 @@ void Lyra3CoversTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, con
         renderer.drawText(SMALL_FONT_ID, tileX + hPaddingInSelection, currentY, line.c_str(), true);
         currentY += titleLineHeight;
       }
+      // FORK-FEATURE-BEGIN: READING_TIME
+      // Overlay badge on bottom-left of cover image to avoid tile height overflow (3 narrow tiles)
+      if (bookSelected) {
+        char timeLabel[20];
+        ReadingTimeTracker::format(recentBooks[i].totalReadingSeconds, timeLabel, sizeof(timeLabel));
+        if (timeLabel[0] != '\0') {
+          constexpr int timePad = 3;
+          const int timeLabelWidth = renderer.getTextWidth(SMALL_FONT_ID, timeLabel);
+          const int timeBgH = renderer.getLineHeight(SMALL_FONT_ID) + timePad;
+          const int badgeX = tileX + hPaddingInSelection + 4;
+          const int badgeY = tileY + hPaddingInSelection + Lyra3CoversMetrics::values.homeCoverHeight - timeBgH - 4;
+          renderer.fillRoundedRect(badgeX, badgeY, timeLabelWidth + timePad * 2, timeBgH, 3, Color::Black);
+          renderer.drawText(SMALL_FONT_ID, badgeX + timePad, badgeY, timeLabel, false);
+        }
+      }
+      // FORK-FEATURE-END: READING_TIME
     }
   } else {
     drawEmptyRecents(renderer, rect);

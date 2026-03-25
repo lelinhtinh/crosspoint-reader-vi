@@ -17,6 +17,12 @@ class XtcReaderActivity final : public Activity {
   uint32_t currentPage = 0;
   int pagesUntilFullRefresh = 0;
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  uint32_t readingSessionStartMs = 0;
+  uint32_t persistedReadingSeconds = 0;
+  std::string readingTimeCachePath;
+  // FORK-FEATURE-END: READING_TIME
+
   void renderPage();
   void saveProgress() const;
   void loadProgress();

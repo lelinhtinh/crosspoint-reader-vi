@@ -23,6 +23,7 @@
 #include "RecentBooksStore.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 #include "util/ScreenshotUtil.h"
 
 namespace {
@@ -86,6 +87,12 @@ void EpubReaderActivity::onEnter() {
   APP_STATE.saveToFile();
   RECENT_BOOKS.addBook(epub->getPath(), epub->getTitle(), epub->getAuthor(), epub->getThumbBmpPath());
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  readingTimeCachePath = epub->getCachePath();
+  persistedReadingSeconds = ReadingTimeTracker::load(readingTimeCachePath);
+  readingSessionStartMs = millis();
+  // FORK-FEATURE-END: READING_TIME
+
   // Trigger first update
   requestUpdate();
 }
@@ -95,6 +102,13 @@ void EpubReaderActivity::onExit() {
 
   // Reset orientation back to portrait for the rest of the UI
   renderer.setOrientation(GfxRenderer::Orientation::Portrait);
+
+  // FORK-FEATURE-BEGIN: READING_TIME
+  if (!readingTimeCachePath.empty()) {
+    const uint32_t elapsed = (millis() - readingSessionStartMs) / 1000;
+    ReadingTimeTracker::save(readingTimeCachePath, persistedReadingSeconds + elapsed);
+  }
+  // FORK-FEATURE-END: READING_TIME
 
   APP_STATE.readerActivityLoadCount = 0;
   APP_STATE.saveToFile();
@@ -692,6 +706,12 @@ void EpubReaderActivity::saveProgress(int spineIndex, int currentPage, int pageC
   } else {
     LOG_ERR("ERS", "Could not save progress!");
   }
+  // FORK-FEATURE-BEGIN: READING_TIME
+  if (!readingTimeCachePath.empty()) {
+    const uint32_t elapsed = (millis() - readingSessionStartMs) / 1000;
+    ReadingTimeTracker::save(readingTimeCachePath, persistedReadingSeconds + elapsed);
+  }
+  // FORK-FEATURE-END: READING_TIME
 }
 void EpubReaderActivity::renderContents(std::unique_ptr<Page> page, const int orientedMarginTop,
                                         const int orientedMarginRight, const int orientedMarginBottom,

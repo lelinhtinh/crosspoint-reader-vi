@@ -18,6 +18,7 @@
 #include "RecentBooksStore.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 int HomeActivity::getMenuItemCount() const {
   int count = 4;  // File Browser, Recents, File transfer, Settings
@@ -46,7 +47,16 @@ void HomeActivity::loadRecentBooks(int maxBooks) {
       continue;
     }
 
-    recentBooks.push_back(book);
+    // FORK-FEATURE-BEGIN: READING_TIME
+    RecentBook b = book;
+    const size_t hash = std::hash<std::string>{}(b.path);
+    const char* prefix = FsHelpers::hasEpubExtension(b.path)  ? "epub_"
+                         : FsHelpers::hasXtcExtension(b.path) ? "xtc_"
+                                                              : "txt_";
+    const std::string cachePath = std::string("/.crosspoint/") + prefix + std::to_string(hash);
+    b.totalReadingSeconds = ReadingTimeTracker::load(cachePath);
+    recentBooks.push_back(b);
+    // FORK-FEATURE-END: READING_TIME
   }
 }
 

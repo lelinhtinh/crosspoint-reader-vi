@@ -7,6 +7,7 @@ struct RecentBook {
   std::string title;
   std::string author;
   std::string coverBmpPath;
+  uint32_t totalReadingSeconds = 0;  // FORK-FEATURE: READING_TIME
 
   bool operator==(const RecentBook& other) const { return path == other.path; }
 };

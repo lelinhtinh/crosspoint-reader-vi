@@ -13,6 +13,7 @@
 #include "RecentBooksStore.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 // Internal constants
 namespace {
@@ -572,8 +573,12 @@ void BaseTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std:
     // "Continue Reading" label at the bottom
     const int continueY = bookY + bookHeight - renderer.getLineHeight(UI_10_FONT_ID) * 3 / 2;
     if (coverRendered) {
-      // Draw box behind "Continue Reading" text (inverted when selected: black box instead of white)
-      const char* continueText = tr(STR_CONTINUE_READING);
+      // FORK-FEATURE-BEGIN: READING_TIME
+      char timeLabel[20];
+      ReadingTimeTracker::format(recentBooks[0].totalReadingSeconds, timeLabel, sizeof(timeLabel));
+      const char* continueText = timeLabel[0] != '\0' ? timeLabel : tr(STR_CONTINUE_READING);
+      // FORK-FEATURE-END: READING_TIME
+      // Draw box behind label text (inverted when selected: black box instead of white)
       const int continueTextWidth = renderer.getTextWidth(UI_10_FONT_ID, continueText);
       constexpr int continuePadding = 6;
       const int continueBoxWidth = continueTextWidth + continuePadding * 2;
@@ -584,7 +589,12 @@ void BaseTheme::drawRecentBookCover(GfxRenderer& renderer, Rect rect, const std:
       renderer.drawRect(continueBoxX, continueBoxY, continueBoxWidth, continueBoxHeight, !bookSelected);
       renderer.drawCenteredText(UI_10_FONT_ID, continueY, continueText, !bookSelected);
     } else {
-      renderer.drawCenteredText(UI_10_FONT_ID, continueY, tr(STR_CONTINUE_READING), !bookSelected);
+      // FORK-FEATURE-BEGIN: READING_TIME
+      char timeLabel[20];
+      ReadingTimeTracker::format(recentBooks[0].totalReadingSeconds, timeLabel, sizeof(timeLabel));
+      renderer.drawCenteredText(UI_10_FONT_ID, continueY, timeLabel[0] != '\0' ? timeLabel : tr(STR_CONTINUE_READING),
+                                !bookSelected);
+      // FORK-FEATURE-END: READING_TIME
     }
   } else {
     // No book to continue reading

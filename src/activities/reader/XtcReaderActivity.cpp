@@ -19,6 +19,7 @@
 #include "XtcReaderChapterSelectionActivity.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
+#include "util/ReadingTimeTracker.h"  // FORK-FEATURE: READING_TIME
 
 namespace {
 constexpr unsigned long skipPageMs = 700;
@@ -42,6 +43,12 @@ void XtcReaderActivity::onEnter() {
   APP_STATE.saveToFile();
   RECENT_BOOKS.addBook(xtc->getPath(), xtc->getTitle(), xtc->getAuthor(), xtc->getThumbBmpPath());
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  readingTimeCachePath = xtc->getCachePath();
+  persistedReadingSeconds = ReadingTimeTracker::load(readingTimeCachePath);
+  readingSessionStartMs = millis();
+  // FORK-FEATURE-END: READING_TIME
+
   // Trigger first update
   requestUpdate();
 }
@@ -49,6 +56,12 @@ void XtcReaderActivity::onEnter() {
 void XtcReaderActivity::onExit() {
   Activity::onExit();
 
+  // FORK-FEATURE-BEGIN: READING_TIME
+  if (!readingTimeCachePath.empty()) {
+    const uint32_t elapsed = (millis() - readingSessionStartMs) / 1000;
+    ReadingTimeTracker::save(readingTimeCachePath, persistedReadingSeconds + elapsed);
+  }
+  // FORK-FEATURE-END: READING_TIME
   APP_STATE.readerActivityLoadCount = 0;
   APP_STATE.saveToFile();
   xtc.reset();
@@ -333,6 +346,12 @@ void XtcReaderActivity::saveProgress() const {
     f.write(data, 4);
     f.close();
   }
+  // FORK-FEATURE-BEGIN: READING_TIME
+  if (!readingTimeCachePath.empty()) {
+    const uint32_t elapsed = (millis() - readingSessionStartMs) / 1000;
+    ReadingTimeTracker::save(readingTimeCachePath, persistedReadingSeconds + elapsed);
+  }
+  // FORK-FEATURE-END: READING_TIME
 }
 
 void XtcReaderActivity::loadProgress() {
